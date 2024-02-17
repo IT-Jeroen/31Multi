@@ -5,7 +5,7 @@ const message = 'Host sends a message';
 var lastPeerId = null;
 var peer = null; 
 var peerId = null;
-var conn = null;
+var connections = [];
 
 
 // PEER OBJECT //
@@ -35,19 +35,23 @@ peer.on('open', function (id) {
 // Emitted when a new data connection is established from a remote peer //
 // Callback function with a dataConnection Object //
 peer.on('connection', function (c) {
-    if (conn && conn.open) {
-        c.on('open', function() {
-            c.send(varName + "Already connected to another client");
-            setTimeout(function() { c.close(); }, 500);
-        });
-        return;
-    }
+    // if (conn && conn.open) {
+    //     c.on('open', function() {
+    //         c.send(varName + "Already connected to another client");
+    //         setTimeout(function() { c.close(); }, 500);
+    //     });
+    //     return;
+    // }
 
-    conn = c;
-    console.log(varName, "Connected to: " + conn.peer);
-    console.log(varName, 'Connection:', conn)
+    connections.push({name: c.peer, c: c});
+    console.log('Connections:', connections);
+    console.log(varName, "Connected to: " + c.peer);
+    console.log(varName, 'Connection:', c)
     
-    ready();
+    if (newConnection(c.peer)){
+        ready(c);
+    }
+    
 });
 
 // Emitted when the peer is disconnected from the signalling server, either manually //
@@ -81,7 +85,7 @@ peer.on('error', function (err) {
 
 // DELAYED (on demand) CONNECTION EVENT LISTENERS //
 
-function ready() {
+function ready(conn) {
 
     conn.on('open', function () {
         console.log(varName, 'Connection open', conn)
@@ -90,12 +94,14 @@ function ready() {
         // Can disconnect peer when connection is established //
         // Close the connection to the server, leaving all existing data and media connections intact. 
         // peer.disconnected will be set to true and the disconnected event will fire.
-        peer.disconnect();
+
+        // Need to keep open or otherwise 2nd Client cannot connect //
+        // peer.disconnect();
         
-        sendMessage();
+        sendMessage(conn);
         setTimeout(()=>{
-            sendMessage()
-            endPeer(10000)
+            sendMessage(conn)
+            endPeer(10000, conn)
         },5000)
     });
 
@@ -105,28 +111,41 @@ function ready() {
 
     conn.on('close', function () {
         console.log(varName, 'Connection reset, Awaiting connection...');
-        conn = null;
+        // remove from array //
+        connections = connections.filter(c=> c.name != conn.peer);
+        console.log('Connections:', connections);
     });
+}
+
+// Bit of a Hack to Prevent sending double messages //
+function newConnection(name){
+    connections.forEach(c =>{
+        if (c.name === name){
+            console.log(varName, 'Name Found in Connections:', name)
+            return false
+        }
+    })
+    return true
 }
 
 
 // SIMPLE (on demand) FUNCTION //
 
-function sendMessage () {
-    console.log('sendMessage')
+function sendMessage (conn) {
+    console.log('sendMessage');
     if (conn && conn.open) {
         conn.send(message);
-        console.log(varName, "Send: " + message)
+        console.log(varName, "Send:", message, 'to', conn.peer);
     } else {
-        console.log(varName, 'Connection is closed');
+        console.log(varName, 'Connection is closed:', conn.peer);
     }
 };
 
 // Close the connection to the server and TERMINATE all existing CONNECTIONS. peer.destroyed will be set to true //
-function endPeer(ms){
+function endPeer(ms, conn){
     setTimeout(()=>{
         peer.destroy();
-        sendMessage()
+        sendMessage(conn)
     }, ms)
 }
 
