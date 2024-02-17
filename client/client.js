@@ -1,4 +1,4 @@
- const clientName = '31-multi-client-01-id';
+const clientName = '31-multi-client-01-id';
 const hostName = '31-multi-host-id';
 const varName = 'Client 01';
 const message = 'Client 01 sends a message';
@@ -41,10 +41,13 @@ peer.on('connection', function (c) {
 peer.on('disconnected', function () {
     console.log(varName, 'Connection lost. Please reconnect');
 
-    // Workaround for peer.reconnect deleting previous id
-    peer.id = lastPeerId;
-    peer._lastServerId = lastPeerId;
-    peer.reconnect();
+    // // Workaround for peer.reconnect deleting previous id
+    // peer.id = lastPeerId;
+    // peer._lastServerId = lastPeerId;
+
+    // Doesn't have to reconnect peer if connection is already established //
+    // Should do so, in case of connection lost //
+    // peer.reconnect();
 });
 
 peer.on('close', function() {
@@ -73,7 +76,18 @@ function join() {
         console.log(varName, 'Connection open', conn)
         console.log(varName, "Connected to: " + conn.peer);
 
+        // Can disconnect peer when connection is established //
+        // Close the connection to the server, leaving all existing data and media connections intact. 
+        // peer.disconnected will be set to true and the disconnected event will fire.
+        peer.disconnect();
+        peer.disconnect();
+
+
         sendMessage();
+        setTimeout(()=>{
+            sendMessage();
+            endPeer(10000);
+        }, 5000)
 
     });
 
@@ -100,3 +114,11 @@ function sendMessage() {
         console.log(varName, 'Connection is closed');
     }
 };
+
+// Close the connection to the server and TERMINATE all existing CONNECTIONS. peer.destroyed will be set to true //
+function endPeer(ms){
+    setTimeout(()=>{
+        peer.destroy();
+        sendMessage()
+    }, ms)
+}

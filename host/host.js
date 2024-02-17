@@ -7,14 +7,20 @@ var peer = null;
 var peerId = null;
 var conn = null;
 
+
+// PEER OBJECT //
+// Is the connection between ICE/STUN/TURN Server //
 peer = new Peer(hostName, {
     debug: 2
 });
 
 
+
 // PEER EVENT LISTENERS //
 
+// Emitted when a connection to the PeerServer is established //
 peer.on('open', function (id) {
+    console.log(varName, 'ID OBject', id);
     // Workaround for peer.reconnect deleting previous id
     if (peer.id === null) {
         console.log(varName, 'Received null id from peer open');
@@ -23,10 +29,11 @@ peer.on('open', function (id) {
         lastPeerId = peer.id;
     }
     console.log(varName, 'Peer Open:', peer);
-    console.log(varName, 'ID: ' + peer.id);
+    console.log(varName, 'Peer ID: ' + peer.id);
 });
 
-
+// Emitted when a new data connection is established from a remote peer //
+// Callback function with a dataConnection Object //
 peer.on('connection', function (c) {
     if (conn && conn.open) {
         c.on('open', function() {
@@ -43,14 +50,20 @@ peer.on('connection', function (c) {
     ready();
 });
 
-
+// Emitted when the peer is disconnected from the signalling server, either manually //
+// or because the connection to the signalling server was lost. When a peer is disconnected, //
+// its existing connections will stay alive, but the peer cannot accept or create any new connections //
 peer.on('disconnected', function () {
     console.log(varName, 'Connection lost. Please reconnect');
+    
+    // Don't need this if you know / seet the peer ID manually //
+    // // Workaround for peer.reconnect deleting previous id
+    // peer.id = lastPeerId;
+    // peer._lastServerId = lastPeerId;
 
-    // Workaround for peer.reconnect deleting previous id
-    peer.id = lastPeerId;
-    peer._lastServerId = lastPeerId;
-    peer.reconnect();
+    // Doesn't have to reconnect peer if connection is already established //
+    // Should do so, in case of connection lost //
+    // peer.reconnect();
 });
 
 
@@ -69,11 +82,21 @@ peer.on('error', function (err) {
 // DELAYED (on demand) CONNECTION EVENT LISTENERS //
 
 function ready() {
+
     conn.on('open', function () {
         console.log(varName, 'Connection open', conn)
         console.log(varName, "Connected to: " + conn.peer);
-
+        
+        // Can disconnect peer when connection is established //
+        // Close the connection to the server, leaving all existing data and media connections intact. 
+        // peer.disconnected will be set to true and the disconnected event will fire.
+        peer.disconnect();
+        
         sendMessage();
+        setTimeout(()=>{
+            sendMessage()
+            endPeer(10000)
+        },5000)
     });
 
     conn.on('data', function (data) {
@@ -98,3 +121,12 @@ function sendMessage () {
         console.log(varName, 'Connection is closed');
     }
 };
+
+// Close the connection to the server and TERMINATE all existing CONNECTIONS. peer.destroyed will be set to true //
+function endPeer(ms){
+    setTimeout(()=>{
+        peer.destroy();
+        sendMessage()
+    }, ms)
+}
+
