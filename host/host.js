@@ -1,11 +1,22 @@
 const hostName = '31-multi-host-id';
 const varName = 'Host';
 const message = 'Host sends a message';
-;
+
 var lastPeerId = null;
 var peer = null; 
 var peerId = null;
 var connections = [];
+
+// Need to exclude location and orientation from object //
+// Location and orientation needs to stay local //
+// Map playersObj to locationObj via names // 
+const playersObj = [
+    {"name":'Host', "location": 'south', 'cards-in-hand':{diamonds : 10, clubs: 'ace', clubs: 10}, 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'orientation': 'matrix0', 'pass': false, 'active':false, 'auto':false},
+    {"name":'Player West', "location": 'west', 'cards-in-hand':{diamonds : 10, clubs: 'ace', clubs: 10}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': 'matrix90Flipped', 'pass': false, 'active':false, 'auto':true},
+    {"name":'Player North', "location": 'north', 'cards-in-hand':{diamonds : 10, clubs: 'ace', clubs: 10}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': 'matrix180Flipped', 'pass': false, 'active':false, 'auto':true},
+    {"name":'Player East', "location": 'east', 'cards-in-hand':{diamonds : 10, clubs: 'ace', clubs: 10}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': 'matrix270Flipped', 'pass': false, 'active':false, 'auto':true},
+    {"name":'Bank', "location": 'center', 'cards-in-hand':{diamonds : 10, clubs: 'ace', clubs: 10}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': 'matrix0', 'pass': true, 'active':false, 'auto':false}
+]
 
 
 // PEER OBJECT //
@@ -134,8 +145,10 @@ function newConnection(name){
 function sendMessage (conn) {
     console.log('sendMessage');
     if (conn && conn.open) {
-        conn.send(message);
-        console.log(varName, "Send:", message, 'to', conn.peer);
+        // conn.send(message);
+        // console.log(varName, "Send:", message, 'to', conn.peer);
+        conn.send(playersObj);
+        console.log(varName, 'send playersObj to', conn.peer);
     } else {
         console.log(varName, 'Connection is closed:', conn.peer);
     }
