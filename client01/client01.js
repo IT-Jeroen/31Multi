@@ -82,6 +82,8 @@ function join() {
         reliable: true
     });
 
+    conn.metadata = clientName;
+
     conn.on('open', function () {
         console.log(varName, 'Connection open', conn)
         console.log(varName, "Connected to: " + conn.peer);

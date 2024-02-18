@@ -57,6 +57,7 @@ peer.on('connection', function (c) {
     connections.push({name: c.peer, c: c});
     console.log('Connections:', connections);
     console.log(varName, "Connected to: " + c.peer);
+    console.log(varName, "MetaData: " + c.metadata);
     console.log(varName, 'Connection:', c)
     
     if (newConnection(c.peer)){
