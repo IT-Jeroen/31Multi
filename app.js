@@ -311,6 +311,12 @@
 
 
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
+const hostName = '31-multi-host-id';
+let peer = null;
+let lastPeerId = null;
+let conn = null;
+const connections = []
+let playerName;
 
 const nextBtn = document.getElementById('next-btn');
 const nameInput = document.getElementById('input-name');
@@ -318,8 +324,104 @@ const nameInput = document.getElementById('input-name');
 nextBtn.addEventListener('click',(e) => {
     e.target.innerText = 'Checking for Host ...';
     e.target.setAttribute('disabled', '');
+    playerName = nameInput.value
     console.log('The name entered is:', nameInput.value);
+
     // Run function check for excisting host // 
+    const peerID = null
+    const isHost = false
+    createPeer(peerID, isHost)
 })
 
 
+////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
+
+
+// const playerName = '31-multi-client-01-id'; // name from input here //
+
+function createPeer(peerID, isHost){
+    peer = new Peer(peerID, {
+        debug: 2 // set to 0 if not to print error to console
+        })
+
+    peer.on('open', function (id) {
+        // // Workaround for peer.reconnect deleting previous id
+        // if (peer.id === null) {
+        //     console.log('Player Received null id from peer open');
+        //     peer.id = lastPeerId;
+        // } else {
+        //     lastPeerId = peer.id;
+        // }
+
+        if (!isHost){
+            findHost(hostName)
+        }
+        else {
+            peer.on('connection', function (c) {
+                connections.push({name: c.metadata, c: c});
+                console.log('Connections:', connections);  
+            });
+        }
+    })
+
+    peer.on('error', err => {
+        if (err.type === 'peer-unavailable'){
+            console.log('PEER UNAVAILABLE:', err.message)
+            setAsHost()
+        }
+        else{
+            console.log('PEER ERROR', err);
+        }
+      
+    })
+
+    console.log('Player ID: ' + peer.id);
+    console.log('Player Peer', peer)
+    
+}
+
+/*
+    connection errors are "caught" by the peer object
+    connection errors cannot be caught by a try and catch block due to the async nature of the event //
+    peer.connect cannot use .then() and or catch()
+*/
+
+
+function findHost(host) {
+    console.log('FIND HOST:', host);
+    // Close old connection
+    if (conn) {
+        conn.close();
+    }
+
+    // Instant return of a connection object //
+    // Will print an error if no connection can be established //
+    // .connect is not an async method and doesn't accept a callback function //
+    // .connect is implementing async functionality in the background creating delayed responses //
+    // on Error will trigger the peer.on('error') event, and not a conn object event //
+    
+    conn = peer.connect(host, {
+        reliable: true
+    })
+
+    conn.metadata = playerName;
+
+    console.log('CONNECTION TO HOST:', conn);
+    // When Host is Found //
+    conn.on('open', ()=> {
+        console.log('FINDING HOST CONNECTION:', conn);
+    })
+    
+ 
+};
+
+function setAsHost(){
+    console.log('SET AS HOST')
+    if (peer){
+        peer.destroy();
+        peer = null;
+        conn = null;
+    }
+
+    createPeer(hostName, true)
+}
