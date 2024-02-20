@@ -345,24 +345,38 @@ function createPeer(peerID, isHost){
         })
 
     peer.on('open', function (id) {
-        // // Workaround for peer.reconnect deleting previous id
-        // if (peer.id === null) {
-        //     console.log('Player Received null id from peer open');
-        //     peer.id = lastPeerId;
-        // } else {
-        //     lastPeerId = peer.id;
-        // }
-
         if (!isHost){
             findHost(hostName)
         }
-        else {
-            peer.on('connection', function (c) {
-                connections.push({name: c.metadata, c: c});
-                console.log('Connections:', connections);  
-            });
-        }
     })
+    
+    // Only works for the Host //
+    peer.on('connection', function (c) {
+        connections.push({name: c.metadata, c: c});
+        console.log('Connections:', connections);
+        
+        // Connection is not open error
+        const players = playersList()
+        connections.forEach(item => {
+            // Host item connection is null //
+            if (item.c){
+                // connection can not be open yet and generate an error //
+                // have to use an event to trigger first response on connection status open change //
+                if (!item.c._open){
+                    console.log(item.name, item.c._open)
+                    item.c.on('open', ()=> {
+                        item.c.send(players)
+                    })
+                }
+                // Once connections status is open, data can be send directly//
+                else{
+                    item.c.send(players)
+                }
+            }
+            
+            
+        })
+    });
 
     peer.on('error', err => {
         if (err.type === 'peer-unavailable'){
@@ -407,9 +421,11 @@ function findHost(host) {
     conn.metadata = playerName;
 
     console.log('CONNECTION TO HOST:', conn);
+    
     // When Host is Found //
     conn.on('open', ()=> {
         console.log('FINDING HOST CONNECTION:', conn);
+        setConnectionEvents(conn)
     })
     
  
@@ -421,7 +437,40 @@ function setAsHost(){
         peer.destroy();
         peer = null;
         conn = null;
+        connections.length = 0;
     }
 
+    connections.push({name:playerName, c: null})
     createPeer(hostName, true)
+}
+
+
+function setConnectionEvents(c) {
+    connections.push({name:playerName, c: c})
+
+    
+    c.on('data', function (data) {
+        console.log("Data recieved:", data);
+    });
+
+    c.on('close', function () {
+        console.log('Connection reset, Awaiting connection...');
+        // remove from array //
+        connections = connections.filter(i=> i.name != c.peer);
+        console.log('Connections:', connections);
+    });
+}
+
+function playersList(){
+    return connections.map(item => item.name)
+}
+
+function newConnection(name){
+    connections.forEach(c =>{
+        if (c.name === name){
+            console.log(varName, 'Name Found in Connections:', name)
+            return false
+        }
+    })
+    return true
 }
