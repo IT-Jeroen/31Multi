@@ -311,11 +311,7 @@
 
 
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
-const hostName = '31-multi-host-id';
-let peer = null;
-let lastPeerId = null;
-let conn = null;
-const connections = []
+
 let playerName;
 
 const nextBtn = document.getElementById('next-btn');
@@ -336,6 +332,11 @@ nextBtn.addEventListener('click',(e) => {
 
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
 
+const hostName = '31-multi-host-id';
+let peer = null;
+let lastPeerId = null;
+let conn = null;
+const connections = []
 
 // const playerName = '31-multi-client-01-id'; // name from input here //
 
@@ -372,10 +373,10 @@ function createPeer(peerID, isHost){
                 else{
                     item.c.send(players)
                 }
-            }
-            
-            
+            } 
         })
+
+        createWaitingRoom(players);
     });
 
     peer.on('error', err => {
@@ -440,8 +441,10 @@ function setAsHost(){
         connections.length = 0;
     }
 
-    connections.push({name:playerName, c: null})
-    createPeer(hostName, true)
+    connections.push({name:playerName, c: null});
+    createPeer(hostName, true);
+
+    createWaitingRoom(playersList())
 }
 
 
@@ -451,6 +454,7 @@ function setConnectionEvents(c) {
     
     c.on('data', function (data) {
         console.log("Data recieved:", data);
+        createWaitingRoom(data)
     });
 
     c.on('close', function () {
@@ -474,3 +478,43 @@ function newConnection(name){
     })
     return true
 }
+
+
+
+//////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
+
+
+function createWaitingRoom(data){
+    // Remove Excisting Stuff //
+    const nameEntry = document.getElementById('name-entry');
+    const waitingRoom = document.getElementById('waiting-room');
+
+    removeElements([nameEntry, waitingRoom]);
+
+    const waitingRoomDiv = document.createElement('div');
+    waitingRoomDiv.id = 'waiting-room';
+    data.forEach(player => {
+        const playerDiv = document.createElement('div');
+        const playerHeading = document.createElement('h2');
+        playerHeading.innerText = player;
+        playerDiv.appendChild(playerHeading);
+        waitingRoomDiv.appendChild(playerDiv)
+    });
+
+    const main = document.getElementsByTagName('main')[0]
+    main.appendChild(waitingRoomDiv)
+
+}
+
+function removeElements(elems=[]){
+    elems.forEach(elem => {
+        if (elem){
+            elem.remove()
+        }
+    })
+    
+}
+
+
+
+
