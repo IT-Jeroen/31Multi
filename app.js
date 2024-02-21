@@ -333,6 +333,7 @@ nextBtn.addEventListener('click',(e) => {
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
 
 const hostName = '31-multi-host-id';
+// let setAsHost = false;
 let peer = null;
 let lastPeerId = null;
 let conn = null;
@@ -500,6 +501,12 @@ function createWaitingRoom(data){
         playerDiv.appendChild(playerHeading);
         waitingRoomDiv.appendChild(playerDiv)
     });
+
+    if (peer.id === hostName){
+        const startGameBtn = document.createElement('button');
+        startGameBtn.innerText ='Start Game';
+        waitingRoomDiv.appendChild(startGameBtn);
+    }
 
     const main = document.getElementsByTagName('main')[0]
     main.appendChild(waitingRoomDiv)
