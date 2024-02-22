@@ -313,6 +313,8 @@
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
 
 let playerName;
+let testConPromise;
+
 
 const nextBtn = document.getElementById('next-btn');
 const nameInput = document.getElementById('input-name');
@@ -326,7 +328,10 @@ nextBtn.addEventListener('click',(e) => {
     // Run function check for excisting host // 
     const peerID = null
     const isHost = false
-    createPeer(peerID, isHost)
+    // createPeer(peerID, isHost)
+
+    testConPromise = testHost();
+    testConPromise.then(connection => {console.log('TEST HOST CONNECTION', connection)}).catch(err => console.log('TEST HOST ERR:', err))
 })
 
 
@@ -341,6 +346,56 @@ const connections = []
 
 // const playerName = '31-multi-client-01-id'; // name from input here //
 
+
+function testHost(){
+    let testConnection
+    
+    console.log('TEST HOST');
+
+    // let hostPromise = new Promise(myResolve)
+    const hostPromise = new Promise((resolve, reject) => {});
+
+    const testPeer = new Peer(null, {
+        debug: 2 // set to 0 if not to print error to console
+        })
+
+    testPeer.on('open', function (id) {
+        console.log('TEST PEER', testPeer)
+        testConnection = testPeer.connect(hostName, {
+            reliable: true
+        })
+        console.log('TEST CONNECTION', testConnection)
+
+        
+        // on future event set promise to rejected //
+        testPeer.on('error', err => {
+            if (err.type === 'peer-unavailable'){
+                console.log('PEER UNAVAILABLE:', err.message)
+                hostPromise.reject(err.message)
+
+
+            }
+            else{
+                console.log('PEER ERROR', err);
+            } 
+            
+        })
+
+        // onn future event set ppromise to resolved //
+        testConnection.on('open', ()=> {
+            console.log('TEST HOST CONNECTION', testConnection)
+            hostPromise.resolve(testConnection)
+
+        })
+    })
+        
+
+    return hostPromise
+}
+
+
+
+
 function createPeer(peerID, isHost){
     peer = new Peer(peerID, {
         debug: 2 // set to 0 if not to print error to console
@@ -352,7 +407,7 @@ function createPeer(peerID, isHost){
         }
     })
     
-    // Only works for the Host //
+    // Only works for the Host not for the Clients //
     peer.on('connection', function (c) {
         connections.push({name: c.metadata, c: c});
         console.log('Connections:', connections);
