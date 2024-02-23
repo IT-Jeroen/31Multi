@@ -313,8 +313,8 @@
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
 
 let playerName;
-let testConPromise;
-
+let testConnection;
+const promiseArray = []
 
 const nextBtn = document.getElementById('next-btn');
 const nameInput = document.getElementById('input-name');
@@ -323,173 +323,72 @@ nextBtn.addEventListener('click',(e) => {
     e.target.innerText = 'Checking for Host ...';
     e.target.setAttribute('disabled', '');
     playerName = nameInput.value
-    console.log('The name entered is:', nameInput.value);
+    // console.log('The name entered is:', nameInput.value);
 
-    // Run function check for excisting host // 
-    const peerID = null
-    const isHost = false
-    // createPeer(peerID, isHost)
+    setupConnection()
 
-    testConPromise = testHost();
-    testConPromise.then(connection => {console.log('TEST HOST CONNECTION', connection)}).catch(err => console.log('TEST HOST ERR:', err))
 })
 
 
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
 
 const hostName = '31-multi-host-id';
-// let setAsHost = false;
 let peer = null;
 let lastPeerId = null;
 let conn = null;
 const connections = []
 
-// const playerName = '31-multi-client-01-id'; // name from input here //
+function setupConnection(){
+    const result = testHost()
+
+    result
+    .then(connection => {
+        // console.log('HOST FOUND')
+
+        setConnectionEvents(connection)
+        createWaitingRoom(playersList());
+    })
+    .catch(err => {
+        if (err.type === 'peer-unavailable'){
+            setAsHost();
+            createWaitingRoom(playersList());
+        }
+        else {
+            console.log('PEER ERROR', err);
+        }   
+    }) 
+}
 
 
 function testHost(){
-    let testConnection
-    
-    console.log('TEST HOST');
-
-    // let hostPromise = new Promise(myResolve)
-    const hostPromise = new Promise((resolve, reject) => {});
-
-    const testPeer = new Peer(null, {
-        debug: 2 // set to 0 if not to print error to console
-        })
-
-    testPeer.on('open', function (id) {
-        console.log('TEST PEER', testPeer)
-        testConnection = testPeer.connect(hostName, {
-            reliable: true
-        })
-        console.log('TEST CONNECTION', testConnection)
-
-        
-        // on future event set promise to rejected //
-        testPeer.on('error', err => {
-            if (err.type === 'peer-unavailable'){
-                console.log('PEER UNAVAILABLE:', err.message)
-                hostPromise.reject(err.message)
-
-
-            }
-            else{
-                console.log('PEER ERROR', err);
-            } 
-            
-        })
-
-        // onn future event set ppromise to resolved //
-        testConnection.on('open', ()=> {
-            console.log('TEST HOST CONNECTION', testConnection)
-            hostPromise.resolve(testConnection)
-
-        })
+    let {promise, resolve, reject} = Promise.withResolvers();
+    peer = new Peer(null, {
+        debug: 2
     })
-        
-
-    return hostPromise
-}
-
-
-
-
-function createPeer(peerID, isHost){
-    peer = new Peer(peerID, {
-        debug: 2 // set to 0 if not to print error to console
-        })
 
     peer.on('open', function (id) {
-        if (!isHost){
-            findHost(hostName)
-        }
-    })
-    
-    // Only works for the Host not for the Clients //
-    peer.on('connection', function (c) {
-        connections.push({name: c.metadata, c: c});
-        console.log('Connections:', connections);
-        
-        // Connection is not open error
-        const players = playersList()
-        connections.forEach(item => {
-            // Host item connection is null //
-            if (item.c){
-                // connection can not be open yet and generate an error //
-                // have to use an event to trigger first response on connection status open change //
-                if (!item.c._open){
-                    console.log(item.name, item.c._open)
-                    item.c.on('open', ()=> {
-                        item.c.send(players)
-                    })
-                }
-                // Once connections status is open, data can be send directly//
-                else{
-                    item.c.send(players)
-                }
-            } 
+        // console.log('TEST PEER', peer)
+        const connection = peer.connect(hostName, {
+            reliable: true
         })
+        connection.metadata = playerName;
 
-        createWaitingRoom(players);
-    });
+        // console.log('TEST CONNECTION', connection)
 
-    peer.on('error', err => {
-        if (err.type === 'peer-unavailable'){
-            console.log('PEER UNAVAILABLE:', err.message)
-            setAsHost()
-        }
-        else{
-            console.log('PEER ERROR', err);
-        }
-      
+        peer.on('error', err => {reject(err)});
+        connection.on('open', ()=> resolve(connection))
+
+        // console.log('PROMISE:',promise)
+
     })
 
-    console.log('Player ID: ' + peer.id);
-    console.log('Player Peer', peer)
-    
+    return promise
+
 }
 
-/*
-    connection errors are "caught" by the peer object
-    connection errors cannot be caught by a try and catch block due to the async nature of the event //
-    peer.connect cannot use .then() and or catch()
-*/
-
-
-function findHost(host) {
-    console.log('FIND HOST:', host);
-    // Close old connection
-    if (conn) {
-        conn.close();
-    }
-
-    // Instant return of a connection object //
-    // Will print an error if no connection can be established //
-    // .connect is not an async method and doesn't accept a callback function //
-    // .connect is implementing async functionality in the background creating delayed responses //
-    // on Error will trigger the peer.on('error') event, and not a conn object event //
-    
-    conn = peer.connect(host, {
-        reliable: true
-    })
-
-    conn.metadata = playerName;
-
-    console.log('CONNECTION TO HOST:', conn);
-    
-    // When Host is Found //
-    conn.on('open', ()=> {
-        console.log('FINDING HOST CONNECTION:', conn);
-        setConnectionEvents(conn)
-    })
-    
- 
-};
 
 function setAsHost(){
-    console.log('SET AS HOST')
+    // console.log('SET AS HOST')
     if (peer){
         peer.destroy();
         peer = null;
@@ -498,49 +397,81 @@ function setAsHost(){
     }
 
     connections.push({name:playerName, c: null});
-    createPeer(hostName, true);
 
-    createWaitingRoom(playersList())
+    peer = new Peer(hostName, {
+        debug: 2 // set to 0 if not to print error to console
+        })
+
+    peer.on('connection', (c)=>{
+        connections.push({name: c.metadata, c: c});
+        // console.log('Connections:', connections);
+
+        connections.forEach(item => {
+            pushData(item.c, playersList())
+        })
+
+        createWaitingRoom(playersList());
+    })
+
+    peer.on('error', err => {console.log('PEER ERROR:', err)});
+
+}
+
+
+function pushData(c, data){
+    if (c){
+        if (!c._open){
+            let counter = 0;
+        
+            const intervalID = setInterval(()=>{
+                if (c._open){
+                    clearInterval(intervalID);
+                    c.send(data)
+                }
+                counter += 1;
+
+                if (counter == 100){
+                    clearInterval(intervalID);
+                    console.log('PUSH DATA TIMEOUT')
+                }
+
+            }, 100)
+        }
+        else {
+            c.send(data);
+        }
+    }
 }
 
 
 function setConnectionEvents(c) {
-    connections.push({name:playerName, c: c})
 
-    
     c.on('data', function (data) {
-        console.log("Data recieved:", data);
+        // console.log("Data recieved:", data);
         createWaitingRoom(data)
     });
 
     c.on('close', function () {
-        console.log('Connection reset, Awaiting connection...');
+        // console.log('Connection reset, Awaiting connection...');
         // remove from array //
         connections = connections.filter(i=> i.name != c.peer);
-        console.log('Connections:', connections);
+        // console.log('Connections:', connections);
     });
+
+    connections.push({name:playerName, c: c})
 }
+
 
 function playersList(){
     return connections.map(item => item.name)
 }
-
-function newConnection(name){
-    connections.forEach(c =>{
-        if (c.name === name){
-            console.log(varName, 'Name Found in Connections:', name)
-            return false
-        }
-    })
-    return true
-}
-
 
 
 //////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
 
 
 function createWaitingRoom(data){
+    // console.log('CREATE WAITING ROOM')
     // Remove Excisting Stuff //
     const nameEntry = document.getElementById('name-entry');
     const waitingRoom = document.getElementById('waiting-room');
