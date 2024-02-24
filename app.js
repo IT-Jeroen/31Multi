@@ -26,29 +26,27 @@ const connections = []
 
 
 function testHost(){
-    let {promise, resolve, reject} = Promise.withResolvers();
-    peer = new Peer(null, {
-        debug: 2
-    })
-
-    peer.on('open', function (id) {
-        // console.log('TEST PEER', peer)
-        const connection = peer.connect(hostName, {
-            reliable: true
+    return new Promise((resolve, reject) => {
+        peer = new Peer(null, {
+            debug: 2
         })
-        connection.metadata = playerName;
 
-        // console.log('TEST CONNECTION', connection)
+        peer.on('open', function (id) {
+            // console.log('TEST PEER', peer)
+            const connection = peer.connect(hostName, {
+                reliable: true
+            })
+            connection.metadata = playerName;
 
-        peer.on('error', err => {reject(err)});
-        connection.on('open', ()=> resolve(connection))
+            // console.log('TEST CONNECTION', connection)
 
-        // console.log('PROMISE:',promise)
+            peer.on('error', err => {reject(err)});
+            connection.on('open', ()=> resolve(connection))
 
+            // console.log('PROMISE:',promise)
+
+        })
     })
-
-    return promise
-
 }
 
 
@@ -64,6 +62,7 @@ function setupConnection(){
     })
     .catch(err => {
         if (err.type === 'peer-unavailable'){
+            console.log("Cannot connect to peer. This is fine though, we will now be the server.")
             setAsHost();
             createWaitingRoom(playersList());
         }
