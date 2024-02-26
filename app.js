@@ -2,7 +2,45 @@
 
 let playerName;
 
-const nextBtn = document.getElementById('next-btn');
+function createNameInput(onNameSubmitted) {
+    const wrapper = document.createElement('div')
+    
+    const label = document.createElement('label')
+    label.innerText = 'Enter Name'
+    
+    const input = document.createElement('input')
+    input.type = 'text';
+    
+    const button = document.createElement('button')
+    button.type = 'button';
+    button.innerText = 'Next';
+   
+    if (onNameSubmitted != null) {
+        button.addEventListener('click', e => {
+            onNameSubmitted(input.value);
+        })
+    } else {
+        button.innerText = 'Checking for host...';
+        button.disabled = true;
+    }
+    
+    wrapper.append(label, input, button)
+    
+    return wrapper;
+}
+
+function handleNameSubmitted(name) {
+    renderApp(createNameInput(null))
+    setupConnection();
+}
+
+function renderApp(component) {
+    document.getElementById('root').replaceChildren(component);
+}
+
+renderApp(createNameInput(handleNameSubmitted));
+
+/*const nextBtn = document.getElementById('next-btn');
 const nameInput = document.getElementById('input-name');
 
 nextBtn.addEventListener('click',(e) => {
@@ -13,7 +51,7 @@ nextBtn.addEventListener('click',(e) => {
 
     setupConnection()
 
-})
+})*/
 
 
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
@@ -158,8 +196,7 @@ function playersList(){
 
 //////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
 
-
-function createWaitingRoom(data){
+function setupWaitingRoomUi(data) {
     // console.log('CREATE WAITING ROOM')
     // Remove Excisting Stuff //
     const nameEntry = document.getElementById('name-entry');
@@ -167,25 +204,36 @@ function createWaitingRoom(data){
 
     removeElements([nameEntry, waitingRoom]);
 
+    const main = document.getElementsByTagName('main')[0]
+    main.appendChild(
+        createWaitingRoom(data, peer, hostName)
+    )
+}
+
+function createWaitingRoom(data, peer, hostName){
     const waitingRoomDiv = document.createElement('div');
     waitingRoomDiv.id = 'waiting-room';
-    data.forEach(player => {
-        const playerDiv = document.createElement('div');
-        const playerHeading = document.createElement('h2');
-        playerHeading.innerText = player;
-        playerDiv.appendChild(playerHeading);
-        waitingRoomDiv.appendChild(playerDiv)
-    });
+    waitingRoomDiv.append(createPlayerList(data))
 
     if (peer.id === hostName){
         const startGameBtn = document.createElement('button');
         startGameBtn.innerText ='Start Game';
         waitingRoomDiv.appendChild(startGameBtn);
     }
+    
+    return waitingRoomDiv
+}
 
-    const main = document.getElementsByTagName('main')[0]
-    main.appendChild(waitingRoomDiv)
+function createPlayerList(playerNames) {
+    return playerNames.map(player => createPlayerLabel(player))
+}
 
+function createPlayerLabel(playerName) {
+    const playerDiv = document.createElement('div');
+    const playerHeading = document.createElement('h2');
+    playerHeading.innerText = player;
+    playerDiv.appendChild(playerHeading);
+    return playerDiv;
 }
 
 function removeElements(elems=[]){
