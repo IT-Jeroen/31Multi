@@ -1,7 +1,5 @@
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
 
-// let playerName;
-
 function createNameInput(cb) {
     const wrapper = document.createElement('div')
     
@@ -28,10 +26,11 @@ function createNameInput(cb) {
     return wrapper;
 }
 
+
 function handleNameSubmitted(playerName) {
-    // renderApp(createNameInput(name))
     setupConnection(playerName);
 }
+
 
 function renderApp(component) {
     document.getElementById('root').replaceChildren(component);
@@ -39,54 +38,12 @@ function renderApp(component) {
 
 renderApp(createNameInput(handleNameSubmitted));
 
-/*const nextBtn = document.getElementById('next-btn');
-const nameInput = document.getElementById('input-name');
-
-nextBtn.addEventListener('click',(e) => {
-    e.target.innerText = 'Checking for Host ...';
-    e.target.setAttribute('disabled', '');
-    playerName = nameInput.value
-    // console.log('The name entered is:', nameInput.value);
-
-    setupConnection()
-
-})*/
-
 
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
 
 const hostName = '31-multi-host-id';
-// let peer = null;
-// let lastPeerId = null;
-// let conn = null;
 const connections = []
 
-
-// function testHost(){
-//     let {promise, resolve, reject} = Promise.withResolvers();
-//     peer = new Peer(null, {
-//         debug: 2
-//     })
-
-//     peer.on('open', function (id) {
-//         // console.log('TEST PEER', peer)
-//         const connection = peer.connect(hostName, {
-//             reliable: true
-//         })
-//         connection.metadata = playerName;
-
-//         // console.log('TEST CONNECTION', connection)
-
-//         peer.on('error', err => {reject(err)});
-//         connection.on('open', ()=> resolve(connection))
-
-//         // console.log('PROMISE:',promise)
-
-//     })
-
-//     return promise
-
-// }
 
 function testHost(playerName){
     return new Promise((resolve, reject) => {
@@ -101,10 +58,6 @@ function testHost(playerName){
             })
             connection.metadata = playerName;
 
-            // console.log('TEST CONNECTION', connection)
-
-            // peer.on('error', err => {reject(err)});
-            // connection.on('open', ()=> resolve(connection));
             peer.on('error', err => {
                 if (err.type === 'peer-unavailable'){
                     resolve({p: peer, c: null, ishost: true})
@@ -119,6 +72,7 @@ function testHost(playerName){
     })
 }
 
+
 function setupConnection(playerName){
     const p2pObject = testHost(playerName)
 
@@ -127,13 +81,12 @@ function setupConnection(playerName){
         if (!result.ishost){
             console.log('HOST FOUND')
             setConnectionEvents(result.c)
-            renderApp(createWaitingRoom(playersList(),result.p));
+            renderApp(createWaitingRoom(playersList(),result.p.id));
         }
         else{
             result.p.destroy();
             connections.length = 0;
             setAsHost(playerName);
-            renderApp(createWaitingRoom(playersList(), result.p));
         }
         
     })
@@ -143,46 +96,13 @@ function setupConnection(playerName){
 }
 
 
-// function setupConnection(playerName){
-//     const result = testHost(playerName)
-
-//     result
-//     .then(connection => {
-//         console.log('HOST FOUND')
-//         // Add peer error EL when client peer //
-//         setConnectionEvents(connection)
-//         // createWaitingRoom(playersList());
-//         // setupWaitingRoomUi(playersList());
-//         renderApp(createWaitingRoom(playersList()));
-//     })
-//     .catch(err => {
-//         if (err.type === 'peer-unavailable'){
-//             setAsHost(playerName);
-//             // createWaitingRoom(playersList());
-//             // setupWaitingRoomUi(playersList());
-//             renderApp(createWaitingRoom(playersList()))
-//         }
-//         else {
-//             console.log('PEER ERROR', err);
-//         }   
-//     }) 
-// }
-
-
-// Needs a con._open / close check to manage connections ??? //
 function setAsHost(playerName){
-    console.log('SET AS HOST')
-    // if (peer){
-    //     peer.destroy();
-    //     // peer = null;
-    //     // conn = null;
-    //     connections.length = 0;
-    // }
-
+    // console.log('SET AS HOST')
     connections.push({name:playerName, c: null});
+    renderApp(createWaitingRoom(playersList(), hostName));
 
     const peer = new Peer(hostName, {
-        debug: 2 // set to 0 if not to print error to console
+        debug: 2
         })
 
     peer.on('connection', (c)=>{
@@ -193,8 +113,6 @@ function setAsHost(playerName){
             pushData(item.c, playersList())
         })
 
-        // createWaitingRoom(playersList());
-        // setupWaitingRoomUi(playersList());
         renderApp(createWaitingRoom(playersList(), hostName))
     })
 
@@ -207,11 +125,7 @@ function setConnectionEvents(c) {
 
     c.on('data', function (data) {
         // console.log("Data recieved:", data);
-        // createWaitingRoom(data)
-        // setupWaitingRoomUi(data)
-
-        // At the moment data recieved is playersList //
-        renderApp(createWaitingRoom(data), c.peer)
+        renderApp(createWaitingRoom(data), c.peer.id)
     });
 
     c.on('close', function () {
@@ -259,26 +173,11 @@ function playersList(){
 
 //////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
 
-// function setupWaitingRoomUi(data) {
-//     // console.log('CREATE WAITING ROOM')
-//     // Remove Excisting Stuff //
-//     const nameEntry = document.getElementById('name-entry');
-//     const waitingRoom = document.getElementById('waiting-room');
-
-//     removeElements([nameEntry, waitingRoom]);
-
-//     const main = document.getElementsByTagName('main')[0]
-//     main.appendChild(
-//         createWaitingRoom(data)
-//     )
-// }
-
 function createWaitingRoom(data, peerName){
     const waitingRoomDiv = document.createElement('div');
     waitingRoomDiv.id = 'waiting-room';
     waitingRoomDiv.append(...createPlayerList(data))
 
-    // if (peer.id === hostName){
     if (peerName === hostName){
         const startGameBtn = document.createElement('button');
         startGameBtn.innerText ='Start Game';
@@ -290,9 +189,10 @@ function createWaitingRoom(data, peerName){
 
 
 function createPlayerList(playerNames) {
-    console.log('PLAYER NAMES', playerNames);
+    // console.log('PLAYER NAMES', playerNames);
     return playerNames.map(player => createPlayerLabel(player))
 }
+
 
 function createPlayerLabel(player) {
     const playerDiv = document.createElement('div');
@@ -301,6 +201,7 @@ function createPlayerLabel(player) {
     playerDiv.appendChild(playerHeading);
     return playerDiv;
 }
+
 
 function removeElements(elems=[]){
     elems.forEach(elem => {
