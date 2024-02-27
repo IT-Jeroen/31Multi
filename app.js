@@ -165,13 +165,13 @@ function setAsHost(playerName){
 
 
 function addNewConnection(connection){
-    // console.log('ADD NEW CLIENT CONNECTION:', connection)
+    console.log('ADD NEW CLIENT CONNECTION:', connection.connectionId)
 
     const newPlayer = players.some(playerHost => {
         // console.log("PLAYERHOST:", playerHost)
         if (playerHost.p2p.connection){
             
-            if (playerHost.p2p.connection.id === connection.id){
+            if (playerHost.p2p.connection.connectionId === connection.connectionId){
                 return true
             }
         }
@@ -188,6 +188,7 @@ function addNewConnection(connection){
         else{
             players[autoPlayerIndex].name = connection.metadata;
             players[autoPlayerIndex].p2p.connection = connection;
+            players[autoPlayerIndex].data.auto = false;
             console.log('ADD PLAYERS:', players)
         }
         
@@ -318,5 +319,15 @@ function mapPlayerObjects(playersHost){
     const playerClientIndex = playersHost.findIndex(playerHost => playerHost.name === players[0].name)
     // [0,1,2,3, not 4] //
     // shift to the left //
-    // [0 - playerCLientIndex, 1 - playerClientIndex]
+    // [0 - playerClientIndex, 1 - playerClientIndex]
+    const a = playersHost.slice(playerClientIndex, 4)
+    const b = playersHost.slice(0, playerClientIndex)
+    const c = playersHost[4]
+    const d = [...a,...b, c]
+    console.log('MAP PLAYER OBJECTS:', d)
+
+    players.forEach((player, index) => {
+        player.name = d[index].name;
+        player.data = d[index].data;
+    })
 }
