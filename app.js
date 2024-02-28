@@ -142,7 +142,7 @@ function setAsHost(playerName){
         players.forEach(clientPlayer => {
             // pushData(clientPlayer.connection, players) // TypeError: t is undefined, binarypack.ts:331:20 //
             // pushData(clientPlayer.p2p.connection, JSON.stringify(players)) // TypeError: cyclic object value app.js:149:52 //
-            pushData(clientPlayer.p2p.connection, playersData())
+            pushData(clientPlayer.p2p.connection, playersData(), 'waiting-room')
         })
 
         renderApp(createWaitingRoom(playersList(), hostName))
@@ -195,10 +195,18 @@ function addNewConnection(connection){
 
 function setConnectionEvents(c) {
 
-    c.on('data', function (playersHost) {
-        console.log("Data recieved:", playersHost);
-        mapPlayerData(playersHost)
-        renderApp(createWaitingRoom(playersList()), c.peer.id)
+    c.on('data', function (data) {
+        console.log("Data recieved:", data);
+        if (data.type === 'waiting-room'){
+            mapPlayerData(data.data)
+            renderApp(createWaitingRoom(playersList()), c.peer.id)
+        }
+
+        if (data.type == 'players-data'){
+            mapPlayerData(data.data)
+            logPlayersCards()
+        }
+        
     });
 
     c.on('close', function () {
@@ -211,7 +219,8 @@ function setConnectionEvents(c) {
 
 
 // Delayed Response in case connection is closed when still setting up in the background //
-function pushData(c, data){
+// Create data Object ??? {type: "", data: ""} //
+function pushData(c, data, type){
     if (c){
         if (!c._open){
             let counter = 0;
@@ -219,7 +228,7 @@ function pushData(c, data){
             const intervalID = setInterval(()=>{
                 if (c._open){
                     clearInterval(intervalID);
-                    c.send(data)
+                    c.send({type: type, data: data})
                 }
                 counter += 1;
 
@@ -231,7 +240,7 @@ function pushData(c, data){
             }, 100)
         }
         else {
-            c.send(data);
+            c.send({type: type, data: data});
         }
     }
 }
@@ -292,7 +301,7 @@ function playersList(){
 function playersData(){
     return players.map(player => {
         return {"name": player.name, "data": player.data}
-    })
+    })    
 }
 
 
@@ -308,7 +317,7 @@ function mapPlayerData(playersHost){
     const b = playersHost.slice(0, playerClientIndex)
     const c = playersHost[4]
     const d = [...a,...b, c]
-    console.log('MAP PLAYER OBJECTS:', d)
+    // console.log('MAP PLAYER OBJECTS:', d)
 
     players.forEach((player, index) => {
         player.name = d[index].name;
@@ -374,8 +383,28 @@ function dealCards(numPlayersCards){
             player.data.cards = [cardsOnTable[index], cardsOnTable[index + players.length], cardsOnTable[index + 2 * players.length]]
         })
         console.log('DEALING CARDS:', players)
+
+        players.forEach(player => {
+            pushData(player.p2p.connection, playersData(), 'players-data')
+        })
+
+        logPlayersCards()
+        
     }
     else {
-        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsOnTable, players.length, numPlayersCards);
+        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsOnTable.length, players.length, numPlayersCards);
     }
+}
+
+
+function logPlayersCards(){
+    console.log('---------- Players Cards --------------')
+    players.forEach(player => {
+        console.log(player.name)
+        player.data.cards.forEach(card => {
+            console.log(`${card.symbol}-${card.value}`)
+        })
+        console.log()
+    })
+    console.log('---------------------------------------')
 }
