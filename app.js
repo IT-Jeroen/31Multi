@@ -196,7 +196,7 @@ function addNewConnection(connection){
 function setConnectionEvents(c) {
 
     c.on('data', function (data) {
-        console.log("Data recieved:", data);
+        // console.log("Data recieved:", data);
         if (data.type === 'waiting-room'){
             mapPlayerData(data.data)
             renderApp(createWaitingRoom(playersList()), c.peer.id)
@@ -382,7 +382,7 @@ function dealCards(numPlayersCards){
         players.forEach((player, index) => {
             player.data.cards = [cardsOnTable[index], cardsOnTable[index + players.length], cardsOnTable[index + 2 * players.length]]
         })
-        console.log('DEALING CARDS:', players)
+        // console.log('DEALING CARDS:', players)
 
         players.forEach(player => {
             pushData(player.p2p.connection, playersData(), 'players-data')
