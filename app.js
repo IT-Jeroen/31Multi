@@ -310,6 +310,16 @@ function removeElements(elems=[]){
     
 }
 
+
+function updateWaitingRoom(playersHost){
+    const shuffledHost = shuffleHostArray(playersHost)
+    players.forEach((player, index) => {
+        player.name = shuffledHost[index].name;
+        player.data = shuffledHost[index].data;
+    })
+}
+
+
 ///////////////////////////////////// PLAYERS //////////////////////////////////////////
 
 function playersList(){
@@ -320,7 +330,6 @@ function playersList(){
 function playersData(){
     return players.map(player => {
         return {"name": player.name, "data": player.data}
-        // return player.data ??? //
     })    
 }
 
@@ -338,43 +347,20 @@ function shuffleHostArray(playersHost){
 }
 
 
-function updateWaitingRoom(playersHost){
-    const shuffledHost = shuffleHostArray(playersHost)
-    players.forEach((player, index) => {
-        player.name = shuffledHost[index].name;
-        player.data = shuffledHost[index].data;
-    })
+
+function findPlayerById(playersArr,id){
+    // console.log("ID", id)
+    return playersArr.find(player => player.data.id == id)
 }
 
-
-function findPlayerById(playersHost,id){
-    console.log("ID", id)
-    return playersHost.find(player => player.data.id == id)
-}
 
 function updatePlayerData(playersHost){
     players.forEach(player => {
         const hostPlayer = findPlayerById(playersHost,player.data.id);
-        console.log('PLAYER FOUND', hostPlayer)
+        // console.log('PLAYER FOUND', hostPlayer)
         player.data = hostPlayer.data
     })
 }
-
-
-// function mapPlayerData(playersHost){
-//     const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.id === players[0].data.id);
-
-//     const clientFirst = playersHost.slice(clientAtIndex, 4)
-//     const theRest = playersHost.slice(0, clientAtIndex)
-//     const bank = playersHost[4]
-//     const shuffledHost = [...clientFirst,...theRest, bank]
-//     // console.log('MAP PLAYER OBJECTS:', shuffledHost)
-
-//     players.forEach((player, index) => {
-//         player.name = shuffledHost[index].name;
-//         player.data = shuffledHost[index].data;
-//     })
-// }
 
 
 ////////////////////////////////// DEAL CARDS ///////////////////////////////////////////
