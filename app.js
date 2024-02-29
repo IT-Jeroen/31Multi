@@ -1,17 +1,48 @@
 const hostName = '31-multi-host-id';
+const cardsDB = {data: null};
 
-// 0 DEGREE Y-AXIS //
-const matrix0 = [1,0,0,0,1,0,1]; // 0 degree z axis
-const matrix90 = [0,1,0,-1,0,0,1]; // 90 degree z axis
-const matrix180 = [-1,0,0,0,-1,0,1]; // 180 degree z axis
-const matrix270 = [0,-1,0,1,0,0,1]; // 270 degree z axis
+const players = [
+    {'name':'Local', 'location': 'south', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local-player', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+    {'name':'Auto 1', 'location': 'west', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 2', 'location': 'north', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 3', 'location': 'east', 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Bank', 'location': 'center', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+]
 
-// 180 DEGREE Y-AXIS //
-const matrix0Flipped = [-1,0,0,0,1,0,-1]; // 0 degree z axis
-const matrix90Flipped = [0,-1,0,1,0,0,-1]; // 90 degree z axis
-const matrix180Flipped = [1,0,0,0,-1,0,-1]; // 180 degree z axis
-const matrix270Flipped = [0,1,0,-1,0,0,-1]; // 270 degree z axis
 
+function returnOrientationMatrix(location, flipped){
+    switch (location){
+        case 'south':
+            if (flipped){
+                return [-1,0,0,0,1,0,-1]; // 180 DEGREE Y-AXIS 0 degree z axis
+            }
+            return  [1,0,0,0,1,0,1]; // 0 DEGREE Y-AXIS 0 degree z axis
+
+        case 'west':
+            if (flipped){
+                return [0,-1,0,1,0,0,-1]; // 180 DEGREE Y-AXIS 90 degree z axis
+            }
+            return [0,1,0,-1,0,0,1]; // 0 DEGREE Y-AXIS 90 degree z axis
+
+        case 'north':
+            if (flipped){
+                return [1,0,0,0,-1,0,-1]; // 180 DEGREE Y-AXIS  180 degree z axis
+            }
+            return [-1,0,0,0,-1,0,1]; // 0 DEGREE Y-AXIS 180 degree z axis
+
+        case 'east':
+            if (flipped){
+                return [0,1,0,-1,0,0,-1]; // 180 DEGREE Y-AXIS 270 degree z axis
+            }
+            return [0,-1,0,1,0,0,1]; // 0 DEGREE Y-AXIS 270 degree z axis
+
+        case 'center':
+            if (flipped){
+                return [-1,0,0,0,1,0,-1]; // 180 DEGREE Y-AXIS 0 degree z axis
+            }
+            return  [1,0,0,0,1,0,1]; // 0 DEGREE Y-AXIS 0 degree z axis
+    }
+}
 
 // Host players //
 // players[0] will have peer, will not have a connection //
@@ -21,19 +52,19 @@ const matrix270Flipped = [0,1,0,-1,0,0,-1]; // 270 degree z axis
 // players[0] will have peer, will have a connection //
 // all other players will not have peer, will not have a connection //
 
-const players = [
-    {'name':'Local Player', 'location': 'south', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local-player', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
-    {'name':'Auto 1', 'location': 'west', 'orientation': matrix90Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 2', 'location': 'north', 'orientation': matrix180Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 3', 'location': 'east', 'orientation': matrix270Flipped, 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Bank', 'location': 'center', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
-]
+// const players = [
+//     {'name':'Local', 'location': 'south', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local-player', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+//     {'name':'Auto 1', 'location': 'west', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+//     {'name':'Auto 2', 'location': 'north', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+//     {'name':'Auto 3', 'location': 'east', 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+//     {'name':'Bank', 'location': 'center', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+// ]
 
 // cards-in-hand = "Clubs-8" :{ x: 425, y: 870 }} // [REMOVED]
 // cards: [{suit: 'clubs', label: '8'},]
 // Card in CardsDB = "clubs-8": { elem: div.card, picked:false, access:true, value:8, suit:'clubs', label:'8', x: 425, y: 870} //
-const cardsDB = {data: null};
-const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
+// const cardsDB = {data: null};
+// const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
 
 
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
@@ -448,21 +479,25 @@ function cardToId(card){
 }
 
 
+function returnCardValue(card){
+    const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
+    let cardValue = Number(card.label);
+    
+    if (!cardValue){
+        cardValue = charValues[card.label];
+    }
+
+    return cardValue
+}
+
+
 function addCardsToCardDB(cards){
     cardsDB.data = {};
     cards.forEach(card => {
-        let cardID = cardToId(card);
-
-        let cardValue = Number(card.label);
-    
-        if (!cardValue){
-            cardValue = charValues[card.label];
-        }
-        
+        const cardID = cardToId(card);
+        const cardValue = returnCardValue(card)
         cardsDB.data[cardID] = {'elem': null, 'picked':false, 'access':false, 'value':cardValue,'suit':card.suit, 'icon':card.label, 'location':'', x: 0, y: 0};
-
     })
-
 }
 
 //////////////////////////// REDUNDANT ////////////////////////////////
