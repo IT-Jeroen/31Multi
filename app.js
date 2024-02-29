@@ -22,17 +22,17 @@ const matrix270Flipped = [0,1,0,-1,0,0,-1]; // 270 degree z axis
 // all other players will not have peer, will not have a connection //
 
 const players = [
-    {'name':'Local Player', 'location': 'south', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
-    {'name':'Auto 1', 'location': 'west', 'orientation': matrix90Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 2', 'location': 'north', 'orientation': matrix180Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 3', 'location': 'east', 'orientation': matrix270Flipped, 'p2p':{'p': null, 'c': null},'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Bank', 'location': 'center', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+    {'name':'Local Player', 'location': 'south', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local-player', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+    {'name':'Auto 1', 'location': 'west', 'orientation': matrix90Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 2', 'location': 'north', 'orientation': matrix180Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 3', 'location': 'east', 'orientation': matrix270Flipped, 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Bank', 'location': 'center', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
 
 // cards-in-hand = "Clubs-8" :{ x: 425, y: 870 }} // [REMOVED]
 // cards: [{suit: 'clubs', label: '8'},]
 // Card in CardsDB = "clubs-8": { elem: div.card, picked:false, access:true, value:8, suit:'clubs', label:'8', x: 425, y: 870} //
-const cardsDB = {};
+const cardsDB = {data: null};
 const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
 
 
@@ -210,13 +210,20 @@ function setConnectionEvents(c) {
     c.on('data', function (data) {
         // console.log("Data recieved:", data);
         if (data.type === 'waiting-room'){
-            mapPlayerData(data.data)
+            // mapPlayerData(data.data)
+            updateWaitingRoom(data.data)
             renderApp(createWaitingRoom(playersList()), c.peer.id)
         }
 
         if (data.type == 'players-data'){
-            mapPlayerData(data.data)
+            // mapPlayerData(data.data)
+            updatePlayerData(data.data)
             logPlayersCards()
+        }
+
+        if (data.type == 'card-data'){
+            setCardsDB(data.data)
+            // console.log(cardsDB)
         }
         
     });
@@ -313,24 +320,61 @@ function playersList(){
 function playersData(){
     return players.map(player => {
         return {"name": player.name, "data": player.data}
+        // return player.data ??? //
     })    
 }
 
 
-function mapPlayerData(playersHost){
+function shuffleHostArray(playersHost){
     const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.id === players[0].data.id);
 
-    const a = playersHost.slice(clientAtIndex, 4)
-    const b = playersHost.slice(0, clientAtIndex)
-    const c = playersHost[4]
-    const d = [...a,...b, c]
-    // console.log('MAP PLAYER OBJECTS:', d)
+    const clientFirst = playersHost.slice(clientAtIndex, 4)
+    const theRest = playersHost.slice(0, clientAtIndex)
+    const bank = playersHost[4]
+    const shuffledHost = [...clientFirst,...theRest, bank]
+    // console.log('MAP PLAYER OBJECTS:', shuffledHost)
 
+    return shuffledHost
+}
+
+
+function updateWaitingRoom(playersHost){
+    const shuffledHost = shuffleHostArray(playersHost)
     players.forEach((player, index) => {
-        player.name = d[index].name;
-        player.data = d[index].data;
+        player.name = shuffledHost[index].name;
+        player.data = shuffledHost[index].data;
     })
 }
+
+
+function findPlayerById(playersHost,id){
+    console.log("ID", id)
+    return playersHost.find(player => player.data.id == id)
+}
+
+function updatePlayerData(playersHost){
+    players.forEach(player => {
+        const hostPlayer = findPlayerById(playersHost,player.data.id);
+        console.log('PLAYER FOUND', hostPlayer)
+        player.data = hostPlayer.data
+    })
+}
+
+
+// function mapPlayerData(playersHost){
+//     const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.id === players[0].data.id);
+
+//     const clientFirst = playersHost.slice(clientAtIndex, 4)
+//     const theRest = playersHost.slice(0, clientAtIndex)
+//     const bank = playersHost[4]
+//     const shuffledHost = [...clientFirst,...theRest, bank]
+//     // console.log('MAP PLAYER OBJECTS:', shuffledHost)
+
+//     players.forEach((player, index) => {
+//         player.name = shuffledHost[index].name;
+//         player.data = shuffledHost[index].data;
+//     })
+// }
 
 
 ////////////////////////////////// DEAL CARDS ///////////////////////////////////////////
@@ -346,59 +390,96 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 
     let randomIndex = 0;
 
-    // Can be miss-aligned //
+    // Can be miss-aligned ??? //
     if (cardLabelRange.length > numCards){
         console.log('Card Value Range not inline with Number of Playing Cards per Player')
     }
 
-    const cardsInGame = [];
+    const cardsInDeck = [];
 
     cardLabelRange.forEach(label => {
         cardSuits.forEach(suit => {
-            // cardsInGame.push(`${symbol}_${value}`);
-            cardsInGame.push({suit: suit, label: label})
+            cardsInDeck.push({suit: suit, label: label})
         })
     })
 
     // Randomize cards //
-    for (let index = cardsInGame.length - 1; index > 0; index--){
+    for (let index = cardsInDeck.length - 1; index > 0; index--){
         
         randomIndex = Math.floor(Math.random() * (index + 1));
-        [cardsInGame[index], cardsInGame[randomIndex]] = [cardsInGame[randomIndex], cardsInGame[index]]
+        [cardsInDeck[index], cardsInDeck[randomIndex]] = [cardsInDeck[randomIndex], cardsInDeck[index]]
         
       }
-    // console.log(cardsInGame);
-    const pickIndex = Math.floor(Math.random() * (cardsInGame.length - numCards));
-    const cardsInDeck = cardsInGame.slice(pickIndex, pickIndex + numCards);
-    
     // console.log(cardsInDeck);
+    const pickIndex = Math.floor(Math.random() * (cardsInDeck.length - numCards));
+    const  cardsInGame = cardsInDeck.slice(pickIndex, pickIndex + numCards);
+    
+    // console.log(cardsInGame);
 
-    return cardsInDeck;
+    return cardsInGame;
 }
 
+
+// Triggered by Start Game Button click event //
 function dealCards(numPlayersCards){
     const maxCards = players.length * numPlayersCards
-    const cardsOnTable = createRandomDeckValues(maxCards, '7');
+    const cardsInGame = createRandomDeckValues(maxCards, '7');
 
-    if (cardsOnTable.length / players.length == numPlayersCards){
+    if (cardsInGame.length / players.length == numPlayersCards){
+        addCardsToCardDB(cardsInGame)
+
         players.forEach((player, index) => {
-            player.data.cards = [cardsOnTable[index], cardsOnTable[index + players.length], cardsOnTable[index + 2 * players.length]]
+            player.data.cards = [cardsInGame[index], cardsInGame[index + players.length], cardsInGame[index + 2 * players.length]]
         })
         // console.log('DEALING CARDS:', players)
 
+
         players.forEach(player => {
-            pushData(player.p2p.c, playersData(), 'players-data')
+            pushData(player.p2p.c, playersData(), 'players-data');
+            pushData(player.p2p.c, cardsDB.data, 'card-data');
         })
 
         logPlayersCards()
         
     }
     else {
-        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsOnTable.length, players.length, numPlayersCards);
+        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayersCards);
     }
 }
 
 
+function setCardsDB(data){
+    if (!cardsDB.data){
+        cardsDB.data = data
+    } else{
+        console.log('UPDATE CARDSDB WHAT HAPPEND ???')
+    }
+}
+
+
+function cardToId(card){
+    return `${card.suit}-${card.label}`
+}
+
+
+function addCardsToCardDB(cards){
+    cardsDB.data = {};
+    cards.forEach(card => {
+        let cardID = cardToId(card);
+
+        let cardValue = Number(card.label);
+    
+        if (!cardValue){
+            cardValue = charValues[card.label];
+        }
+        
+        cardsDB.data[cardID] = {'elem': null, 'picked':false, 'access':false, 'value':cardValue,'suit':card.suit, 'icon':card.label, 'location':'', x: 0, y: 0};
+
+    })
+
+}
+
+//////////////////////////// REDUNDANT ////////////////////////////////
 function logPlayersCards(){
     console.log('---------- Players Cards --------------')
     players.forEach(player => {
