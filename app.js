@@ -1,3 +1,5 @@
+const hostName = '31-multi-host-id';
+
 // 0 DEGREE Y-AXIS //
 const matrix0 = [1,0,0,0,1,0,1]; // 0 degree z axis
 const matrix90 = [0,1,0,-1,0,0,1]; // 90 degree z axis
@@ -10,20 +12,28 @@ const matrix90Flipped = [0,-1,0,1,0,0,-1]; // 90 degree z axis
 const matrix180Flipped = [1,0,0,0,-1,0,-1]; // 180 degree z axis
 const matrix270Flipped = [0,1,0,-1,0,0,-1]; // 270 degree z axis
 
-// p2p: sending peer or connection via connection.send() raises error due to formatting //
-// Duplicate Naming: maybe add connectionId with name to differentiate duplicate names //
+
+// Host players //
+// players[0] will have peer, will not have a connection //
+// all remote players will not have a peer, but will have a connection //
+
+// Client Players //
+// players[0] will have peer, will have a connection //
+// all other players will not have peer, will not have a connection //
 
 const players = [
-    {"name":'Local Player', "p2p":{"peer": null, "connection": null}, "data":{"location": 'south', "cards":[],'cards-in-hand':{}, 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'orientation': matrix0, 'pass': false, 'active':false, 'auto':false}},
-    {"name":'Auto 1', "p2p":{"peer": null, "connection": null}, "data":{"location": 'west', "cards":[], 'cards-in-hand':{}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': matrix90Flipped, 'pass': false, 'active':false, 'auto':true}},
-    {"name":'Auto 2', "p2p":{"peer": null, "connection": null}, "data":{"location": 'north', "cards":[], 'cards-in-hand':{}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': matrix180Flipped, 'pass': false, 'active':false, 'auto':true}},
-    {"name":'Auto 3', "p2p":{"peer": null, "connection": null},"data":{"location": 'east', "cards":[], 'cards-in-hand':{}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': matrix270Flipped, 'pass': false, 'active':false, 'auto':true}},
-    {"name":'Bank', "p2p":{"peer": null, "connection": null}, "data":{"location": 'center', "cards":[], 'cards-in-hand':{}, 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'orientation': matrix0, 'pass': true, 'active':false, 'auto':false}}
+    {'name':'Local Player', 'location': 'south', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+    {'name':'Auto 1', 'location': 'west', 'orientation': matrix90Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 2', 'location': 'north', 'orientation': matrix180Flipped, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 3', 'location': 'east', 'orientation': matrix270Flipped, 'p2p':{'p': null, 'c': null},'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Bank', 'location': 'center', 'orientation': matrix0, 'p2p':{'p': null, 'c': null}, 'data':{ 'id': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
 
-const hostName = '31-multi-host-id';
-const connections = []
-
+// cards-in-hand = "Clubs-8" :{ x: 425, y: 870 }} // [REMOVED]
+// cards: [{suit: 'clubs', label: '8'},]
+// Card in CardsDB = "clubs-8": { elem: div.card, picked:false, access:true, value:8, suit:'clubs', label:'8', x: 425, y: 870} //
+const cardsDB = {};
+const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
 
 
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
@@ -106,18 +116,19 @@ function setupConnection(playerName){
     .then(result => {
         if (!result.ishost){
             // console.log('HOST FOUND')
-            // connections.push({name:playerName, c: c})
 
-            players[0].name = playerName
-            players[0].p2p.peer = result.p
-            players[0].p2p.connection = result.c
+            players[0].name = playerName;
+            players[0].p2p.p = result.p;
+            players[0].p2p.c = result.c;
+            players[0].data.id = result.c.connectionId;
 
             setConnectionEvents(result.c)
             renderApp(createWaitingRoom(playersList(),result.p.id));
         }
         else{
             result.p.destroy();
-            connections.length = 0;
+            players[0].p2p.c = null;
+            players[0].p2p.p = null;
             setAsHost(playerName);
         }
         
@@ -140,9 +151,7 @@ function setAsHost(playerName){
         addNewConnection(c)
 
         players.forEach(clientPlayer => {
-            // pushData(clientPlayer.connection, players) // TypeError: t is undefined, binarypack.ts:331:20 //
-            // pushData(clientPlayer.p2p.connection, JSON.stringify(players)) // TypeError: cyclic object value app.js:149:52 //
-            pushData(clientPlayer.p2p.connection, playersData(), 'waiting-room')
+            pushData(clientPlayer.p2p.c, playersData(), 'waiting-room')
         })
 
         renderApp(createWaitingRoom(playersList(), hostName))
@@ -151,48 +160,51 @@ function setAsHost(playerName){
     peer.on('error', err => {console.log('PEER ERROR:', err)});
 
     players[0].name = playerName;
-    players[0].p2p.peer = peer;
+    players[0].p2p.p = peer;
+    players[0].data.id = hostName;
     renderApp(createWaitingRoom(playersList(), hostName));
 
 }
 
 
 
-function addNewConnection(connection){
+function addNewConnection(c){
     // console.log('ADD NEW CLIENT CONNECTION:', connection.connectionId)
 
-    const newPlayer = players.some(playerHost => {
+    const excistingPlayer = players.some(playerHost => {
         // console.log("PLAYERHOST:", playerHost)
-        if (playerHost.p2p.connection){
+        if (playerHost.p2p.c){
             
-            if (playerHost.p2p.connection.connectionId === connection.connectionId){
+            if (playerHost.p2p.c.connectionId === c.connectionId){
                 return true
             }
         }
         
     })
 
-    if(!newPlayer){
+    if(!excistingPlayer){
         const autoPlayerIndex = players.findIndex(playerHost => playerHost.data.auto)
         
         if (autoPlayerIndex == -1){
-            console.log('CANNOT ADD CONNECTION:', connection.metadata)
+            console.log('CANNOT ADD CONNECTION:', c.metadata)
             // c.send('CANNOT ADD CLIENT')
         }
         else{
-            players[autoPlayerIndex].name = connection.metadata;
-            players[autoPlayerIndex].p2p.connection = connection;
+            players[autoPlayerIndex].name = c.metadata;
+            players[autoPlayerIndex].p2p.c = c;
             players[autoPlayerIndex].data.auto = false;
+            players[autoPlayerIndex].data.id = c.connectionId;
             // console.log('ADD PLAYERS:', players)
         }
         
     }
     else {
-        console.log('NOT A NEW CONNECTION:', connection.metadata)
+        console.log('NOT A NEW CONNECTION:', c.metadata)
     }
 }
 
 
+// Client Side (Only one connection) //
 function setConnectionEvents(c) {
 
     c.on('data', function (data) {
@@ -211,15 +223,15 @@ function setConnectionEvents(c) {
 
     c.on('close', function () {
         console.log('Connection reset, Awaiting connection...');
-        // remove from array //
-        connections = connections.filter(i=> i.name != c.peer);
-        // console.log('Connections:', connections);
+        // set player connection to null
+        // set player data.id to null
+        // set player to auto ???
+        // rename player to auto ???
     });
 }
 
 
 // Delayed Response in case connection is closed when still setting up in the background //
-// Create data Object ??? {type: "", data: ""} //
 function pushData(c, data, type){
     if (c){
         if (!c._open){
@@ -306,15 +318,10 @@ function playersData(){
 
 
 function mapPlayerData(playersHost){
-    const playerClientIndex = playersHost.findIndex(playerHost => playerHost.name === players[0].name)
-    // Prevent Duplicate Name Problems (Doesn't work to the lack of p2p data from host)
-    // const playerClientIndex = playersHost.findIndex(playerHost => playerHost.p2p.connection.connectionId === players[0].p2p.connection.connectionId)
+    const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.id === players[0].data.id);
 
-    // [0,1,2,3, not 4] //
-    // shift to the left //
-    // [0 - playerClientIndex, 1 - playerClientIndex]
-    const a = playersHost.slice(playerClientIndex, 4)
-    const b = playersHost.slice(0, playerClientIndex)
+    const a = playersHost.slice(clientAtIndex, 4)
+    const b = playersHost.slice(0, clientAtIndex)
     const c = playersHost[4]
     const d = [...a,...b, c]
     // console.log('MAP PLAYER OBJECTS:', d)
@@ -328,32 +335,28 @@ function mapPlayerData(playersHost){
 
 ////////////////////////////////// DEAL CARDS ///////////////////////////////////////////
 
-const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
-// Card in CardsDB = "Clubs-8": Object { elem: div.card, picked:false, access:true, value:8, symbol:'Clubs', icon:'8'} //
-const cardsDB = {}; 
-
 
 function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
-    const cardValues = ['2','3','4','5','6','7','8','9','10','jack', 'queen', 'king', 'ace'];
-    const cardSymbols = ['club', 'diamond', 'heart', 'spade'];
+    const cardLabels = ['2','3','4','5','6','7','8','9','10','jack', 'queen', 'king', 'ace'];
+    const cardSuits = ['club', 'diamond', 'heart', 'spade'];
 
-    const min = cardValues.indexOf(minValue);
-    const max = cardValues.indexOf(maxValue)+1;
-    const cardRange = cardValues.slice(min, max);
+    const min = cardLabels.indexOf(minValue);
+    const max = cardLabels.indexOf(maxValue)+1;
+    const cardLabelRange = cardLabels.slice(min, max);
 
     let randomIndex = 0;
 
     // Can be miss-aligned //
-    if (cardRange.length > numCards){
+    if (cardLabelRange.length > numCards){
         console.log('Card Value Range not inline with Number of Playing Cards per Player')
     }
 
     const cardsInGame = [];
 
-    cardRange.forEach(value => {
-        cardSymbols.forEach(symbol => {
+    cardLabelRange.forEach(label => {
+        cardSuits.forEach(suit => {
             // cardsInGame.push(`${symbol}_${value}`);
-            cardsInGame.push({symbol: symbol, value: value})
+            cardsInGame.push({suit: suit, label: label})
         })
     })
 
@@ -374,7 +377,6 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 }
 
 function dealCards(numPlayersCards){
-    // const numPlayersCards = 3;
     const maxCards = players.length * numPlayersCards
     const cardsOnTable = createRandomDeckValues(maxCards, '7');
 
@@ -385,7 +387,7 @@ function dealCards(numPlayersCards){
         // console.log('DEALING CARDS:', players)
 
         players.forEach(player => {
-            pushData(player.p2p.connection, playersData(), 'players-data')
+            pushData(player.p2p.c, playersData(), 'players-data')
         })
 
         logPlayersCards()
@@ -400,11 +402,11 @@ function dealCards(numPlayersCards){
 function logPlayersCards(){
     console.log('---------- Players Cards --------------')
     players.forEach(player => {
-        console.log(player.name)
+        console.log('# ' + player.name)
         player.data.cards.forEach(card => {
-            console.log(`${card.symbol}-${card.value}`)
+            console.log(`${card.suit}-${card.label}`)
         })
-        console.log()
+        console.log('#')
     })
     console.log('---------------------------------------')
 }
