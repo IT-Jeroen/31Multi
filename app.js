@@ -110,6 +110,19 @@ function renderApp(component) {
 renderApp(createNameInput(handleNameSubmitted));
 
 
+function createPlayfield(){
+    const playfield = document.createElement('div')
+    playfield.id = 'playfield'
+    addClassToElement(playfield, 'playfield')
+
+    createDeck(playfield)
+
+    renderApp(playfield)
+
+    // Temp ??? //
+    dealCardsToPlayers()
+}
+
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
 
 function testHost(playerName){
@@ -255,6 +268,7 @@ function setConnectionEvents(c) {
         if (data.type == 'card-data'){
             setCardsDB(data.data)
             // console.log(cardsDB)
+            createPlayfield()
         }
         
     });
@@ -457,6 +471,7 @@ function dealCards(numPlayersCards){
         })
 
         logPlayersCards()
+        createPlayfield()
         
     }
     else {
@@ -475,7 +490,7 @@ function setCardsDB(data){
 
 
 function cardToId(card){
-    return `${card.suit}-${card.label}`
+    return `${card.suit}_${card.label}`
 }
 
 
@@ -496,9 +511,10 @@ function addCardsToCardDB(cards){
     cards.forEach(card => {
         const cardID = cardToId(card);
         const cardValue = returnCardValue(card)
-        cardsDB.data[cardID] = {'elem': null, 'picked':false, 'access':false, 'value':cardValue,'suit':card.suit, 'icon':card.label, 'location':'', x: 0, y: 0};
+        cardsDB.data[cardID] = {'elem': null, 'picked':false, 'access':false, 'value':cardValue,'suit':card.suit, 'icon':card.label, 'location':'center', x: 0, y: 0};
     })
 }
+
 
 //////////////////////////// REDUNDANT ////////////////////////////////
 function logPlayersCards(){
@@ -515,6 +531,34 @@ function logPlayersCards(){
 
 
 //////////////////////////// 31 Single //////////////////////////////////////
+const numPlayersCards = 3;
+
+const backgroundElem = document.getElementById('background');
+const playFieldElem = document.getElementById('playfield');
+
+const viewPortDimension = {'width': window.innerWidth, 'height': window.innerHeight};
+const viewPortScale = {'scale': 1, 'x': 1, 'y': 1}; // set the correct scale depending on screen orientation (horizontal vs vertical)
+
+const imageDimensions = {'width': 169, 'height': 244};
+const cssViewPort = {'width': 0.98, 'height': 0.98};
+const buttonSpecs = {'width': 250, 'height': null, 'font': 1.5, 'padding': 1};
+
+const winnerBadge = {'width': 160 * viewPortScale.scale, 'height': 160 * viewPortScale.scale, 'line': 160 * viewPortScale.scale, 'font': 500 * viewPortScale.scale,'border': 5};
+const infoDisplay = {'width': (viewPortDimension.width * 0.6) * viewPortScale.scale, 'height': (viewPortDimension.height / 5) * viewPortScale.scale, 'padding': 20 * viewPortScale.scale, 'font': 1.5 * viewPortScale.scale,'border': 5};
+const displayPos = {'x': (viewPortDimension.width * 0.5) - (infoDisplay.width * 0.5) - infoDisplay.border, 'y': (viewPortDimension.height * 0.5) - (infoDisplay.height * 0.5)};
+const cardDimensions = {'width': imageDimensions.width * viewPortScale.scale, 'height': imageDimensions.height * viewPortScale.scale};
+const offset = {'stacked':40 * viewPortScale.scale, 'hoverx':5, 'hovery':40 * viewPortScale.scale};
+const handWidth = {'stacked': (cardDimensions.width + ((numPlayersCards -1) * offset.stacked)), 'unstacked': (numPlayersCards * cardDimensions.width)};
+const btnDimensions = {'width': buttonSpecs.width * viewPortScale.scale, 'height': null, 'font': buttonSpecs.font * viewPortScale.scale, 'padding': buttonSpecs.padding * viewPortScale.scale};
+const centerPos = {'x': (cssViewPort.width * viewPortDimension.width) / 2,'y': (cssViewPort.height * viewPortDimension.height) / 2};
+const deckPos = {'x': centerPos.x - (cardDimensions.width / 2), 'y': centerPos.y - (cardDimensions.height /2)};
+const minViewPortDimensions = {'width': ((numPlayersCards -1) * cardDimensions.height) + (numPlayersCards * cardDimensions.width) + 80, 'height': (3 * cardDimensions.height) + 80};
+const zonesPos = {
+    'south': (cssViewPort.height * viewPortDimension.height) - cardDimensions.height,
+    'west': (cardDimensions.height - cardDimensions.width) /2,
+    'north': 0,
+    'east': (cssViewPort.height * viewPortDimension.width - cardDimensions.height + ((cardDimensions.height - cardDimensions.width) /2))
+}
 
 function createElem(elemType, classNames=[], idName){
     const elem = document.createElement(elemType);
@@ -529,54 +573,103 @@ function createElem(elemType, classNames=[], idName){
 }
 
 
-function createDeckElements(){
-    const deckElems = [];
-    for (let i = 0; i < cardsInGame; i++){
-        const cardElem = createCard();
+// function createDeckElements(playFieldElem){
+//     const deckElems = [];
+//     for (let i = 0; i < cardsInGame; i++){
+//         const cardElem = createCard();
 
-        // Scaling 1.001 to keep images crisp //
-        cardElem.style = `transform: matrix3d(
-            ${matrix0Flipped[0]},
-            ${matrix0Flipped[1]},
-            ${matrix0Flipped[2]},
-            0,
-            ${matrix0Flipped[3]},
-            ${matrix0Flipped[4]},
-            0,
-            0,
-            ${matrix0Flipped[5]},
-            0,
-            ${matrix0Flipped[6]},
-            0,
-            ${deckPos.x},
-            ${deckPos.y},
-            0,
-            1.001
-            ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px;`; 
+//         // Scaling 1.001 to keep images crisp //
+//         cardElem.style = `transform: matrix3d(
+//             ${matrix0Flipped[0]},
+//             ${matrix0Flipped[1]},
+//             ${matrix0Flipped[2]},
+//             0,
+//             ${matrix0Flipped[3]},
+//             ${matrix0Flipped[4]},
+//             0,
+//             0,
+//             ${matrix0Flipped[5]},
+//             0,
+//             ${matrix0Flipped[6]},
+//             0,
+//             ${deckPos.x},
+//             ${deckPos.y},
+//             0,
+//             1.001
+//             ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px;`; 
         
-        // add hover mouse event //
-        mouseOverEvent(cardElem);
-        // add click card event //
-        cardClickEvent(cardElem);
+//         // // add hover mouse event //
+//         // mouseOverEvent(cardElem);
+//         // // add click card event //
+//         // cardClickEvent(cardElem);
 
-        addChildElement(playFieldElem, cardElem);
-        deckElems.push(cardElem);
-    }
-    return deckElems;
+//         addChildElement(playFieldElem, cardElem);
+//         deckElems.push(cardElem);
+//     }
+//     return deckElems;
+// }
+
+
+// Local Deck //
+function createDeck(playFieldElem){
+    const cardIDs = Object.keys(cardsDB.data) 
+    cardIDs.forEach((cardID, index) => {
+        cardsDB.data[cardID].elem = createDeckElement(cardID, deckPos, cardDimensions, cardIDs.length - index);
+        cardsDB.data[cardID].location = 'center';
+        cardsDB.data[cardID].x = deckPos.x;
+        cardsDB.data[cardID].y = deckPos.y
+
+        playFieldElem.appendChild(cardsDB.data[cardID].elem)
+    })
 }
 
 
-function createCard(){
+function createDeckElement(cardID, pos, dimensions, zIndex){
+
+    const cardElem = createCard(cardID);
+    const matrix = returnOrientationMatrix('center', flipped=true)
+    // Scaling 1.001 to keep images crisp //
+    cardElem.style = `transform: matrix3d(
+        ${matrix[0]},
+        ${matrix[1]},
+        ${matrix[2]},
+        0,
+        ${matrix[3]},
+        ${matrix[4]},
+        0,
+        0,
+        ${matrix[5]},
+        0,
+        ${matrix[6]},
+        0,
+        ${pos.x},
+        ${pos.y},
+        0,
+        1.001
+        ); width: ${dimensions.width}px; height: ${dimensions.height}px; z-index: ${zIndex};`; 
+    
+    // // add hover mouse event //
+    // mouseOverEvent(cardElem);
+    // // add click card event //
+    // cardClickEvent(cardElem);
+    return cardElem;
+}
+    
+
+function createCard(cardID){
+    
     const cardElem = createElement('div');
     addClassToElement(cardElem, 'card');
 
     const frontElem = createElement('div');
     addClassToElement(frontElem, 'front');
     const frontImg = createElement('img');
+    frontImg.src = `./src/img/${cardID}.png`;
 
     const backElem = createElement('div');
     addClassToElement(backElem, 'back');
     const backImg = createElement('img');
+    backImg.src = './src/img/back-blue.png';
 
     addChildElement(frontElem,frontImg);
     addChildElement(backElem, backImg);
@@ -584,17 +677,6 @@ function createCard(){
     addChildElement(cardElem, backElem);
 
     return cardElem;
-}
-
-
-function createWinnerBadgeElem(){
-    const badgeElem = document.createElement('div');
-    addClassToElement(badgeElem, 'badge');
-    addIdToElement(badgeElem, 'winner-badge');
-    const badgeText = document.createTextNode('31');
-    addChildElement(badgeElem, badgeText);
-    addChildElement(playFieldElem, badgeElem);
-    return badgeElem;
 }
 
 
@@ -628,7 +710,8 @@ function addChildElement(parentElem, childElem){
 // cardsDB now holds the x and y position of the card //
 
 function calcCardPositions(player, stacked=true){
-    let cardsInHand = player['cards-in-hand'];
+    // let cardsInHand = player['cards-in-hand'];
+    const cardsInHand = player.data.cards
     let widthHand = 0;
     let cardOffSet = 0;
 
@@ -645,154 +728,151 @@ function calcCardPositions(player, stacked=true){
     let emptySpaceY = ((cssViewPort.height * viewPortDimension.height) - widthHand) / 2 - (offset.stacked / 2);
 
     if (player.location == 'south'){
-        Object.keys(cardsInHand).forEach((cardId, index) => {
-            player['cards-in-hand'][cardId].y = zonesPos.south;
-            player['cards-in-hand'][cardId].x = emptySpaceX + (index * cardOffSet);
+        cardsInHand.forEach((card, index) => {
+            cardsDB.data[cardToId(card)].y = zonesPos.south;
+            cardsDB.data[cardToId(card)].x = emptySpaceX + (index * cardOffSet);
         })
     }
 
     if (player.location == 'west'){
-        Object.keys(cardsInHand).forEach((cardId, index) => {
-            player['cards-in-hand'][cardId].x = zonesPos.west;
-            player['cards-in-hand'][cardId].y = emptySpaceY + (index * cardOffSet);
+        cardsInHand.forEach((card, index) => {
+            cardsDB.data[cardToId(card)].x = zonesPos.west;
+            cardsDB.data[cardToId(card)].y = emptySpaceY + (index * cardOffSet);
         })
 
     }
 
     if (player.location == 'north'){
-        Object.keys(cardsInHand).forEach((cardId, index) => {
-            player['cards-in-hand'][cardId].y = zonesPos.north;
-            player['cards-in-hand'][cardId].x = emptySpaceX + (index * cardOffSet);
+        cardsInHand.forEach((card, index) => {
+            cardsDB.data[cardToId(card)].y = zonesPos.north;
+            cardsDB.data[cardToId(card)].x = emptySpaceX + (index * cardOffSet);
         })
 
     }
     if (player.location == 'east'){
-        Object.keys(cardsInHand).forEach((cardId, index) => {
-            player['cards-in-hand'][cardId].x = zonesPos.east;
-            player['cards-in-hand'][cardId].y = emptySpaceY + (index * cardOffSet);
+        cardsInHand.forEach((card, index) => {
+            cardsDB.data[cardToId(card)].x = zonesPos.east;
+            cardsDB.data[cardToId(card)].y = emptySpaceY + (index * cardOffSet);
         })
 
     }
 
     if (player.location == 'center'){
-        Object.keys(cardsInHand).forEach((cardId, index) => {
-            player['cards-in-hand'][cardId].x = emptySpaceX + (index * cardOffSet);
-            player['cards-in-hand'][cardId].y = deckPos.y;
+        cardsInHand.forEach((card, index) => {
+            cardsDB.data[cardToId(card)].x = emptySpaceX + (index * cardOffSet);
+            cardsDB.data[cardToId(card)].y = deckPos.y;
         })
 
     }
 }
 
-function repositionCards(playersArr=[]){
-    let zIndex = 1;
 
-    playersArr.forEach(player=> {
-        const orientation = player.orientation;
-        const cardsID = Object.keys(player['cards-in-hand'])
-
-        cardsID.forEach(cardID =>{
-            const cardElem = cardsDB[cardID].elem;
-            const cardPos = player['cards-in-hand'][cardID];
-
-            // Scaling 1.001 to keep images crisp //
-            cardElem.style = `transform: matrix3d(
-                ${orientation[0]},
-                ${orientation[1]},
-                ${orientation[2]},
-                0,
-                ${orientation[3]},
-                ${orientation[4]},
-                0,
-                0,
-                ${orientation[5]},
-                0,
-                ${orientation[6]},
-                0,
-                ${cardPos.x},
-                ${cardPos.y},
-                0,
-                1.001
-                ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px; z-index: ${zIndex};`;
-            
-            zIndex += 1;
-        });
-    })
-}
-
-function addDeckCardsToPlayers(){
-    const allCardElems = createDeckElements(cardsInGame, matrix0Flipped, deckPos);
-    // Create card values and id's
-    const deckCardValues = createRandomDeckValues(allCardElems.length, '7');
-    // let playersID = Object.keys(players)
-    // let players = Object.values(players); 
-    let playerIndex = 0;
-
-    allCardElems.forEach((cardElem, index) =>{
-        // pick a card //
-        let cardID = deckCardValues[index];
-
-        // Add Correct Card Images to image Elements //
-        const frontElem = cardElem.getElementsByClassName('front');
-        const frontImg = frontElem[0].children[0];
-        frontImg.src = `./src/img/${cardID}.png`;
-        const backElem = cardElem.getElementsByClassName('back');
-        const backImg = backElem[0].children[0];
-        backImg.src = './src/img/back-blue.png';
-        
-        // add card to DB //
-        addCardToCardDB(cardID, cardElem);
-        
-        // add card to player hand //
-        players[playerIndex]['cards-in-hand'][cardID] = {'x':deckPos.x, 'y':deckPos.y};
-        cardsDB[cardID].location = players[playerIndex].location;
-        
-        if (players[playerIndex].name == 'Bank' || players[playerIndex].location == 'south'){
-            cardsDB[cardID].access = true;
-        }
-        
-        playerIndex += 1;
-
-        if (playerIndex == players.length){
-            playerIndex = 0;
-        }
-    })  
-}
-
-function dealDeckCards(timing){
-    // const bankPlayer = Object.values(filterPlayers('name', ['Bank'], false));
-    // const nonBankPlayers = Object.values(filterPlayers('name', ['Bank']));
-    const bankPlayer = filterPlayers('name', 'Bank', false);
-    const nonBankPlayers = filterPlayers('name', 'Bank', true);
+function dealCardsToPlayers(){
     
-    addDeckCardsToPlayers(players);
-
     // Calculate Card Positions //
-    // Object.values(players).forEach(player =>{
-    players.forEach(player =>{
-        if (player.name == 'Bank'){
-            calcCardPositions(player, stacked=false);
-        }else{
-            calcCardPositions(player);
-        }  
+    players.forEach(player => {
+        if(player.location === 'center'){
+            calcCardPositions(player, stacked=false)
+        }
+        else {
+            calcCardPositions(player, stacked=true)
+        }
     })
-    
 
-    handOutDeckCards(nonBankPlayers, timing);
-    setTimeout(()=>{
-        handOutDeckCards(bankPlayer, timing);
-    },(cardsInGame + 1) * timing);
+    // Deal Cards to Players CSS Animation //
+    handOutDeckCards(300)
+    
+    
 }
 
 
-function handOutDeckCards(playersArr=[], timing=0){
+// // Actually css animation trigger //
+// function repositionCards(playersArr=[]){
+//     let zIndex = 1;
+
+//     playersArr.forEach(player=> {
+//         const orientation = returnOrientationMatrix(player.orientation);
+//         // const cardsID = Object.keys(player['cards-in-hand'])
+
+//         player.data.cards.forEach(card =>{
+//             const cardID = cardToId(card)
+//             const cardElem = cardsDB.data[cardID].elem;
+//             // const cardPos = player['cards-in-hand'][cardID];
+
+//             // Scaling 1.001 to keep images crisp //
+//             cardElem.style = `transform: matrix3d(
+//                 ${orientation[0]},
+//                 ${orientation[1]},
+//                 ${orientation[2]},
+//                 0,
+//                 ${orientation[3]},
+//                 ${orientation[4]},
+//                 0,
+//                 0,
+//                 ${orientation[5]},
+//                 0,
+//                 ${orientation[6]},
+//                 0,
+//                 ${cardsDB.data[cardID].x},
+//                 ${cardsDB.data[cardID].y},
+//                 0,
+//                 1.001
+//                 ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px; z-index: ${zIndex};`;
+            
+//             zIndex += 1;
+//         });
+//     })
+// }
+
+// function addDeckCardsToPlayers(){
+//     const allCardElems = createDeckElements(cardsInGame, matrix0Flipped, deckPos);
+//     // Create card values and id's
+//     const deckCardValues = createRandomDeckValues(allCardElems.length, '7');
+//     // let playersID = Object.keys(players)
+//     // let players = Object.values(players); 
+//     let playerIndex = 0;
+
+//     allCardElems.forEach((cardElem, index) =>{
+//         // pick a card //
+//         let cardID = deckCardValues[index];
+
+//         // Add Correct Card Images to image Elements //
+//         const frontElem = cardElem.getElementsByClassName('front');
+//         const frontImg = frontElem[0].children[0];
+//         frontImg.src = `./src/img/${cardID}.png`;
+//         const backElem = cardElem.getElementsByClassName('back');
+//         const backImg = backElem[0].children[0];
+//         backImg.src = './src/img/back-blue.png';
+        
+//         // add card to DB //
+//         addCardToCardDB(cardID, cardElem);
+        
+//         // add card to player hand //
+//         players[playerIndex]['cards-in-hand'][cardID] = {'x':deckPos.x, 'y':deckPos.y};
+//         cardsDB.data[cardID].location = players[playerIndex].location;
+        
+//         if (players[playerIndex].name == 'Bank' || players[playerIndex].location == 'south'){
+//             cardsDB.data[cardID].access = true;
+//         }
+        
+//         playerIndex += 1;
+
+//         if (playerIndex == players.length){
+//             playerIndex = 0;
+//         }
+//     })  
+// }
+
+
+function handOutDeckCards(timing=0){
     let i = 0;
     let playerIndex = 0;
     let zIndex = 1;
     let cardIndex = 0;
     let numCardsToDeal = 0;
     
-    playersArr.forEach(player => {
-        numCardsToDeal += Object.keys(player['cards-in-hand']).length;
+    players.forEach(player => {
+        numCardsToDeal += player.data.cards.length;
     })
 
     const intervalID = setInterval(()=>{
@@ -800,13 +880,25 @@ function handOutDeckCards(playersArr=[], timing=0){
             clearInterval(intervalID);
         }
         
-        let player = playersArr[playerIndex];
-        const cardIds = Object.keys(player['cards-in-hand']);
-        const cardID = cardIds[cardIndex];
-        const card = player['cards-in-hand'][cardID];
-        const orientation = player.orientation;
+        let player = players[playerIndex];
+        // const cardIds = Object.keys(player['cards-in-hand']);
 
-        const cardElem = cardsDB[cardID].elem;
+        // const cardID = cardIds[cardIndex];
+        const cardID = cardToId(player.data.cards[cardIndex]);
+
+        // const card = player['cards-in-hand'][cardID];
+        const card = cardsDB.data[cardID]
+
+        // const orientation = player.orientation;
+
+
+        let isFlipped = true
+        if(player.location == 'south' || player.location == 'center'){
+            isFlipped = false
+        }
+        const orientation = returnOrientationMatrix(player.location, isFlipped)
+
+        const cardElem = card.elem;
 
         // Scaling 1.001 to keep images crisp //
         cardElem.style = `transform: matrix3d(
@@ -831,7 +923,7 @@ function handOutDeckCards(playersArr=[], timing=0){
         zIndex += 1;
         playerIndex += 1;
 
-        if (playerIndex == playersArr.length){
+        if (playerIndex == players.length){
             cardIndex += 1;
             playerIndex = 0;
         }
@@ -840,41 +932,62 @@ function handOutDeckCards(playersArr=[], timing=0){
     }, timing);
 }
 
+
+
+// function dealDeckCards(timing){
+//     const bankPlayer = filterPlayers('name', 'Bank', false);
+//     const nonBankPlayers = filterPlayers('name', 'Bank', true);
+    
+//     addDeckCardsToPlayers(players);
+
+//     // Calculate Card Positions //
+//     players.forEach(player =>{
+//         if (player.name == 'Bank'){
+//             calcCardPositions(player, stacked=false);
+//         }else{
+//             calcCardPositions(player);
+//         }  
+//     })
+    
+
+//     handOutDeckCards(nonBankPlayers, timing);
+//     setTimeout(()=>{
+//         handOutDeckCards(bankPlayer, timing);
+//     },(cardsInGame + 1) * timing);
+// }
+
+
 function loadGame(){
     // Recalculated variables when newgame() //
     // calculateVariables();
 
-    intro = true;
-    const playerName = document.getElementById('player-name');
-    const playerEntry = document.getElementById('player-entry');
+    // intro = true;
+    // const playerName = document.getElementById('player-name');
+    // const playerEntry = document.getElementById('player-entry');
 
-    // Display Elements //
-    setTimeout(()=>{
-        if (playerEntry){
-            players[0].name = playerName.value;
-            players[0].auto = false;
-            playerEntry.remove();
-        }   
-    }, 500);
+    // // Display Elements //
+    // setTimeout(()=>{
+    //     if (playerEntry){
+    //         players[0].name = playerName.value;
+    //         players[0].auto = false;
+    //         playerEntry.remove();
+    //     }   
+    // }, 500);
 
-    // playCardsBtn = createPlayCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked * 2)), zonesPos.south + 0.5 * cardDimensions.height);
-    // holdCardsBtn = createHoldCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked * 2)), zonesPos.south + 0.5 * cardDimensions.height);
-    // swapBankBtn = createSwapBankBtn(((cssViewPort.width * viewPortDimension.width) / 2 + handWidth.stacked), zonesPos.south + 0.5 * cardDimensions.height);
-
-    playCardsBtn = createPlayCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
-    holdCardsBtn = createHoldCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
-    swapBankBtn = createSwapBankBtn(((cssViewPort.width * viewPortDimension.width) / 2 + (handWidth.stacked / 2) + 20), zonesPos.south + 0.5 * cardDimensions.height);
+    // playCardsBtn = createPlayCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
+    // holdCardsBtn = createHoldCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
+    // swapBankBtn = createSwapBankBtn(((cssViewPort.width * viewPortDimension.width) / 2 + (handWidth.stacked / 2) + 20), zonesPos.south + 0.5 * cardDimensions.height);
 
     // Deal Cards //
-    setTimeout(()=>{
+    // setTimeout(()=>{
         
-        dealDeckCards(300);
-    }, 1000);
+    //     dealDeckCards(300);
+    // }, 1000);
 
-    // only after cards are dealt 
-    setTimeout(()=>{
-        players[0].active = true;
-        enableDisablePlayHoldBtn(holdCardsBtn, 'visible');
-        enableDisablePlayHoldBtn(swapBankBtn, 'visible');
-    }, 8000);  
+    // // only after cards are dealt 
+    // setTimeout(()=>{
+    //     players[0].active = true;
+    //     enableDisablePlayHoldBtn(holdCardsBtn, 'visible');
+    //     enableDisablePlayHoldBtn(swapBankBtn, 'visible');
+    // }, 8000);  
 }
