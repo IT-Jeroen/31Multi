@@ -512,3 +512,369 @@ function logPlayersCards(){
     })
     console.log('---------------------------------------')
 }
+
+
+//////////////////////////// 31 Single //////////////////////////////////////
+
+function createElem(elemType, classNames=[], idName){
+    const elem = document.createElement(elemType);
+
+    for (let className of classNames){
+        addClassToElement(elem, className);
+    }
+    
+    addIdToElement(elem, idName);
+
+    return elem;
+}
+
+
+function createDeckElements(){
+    const deckElems = [];
+    for (let i = 0; i < cardsInGame; i++){
+        const cardElem = createCard();
+
+        // Scaling 1.001 to keep images crisp //
+        cardElem.style = `transform: matrix3d(
+            ${matrix0Flipped[0]},
+            ${matrix0Flipped[1]},
+            ${matrix0Flipped[2]},
+            0,
+            ${matrix0Flipped[3]},
+            ${matrix0Flipped[4]},
+            0,
+            0,
+            ${matrix0Flipped[5]},
+            0,
+            ${matrix0Flipped[6]},
+            0,
+            ${deckPos.x},
+            ${deckPos.y},
+            0,
+            1.001
+            ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px;`; 
+        
+        // add hover mouse event //
+        mouseOverEvent(cardElem);
+        // add click card event //
+        cardClickEvent(cardElem);
+
+        addChildElement(playFieldElem, cardElem);
+        deckElems.push(cardElem);
+    }
+    return deckElems;
+}
+
+
+function createCard(){
+    const cardElem = createElement('div');
+    addClassToElement(cardElem, 'card');
+
+    const frontElem = createElement('div');
+    addClassToElement(frontElem, 'front');
+    const frontImg = createElement('img');
+
+    const backElem = createElement('div');
+    addClassToElement(backElem, 'back');
+    const backImg = createElement('img');
+
+    addChildElement(frontElem,frontImg);
+    addChildElement(backElem, backImg);
+    addChildElement(cardElem, frontElem);
+    addChildElement(cardElem, backElem);
+
+    return cardElem;
+}
+
+
+function createWinnerBadgeElem(){
+    const badgeElem = document.createElement('div');
+    addClassToElement(badgeElem, 'badge');
+    addIdToElement(badgeElem, 'winner-badge');
+    const badgeText = document.createTextNode('31');
+    addChildElement(badgeElem, badgeText);
+    addChildElement(playFieldElem, badgeElem);
+    return badgeElem;
+}
+
+
+function createElement(elemType){
+    return document.createElement(elemType);
+}
+
+
+function addClassToElement(elem, className){
+    elem.classList.add(className);
+    
+}
+
+
+function removeClassFromElement(elem, className){
+    elem.classList.remove(className);
+}
+
+
+function addIdToElement(elem, idName){
+    elem.id = idName;
+}
+
+
+function addChildElement(parentElem, childElem){
+    parentElem.appendChild(childElem);
+}
+
+// cards-in-hands has been removed in 31Multi //
+// cards is now [{suit: clubs, label: 8},]
+// cardsDB now holds the x and y position of the card //
+
+function calcCardPositions(player, stacked=true){
+    let cardsInHand = player['cards-in-hand'];
+    let widthHand = 0;
+    let cardOffSet = 0;
+
+    if (stacked){
+        widthHand = handWidth.stacked;
+        cardOffSet = offset.stacked;
+    }
+    else{
+        widthHand = handWidth.unstacked;
+        cardOffSet = cardDimensions.width;
+    }
+    
+    let emptySpaceX = ((cssViewPort.width * viewPortDimension.width) - widthHand) / 2;
+    let emptySpaceY = ((cssViewPort.height * viewPortDimension.height) - widthHand) / 2 - (offset.stacked / 2);
+
+    if (player.location == 'south'){
+        Object.keys(cardsInHand).forEach((cardId, index) => {
+            player['cards-in-hand'][cardId].y = zonesPos.south;
+            player['cards-in-hand'][cardId].x = emptySpaceX + (index * cardOffSet);
+        })
+    }
+
+    if (player.location == 'west'){
+        Object.keys(cardsInHand).forEach((cardId, index) => {
+            player['cards-in-hand'][cardId].x = zonesPos.west;
+            player['cards-in-hand'][cardId].y = emptySpaceY + (index * cardOffSet);
+        })
+
+    }
+
+    if (player.location == 'north'){
+        Object.keys(cardsInHand).forEach((cardId, index) => {
+            player['cards-in-hand'][cardId].y = zonesPos.north;
+            player['cards-in-hand'][cardId].x = emptySpaceX + (index * cardOffSet);
+        })
+
+    }
+    if (player.location == 'east'){
+        Object.keys(cardsInHand).forEach((cardId, index) => {
+            player['cards-in-hand'][cardId].x = zonesPos.east;
+            player['cards-in-hand'][cardId].y = emptySpaceY + (index * cardOffSet);
+        })
+
+    }
+
+    if (player.location == 'center'){
+        Object.keys(cardsInHand).forEach((cardId, index) => {
+            player['cards-in-hand'][cardId].x = emptySpaceX + (index * cardOffSet);
+            player['cards-in-hand'][cardId].y = deckPos.y;
+        })
+
+    }
+}
+
+function repositionCards(playersArr=[]){
+    let zIndex = 1;
+
+    playersArr.forEach(player=> {
+        const orientation = player.orientation;
+        const cardsID = Object.keys(player['cards-in-hand'])
+
+        cardsID.forEach(cardID =>{
+            const cardElem = cardsDB[cardID].elem;
+            const cardPos = player['cards-in-hand'][cardID];
+
+            // Scaling 1.001 to keep images crisp //
+            cardElem.style = `transform: matrix3d(
+                ${orientation[0]},
+                ${orientation[1]},
+                ${orientation[2]},
+                0,
+                ${orientation[3]},
+                ${orientation[4]},
+                0,
+                0,
+                ${orientation[5]},
+                0,
+                ${orientation[6]},
+                0,
+                ${cardPos.x},
+                ${cardPos.y},
+                0,
+                1.001
+                ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px; z-index: ${zIndex};`;
+            
+            zIndex += 1;
+        });
+    })
+}
+
+function addDeckCardsToPlayers(){
+    const allCardElems = createDeckElements(cardsInGame, matrix0Flipped, deckPos);
+    // Create card values and id's
+    const deckCardValues = createRandomDeckValues(allCardElems.length, '7');
+    // let playersID = Object.keys(players)
+    // let players = Object.values(players); 
+    let playerIndex = 0;
+
+    allCardElems.forEach((cardElem, index) =>{
+        // pick a card //
+        let cardID = deckCardValues[index];
+
+        // Add Correct Card Images to image Elements //
+        const frontElem = cardElem.getElementsByClassName('front');
+        const frontImg = frontElem[0].children[0];
+        frontImg.src = `./src/img/${cardID}.png`;
+        const backElem = cardElem.getElementsByClassName('back');
+        const backImg = backElem[0].children[0];
+        backImg.src = './src/img/back-blue.png';
+        
+        // add card to DB //
+        addCardToCardDB(cardID, cardElem);
+        
+        // add card to player hand //
+        players[playerIndex]['cards-in-hand'][cardID] = {'x':deckPos.x, 'y':deckPos.y};
+        cardsDB[cardID].location = players[playerIndex].location;
+        
+        if (players[playerIndex].name == 'Bank' || players[playerIndex].location == 'south'){
+            cardsDB[cardID].access = true;
+        }
+        
+        playerIndex += 1;
+
+        if (playerIndex == players.length){
+            playerIndex = 0;
+        }
+    })  
+}
+
+function dealDeckCards(timing){
+    // const bankPlayer = Object.values(filterPlayers('name', ['Bank'], false));
+    // const nonBankPlayers = Object.values(filterPlayers('name', ['Bank']));
+    const bankPlayer = filterPlayers('name', 'Bank', false);
+    const nonBankPlayers = filterPlayers('name', 'Bank', true);
+    
+    addDeckCardsToPlayers(players);
+
+    // Calculate Card Positions //
+    // Object.values(players).forEach(player =>{
+    players.forEach(player =>{
+        if (player.name == 'Bank'){
+            calcCardPositions(player, stacked=false);
+        }else{
+            calcCardPositions(player);
+        }  
+    })
+    
+
+    handOutDeckCards(nonBankPlayers, timing);
+    setTimeout(()=>{
+        handOutDeckCards(bankPlayer, timing);
+    },(cardsInGame + 1) * timing);
+}
+
+
+function handOutDeckCards(playersArr=[], timing=0){
+    let i = 0;
+    let playerIndex = 0;
+    let zIndex = 1;
+    let cardIndex = 0;
+    let numCardsToDeal = 0;
+    
+    playersArr.forEach(player => {
+        numCardsToDeal += Object.keys(player['cards-in-hand']).length;
+    })
+
+    const intervalID = setInterval(()=>{
+        if (i == numCardsToDeal -1){
+            clearInterval(intervalID);
+        }
+        
+        let player = playersArr[playerIndex];
+        const cardIds = Object.keys(player['cards-in-hand']);
+        const cardID = cardIds[cardIndex];
+        const card = player['cards-in-hand'][cardID];
+        const orientation = player.orientation;
+
+        const cardElem = cardsDB[cardID].elem;
+
+        // Scaling 1.001 to keep images crisp //
+        cardElem.style = `transform: matrix3d(
+            ${orientation[0]},
+            ${orientation[1]},
+            ${orientation[2]},
+            0,
+            ${orientation[3]},
+            ${orientation[4]},
+            0,
+            0,
+            ${orientation[5]},
+            0,
+            ${orientation[6]},
+            0,
+            ${card.x},
+            ${card.y},
+            0,
+            1.001
+            ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px; z-index: ${zIndex};`;
+        
+        zIndex += 1;
+        playerIndex += 1;
+
+        if (playerIndex == playersArr.length){
+            cardIndex += 1;
+            playerIndex = 0;
+        }
+
+        i += 1;
+    }, timing);
+}
+
+function loadGame(){
+    // Recalculated variables when newgame() //
+    // calculateVariables();
+
+    intro = true;
+    const playerName = document.getElementById('player-name');
+    const playerEntry = document.getElementById('player-entry');
+
+    // Display Elements //
+    setTimeout(()=>{
+        if (playerEntry){
+            players[0].name = playerName.value;
+            players[0].auto = false;
+            playerEntry.remove();
+        }   
+    }, 500);
+
+    // playCardsBtn = createPlayCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked * 2)), zonesPos.south + 0.5 * cardDimensions.height);
+    // holdCardsBtn = createHoldCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked * 2)), zonesPos.south + 0.5 * cardDimensions.height);
+    // swapBankBtn = createSwapBankBtn(((cssViewPort.width * viewPortDimension.width) / 2 + handWidth.stacked), zonesPos.south + 0.5 * cardDimensions.height);
+
+    playCardsBtn = createPlayCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
+    holdCardsBtn = createHoldCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
+    swapBankBtn = createSwapBankBtn(((cssViewPort.width * viewPortDimension.width) / 2 + (handWidth.stacked / 2) + 20), zonesPos.south + 0.5 * cardDimensions.height);
+
+    // Deal Cards //
+    setTimeout(()=>{
+        
+        dealDeckCards(300);
+    }, 1000);
+
+    // only after cards are dealt 
+    setTimeout(()=>{
+        players[0].active = true;
+        enableDisablePlayHoldBtn(holdCardsBtn, 'visible');
+        enableDisablePlayHoldBtn(swapBankBtn, 'visible');
+    }, 8000);  
+}
