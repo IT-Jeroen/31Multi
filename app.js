@@ -441,7 +441,8 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 
     cardLabelRange.forEach(label => {
         cardSuits.forEach(suit => {
-            cardsInDeck.push({suit: suit, label: label})
+            // cardsInDeck.push({suit: suit, label: label})
+            cardsInDeck.push(`${suit}_${label}`)
         })
     })
 
@@ -506,9 +507,9 @@ function setCardsDB(data){
 }
 
 
-function cardToId(card){
-    return `${card.suit}_${card.label}`
-}
+// function old_cardToId(card){
+//     return `${card.suit}_${card.label}`
+// }
 
 
 function returnCardValue(card){
@@ -526,9 +527,11 @@ function returnCardValue(card){
 function addCardsToCardDB(cards){
     cardsDB.data = {};
     cards.forEach(card => {
-        const cardID = cardToId(card);
+        // const cardID = card;
         const cardValue = returnCardValue(card)
-        cardsDB.data[cardID] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: card.suit, icon: card.label, location: 'center', x: 0, y: 0};
+        // cardsDB.data[cardID] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: card.suit, icon: card.label, location: 'center', x: 0, y: 0};
+        const splitID = card.split('_')
+        cardsDB.data[card] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'center', x: 0, y: 0};
     })
 }
 
@@ -717,39 +720,39 @@ function setCardsPosition(player, stacked=true){
 
     if (player.location == 'south'){
         cardsInHand.forEach((card, index) => {
-            cardsDB.data[cardToId(card)].y = zonesPos.south;
-            cardsDB.data[cardToId(card)].x = emptySpaceX + (index * cardOffSet);
+            cardsDB.data[card].y = zonesPos.south;
+            cardsDB.data[card].x = emptySpaceX + (index * cardOffSet);
         })
     }
 
     if (player.location == 'west'){
         cardsInHand.forEach((card, index) => {
-            cardsDB.data[cardToId(card)].x = zonesPos.west;
-            cardsDB.data[cardToId(card)].y = emptySpaceY + (index * cardOffSet);
+            cardsDB.data[card].x = zonesPos.west;
+            cardsDB.data[card].y = emptySpaceY + (index * cardOffSet);
         })
 
     }
 
     if (player.location == 'north'){
         cardsInHand.forEach((card, index) => {
-            cardsDB.data[cardToId(card)].y = zonesPos.north;
-            cardsDB.data[cardToId(card)].x = emptySpaceX + (index * cardOffSet);
+            cardsDB.data[card].y = zonesPos.north;
+            cardsDB.data[card].x = emptySpaceX + (index * cardOffSet);
         })
 
     }
     if (player.location == 'east'){
         cardsInHand.forEach((card, index) => {
-            cardsDB.data[cardToId(card)].x = zonesPos.east;
-            cardsDB.data[cardToId(card)].y = emptySpaceY + (index * cardOffSet);
+            cardsDB.data[card].x = zonesPos.east;
+            cardsDB.data[card].y = emptySpaceY + (index * cardOffSet);
         })
 
     }
 
     if (player.location == 'center'){
         cardsInHand.forEach((card, index) => {
-            cardsDB.data[cardToId(card)].x = emptySpaceX + (index * cardOffSet);
-            // cardsDB.data[cardToId(card)].y = deckPos.y;
-            cardsDB.data[cardToId(card)].y = (vh / 2) - (cardsDB.height / 2);
+            cardsDB.data[card].x = emptySpaceX + (index * cardOffSet);
+            // cardsDB.data[card].y = deckPos.y;
+            cardsDB.data[card].y = (vh / 2) - (cardsDB.height / 2);
         })
 
     }
@@ -795,7 +798,8 @@ function handOutDeckCards(timing=0){
         // const cardIds = Object.keys(player['cards-in-hand']);
 
         // const cardID = cardIds[cardIndex];
-        const cardID = cardToId(player.data.cards[cardIndex]);
+        // const cardID = cardToId(player.data.cards[cardIndex]);
+        const cardID = player.data.cards[cardIndex];
 
         // const card = player['cards-in-hand'][cardID];
         const card = cardsDB.data[cardID]
@@ -883,21 +887,9 @@ function cardClickEvent(elem){
     elem.addEventListener('click', (event)=>{
         const cardID = findCardID(event.target.parentElement.parentElement);
     
-        if (cardsDB[cardID].data.access && players[0].data.active){
-            pickCardEffect(event.target.parentElement.parentElement);
-        }
-
-        // // Not Working no cardID attached to element //
-        // if (cardsDB[cardID].data.access && players[0].data.active){
-        //     pickCardEffect(event.target.parentElement.parentElement);
-        // }
-
-        if (cardPickedBank.length == 1 && cardPickedPlayer.length == 1){
-            // enableDisablePlayHoldBtn(holdCardsBtn, 'hidden');
-            // enableDisablePlayHoldBtn(playCardsBtn, 'visible');
-        }else{
-            // enableDisablePlayHoldBtn(playCardsBtn, 'hidden');
-            // enableDisablePlayHoldBtn(holdCardsBtn, 'visible');
+        if (cardsDB.data[cardID].access && players[0].data.active){
+            pickCardEffect(cardID)
+            // pickCardEffect(event.target.parentElement.parentElement);
         }
     })
 }
@@ -905,35 +897,60 @@ function cardClickEvent(elem){
 
 ///////////////////////////////////////// CARD EFFECTS ///////////////////////////////////////////////////
 
-function pickCardEffect(pickedElem){
-    const cardID = findCardID(pickedElem);
-    const location = cardsDB[cardID].location;
-    let pickCardArray = [];
-
-    if (location == 'center'){
-        pickCardArray =  cardPickedBank;
+function pickCardEffect(cardID){
+    console.log('pickCardEffect', cardID)
+    // If picked card in local player's hand unpick all cards //
+    if(players[0].data.cards.includes(cardID)){
+        console.log('Local Player Card Picked')
+        players[0].data.cards.forEach(id => {
+            cardsDB.data[id].picked = false
+            cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+        })
     }
 
-    if (location == 'south'){
-        pickCardArray = cardPickedPlayer;
+    // If picked card in bank's hand unpick all cards //
+    if(players[4].data.cards.includes(cardID)){
+        console.log('Bank Card Picked')
+        players[4].data.cards.forEach(id => {
+            cardsDB.data[id].picked = false
+            cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+        })
     }
 
-    if (pickCardArray.length == 0){
-        pickCardArray.push(cardID);
-        cardsDB[cardID].picked = true;
-    }else{
-        if (cardID == pickCardArray[0]){
-            const unPickSameID = pickCardArray.pop();
-            cardsDB[unPickSameID].picked = false;
-        }else{
-            const unPickCardID = pickCardArray.pop();
-            cardsDB[unPickCardID].picked = false;
-            pickCardArray.push(cardID);
-            cardsDB[cardID].picked = true;
-            mouseLeaveEffect(cardsDB[unPickCardID].elem);
-        }
-    }             
+    cardsDB.data[cardID].elem.style = cardHoverEffect(cardsDB.data[cardID].elem, cardID,'up');
+    cardsDB.data[cardID].picked = true;
+
 }
+
+// function pickCardEffect(pickedElem){
+//     const cardID = findCardID(pickedElem);
+//     const location = cardsDB[cardID].location;
+//     let pickCardArray = [];
+
+//     if (location == 'center'){
+//         pickCardArray =  cardPickedBank;
+//     }
+
+//     if (location == 'south'){
+//         pickCardArray = cardPickedPlayer;
+//     }
+
+//     if (pickCardArray.length == 0){
+//         pickCardArray.push(cardID);
+//         cardsDB[cardID].picked = true;
+//     }else{
+//         if (cardID == pickCardArray[0]){
+//             const unPickSameID = pickCardArray.pop();
+//             cardsDB[unPickSameID].picked = false;
+//         }else{
+//             const unPickCardID = pickCardArray.pop();
+//             cardsDB[unPickCardID].picked = false;
+//             pickCardArray.push(cardID);
+//             cardsDB[cardID].picked = true;
+//             mouseLeaveEffect(cardsDB[unPickCardID].elem);
+//         }
+//     }             
+// }
 
 function cardHoverEffect(hoverElem, cardID ,effect){
     // console.log(cardID, effect)
