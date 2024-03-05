@@ -1,5 +1,5 @@
 const hostName = '31-multi-host-id';
-const cardsDB = {data: null};
+const cardsDB = {width: 169, height: 244, data: null};
 
 const players = [
     {'name':'Local', 'location': 'south', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
@@ -10,34 +10,34 @@ const players = [
 ]
 
 
-function returnOrientationMatrix(location, flipped){
+function returnOrientationMatrix(location, flipSide){
     switch (location){
         case 'south':
-            if (flipped){
+            if (flipSide == 'closed'){
                 return [-1,0,0,0,1,0,-1]; // 180 DEGREE Y-AXIS 0 degree z axis
             }
             return  [1,0,0,0,1,0,1]; // 0 DEGREE Y-AXIS 0 degree z axis
 
         case 'west':
-            if (flipped){
+            if (flipSide == 'closed'){
                 return [0,-1,0,1,0,0,-1]; // 180 DEGREE Y-AXIS 90 degree z axis
             }
             return [0,1,0,-1,0,0,1]; // 0 DEGREE Y-AXIS 90 degree z axis
 
         case 'north':
-            if (flipped){
+            if (flipSide == 'closed'){
                 return [1,0,0,0,-1,0,-1]; // 180 DEGREE Y-AXIS  180 degree z axis
             }
             return [-1,0,0,0,-1,0,1]; // 0 DEGREE Y-AXIS 180 degree z axis
 
         case 'east':
-            if (flipped){
+            if (flipSide == 'closed'){
                 return [0,1,0,-1,0,0,-1]; // 180 DEGREE Y-AXIS 270 degree z axis
             }
             return [0,-1,0,1,0,0,1]; // 0 DEGREE Y-AXIS 270 degree z axis
 
         case 'center':
-            if (flipped){
+            if (flipSide == 'closed'){
                 return [-1,0,0,0,1,0,-1]; // 180 DEGREE Y-AXIS 0 degree z axis
             }
             return  [1,0,0,0,1,0,1]; // 0 DEGREE Y-AXIS 0 degree z axis
@@ -119,7 +119,6 @@ function createPlayfield(){
 
     renderApp(playfield)
 
-    // Temp ??? //
     dealCardsToPlayers()
 }
 
@@ -254,20 +253,20 @@ function setConnectionEvents(c) {
     c.on('data', function (data) {
         // console.log("Data recieved:", data);
         if (data.type === 'waiting-room'){
-            // mapPlayerData(data.data)
             updateWaitingRoom(data.data)
             renderApp(createWaitingRoom(playersList()), c.peer.id)
         }
 
         if (data.type == 'players-data'){
-            // mapPlayerData(data.data)
             updatePlayerData(data.data)
-            logPlayersCards()
         }
 
         if (data.type == 'card-data'){
             setCardsDB(data.data)
-            // console.log(cardsDB)
+        }
+
+        if (data.type == 'start-game'){
+            updatePlayerData(data.data)
             createPlayfield()
         }
         
@@ -322,7 +321,7 @@ function createWaitingRoom(data, peerName){
         startGameBtn.innerText ='Start Game';
 
         startGameBtn.addEventListener('click', () => {
-            dealCards(3)
+            startGame()
         })
         waitingRoomDiv.appendChild(startGameBtn);
     }
@@ -330,6 +329,18 @@ function createWaitingRoom(data, peerName){
     return waitingRoomDiv
 }
 
+
+function startGame(){
+    // dealCards(3);
+    prepCards(3)
+    .then(cardsInGame => {
+        dealCards(cardsInGame);
+        // logPlayersCards()
+        createPlayfield()
+    })
+    .catch(err => console.log(err))
+    
+}
 
 function createPlayerList(playerNames) {
     // console.log('PLAYER NAMES', playerNames);
@@ -451,34 +462,40 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 }
 
 
-// Triggered by Start Game Button click event //
-function dealCards(numPlayersCards){
-    const maxCards = players.length * numPlayersCards
-    const cardsInGame = createRandomDeckValues(maxCards, '7');
-
-    if (cardsInGame.length / players.length == numPlayersCards){
-        addCardsToCardDB(cardsInGame)
-
-        players.forEach((player, index) => {
-            player.data.cards = [cardsInGame[index], cardsInGame[index + players.length], cardsInGame[index + 2 * players.length]]
-        })
-        // console.log('DEALING CARDS:', players)
-
-
-        players.forEach(player => {
-            pushData(player.p2p.c, playersData(), 'players-data');
-            pushData(player.p2p.c, cardsDB.data, 'card-data');
-        })
-
-        logPlayersCards()
-        createPlayfield()
-        
-    }
-    else {
-        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayersCards);
-    }
+// Host function //
+function prepCards(numPlayerCards){
+    return new Promise((resolve, reject) => {
+        const maxCards = players.length * numPlayerCards
+        const cardsInGame = createRandomDeckValues(maxCards, '7');
+        if (cardsInGame.length / players.length == numPlayerCards){
+            addCardsToCardDB(cardsInGame);
+            players.forEach(player => {
+                pushData(player.p2p.c, cardsDB.data, 'card-data');
+            })
+            resolve(cardsInGame)
+        }
+        else {
+            console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayerCards);
+            reject(new Error('CARDS ON TABLE DOES NOT MATCH PLAYERS'))
+        }
+    })
 }
 
+// Host function //
+function dealCards(cardsInGame){
+
+    players.forEach((player, index) => {
+        player.data.cards = [cardsInGame[index], cardsInGame[index + players.length], cardsInGame[index + 2 * players.length]]
+    })
+    // console.log('DEALING CARDS:', players)
+
+    players.forEach(player => {
+        pushData(player.p2p.c, playersData(), 'start-game');
+    })
+}
+
+
+//////////////////////////////////////////// Cards ID ////////////////////////////////////////////////////////
 
 function setCardsDB(data){
     if (!cardsDB.data){
@@ -511,54 +528,31 @@ function addCardsToCardDB(cards){
     cards.forEach(card => {
         const cardID = cardToId(card);
         const cardValue = returnCardValue(card)
-        cardsDB.data[cardID] = {'elem': null, 'picked':false, 'access':false, 'value':cardValue,'suit':card.suit, 'icon':card.label, 'location':'center', x: 0, y: 0};
+        cardsDB.data[cardID] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: card.suit, icon: card.label, location: 'center', x: 0, y: 0};
     })
 }
 
 
 //////////////////////////// REDUNDANT ////////////////////////////////
-function logPlayersCards(){
-    console.log('---------- Players Cards --------------')
-    players.forEach(player => {
-        console.log('# ' + player.name)
-        player.data.cards.forEach(card => {
-            console.log(`${card.suit}-${card.label}`)
-        })
-        console.log('#')
-    })
-    console.log('---------------------------------------')
-}
+// function logPlayersCards(){
+//     console.log('---------- Players Cards --------------')
+//     players.forEach(player => {
+//         console.log('# ' + player.name)
+//         player.data.cards.forEach(card => {
+//             console.log(`${card.suit}-${card.label}`)
+//         })
+//         console.log('#')
+//     })
+//     console.log('---------------------------------------')
+// }
 
 
 //////////////////////////// 31 Single //////////////////////////////////////
-const numPlayersCards = 3;
 
-const backgroundElem = document.getElementById('background');
-const playFieldElem = document.getElementById('playfield');
+const vw = window.innerWidth // Need to be set at start of the game
+const vh = window.innerHeight // Need to be set at start of the game
+// [MOVED TO CARDSDB] const cardDimensions = {'width': 169, 'height': 244} // could differ per client 
 
-const viewPortDimension = {'width': window.innerWidth, 'height': window.innerHeight};
-const viewPortScale = {'scale': 1, 'x': 1, 'y': 1}; // set the correct scale depending on screen orientation (horizontal vs vertical)
-
-const imageDimensions = {'width': 169, 'height': 244};
-const cssViewPort = {'width': 0.98, 'height': 0.98};
-const buttonSpecs = {'width': 250, 'height': null, 'font': 1.5, 'padding': 1};
-
-const winnerBadge = {'width': 160 * viewPortScale.scale, 'height': 160 * viewPortScale.scale, 'line': 160 * viewPortScale.scale, 'font': 500 * viewPortScale.scale,'border': 5};
-const infoDisplay = {'width': (viewPortDimension.width * 0.6) * viewPortScale.scale, 'height': (viewPortDimension.height / 5) * viewPortScale.scale, 'padding': 20 * viewPortScale.scale, 'font': 1.5 * viewPortScale.scale,'border': 5};
-const displayPos = {'x': (viewPortDimension.width * 0.5) - (infoDisplay.width * 0.5) - infoDisplay.border, 'y': (viewPortDimension.height * 0.5) - (infoDisplay.height * 0.5)};
-const cardDimensions = {'width': imageDimensions.width * viewPortScale.scale, 'height': imageDimensions.height * viewPortScale.scale};
-const offset = {'stacked':40 * viewPortScale.scale, 'hoverx':5, 'hovery':40 * viewPortScale.scale};
-const handWidth = {'stacked': (cardDimensions.width + ((numPlayersCards -1) * offset.stacked)), 'unstacked': (numPlayersCards * cardDimensions.width)};
-const btnDimensions = {'width': buttonSpecs.width * viewPortScale.scale, 'height': null, 'font': buttonSpecs.font * viewPortScale.scale, 'padding': buttonSpecs.padding * viewPortScale.scale};
-const centerPos = {'x': (cssViewPort.width * viewPortDimension.width) / 2,'y': (cssViewPort.height * viewPortDimension.height) / 2};
-const deckPos = {'x': centerPos.x - (cardDimensions.width / 2), 'y': centerPos.y - (cardDimensions.height /2)};
-const minViewPortDimensions = {'width': ((numPlayersCards -1) * cardDimensions.height) + (numPlayersCards * cardDimensions.width) + 80, 'height': (3 * cardDimensions.height) + 80};
-const zonesPos = {
-    'south': (cssViewPort.height * viewPortDimension.height) - cardDimensions.height,
-    'west': (cardDimensions.height - cardDimensions.width) /2,
-    'north': 0,
-    'east': (cssViewPort.height * viewPortDimension.width - cardDimensions.height + ((cardDimensions.height - cardDimensions.width) /2))
-}
 
 function createElem(elemType, classNames=[], idName){
     const elem = document.createElement(elemType);
@@ -573,63 +567,49 @@ function createElem(elemType, classNames=[], idName){
 }
 
 
-// function createDeckElements(playFieldElem){
-//     const deckElems = [];
-//     for (let i = 0; i < cardsInGame; i++){
-//         const cardElem = createCard();
-
-//         // Scaling 1.001 to keep images crisp //
-//         cardElem.style = `transform: matrix3d(
-//             ${matrix0Flipped[0]},
-//             ${matrix0Flipped[1]},
-//             ${matrix0Flipped[2]},
-//             0,
-//             ${matrix0Flipped[3]},
-//             ${matrix0Flipped[4]},
-//             0,
-//             0,
-//             ${matrix0Flipped[5]},
-//             0,
-//             ${matrix0Flipped[6]},
-//             0,
-//             ${deckPos.x},
-//             ${deckPos.y},
-//             0,
-//             1.001
-//             ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px;`; 
-        
-//         // // add hover mouse event //
-//         // mouseOverEvent(cardElem);
-//         // // add click card event //
-//         // cardClickEvent(cardElem);
-
-//         addChildElement(playFieldElem, cardElem);
-//         deckElems.push(cardElem);
-//     }
-//     return deckElems;
-// }
+function setDimension(){
+    // change dimensions base on screen size ??? //
+}
 
 
 // Local Deck //
 function createDeck(playFieldElem){
+    const centerPos = {'x': vw / 2,'y': vh / 2};
+    const deckPos = {'x': centerPos.x - (cardsDB.width / 2), 'y': centerPos.y - (cardsDB.height /2)};
     const cardIDs = Object.keys(cardsDB.data) 
     cardIDs.forEach((cardID, index) => {
-        cardsDB.data[cardID].elem = createDeckElement(cardID, deckPos, cardDimensions, cardIDs.length - index);
+
+        // const cardElem = setCssTransform(cardID, deckPos, cardIDs.length - index);
+        const cardElem = createCardElem(cardID);
+        
+        //// Card Event Listeners ////
+        // mouseOverEvent(cardElem);
+        // cardClickEvent(cardElem);
+        mouseOverEvent(cardElem, cardID);
+        cardClickEvent(cardElem, cardID);
+
+        cardsDB.data[cardID].elem = cardElem
         cardsDB.data[cardID].location = 'center';
         cardsDB.data[cardID].x = deckPos.x;
-        cardsDB.data[cardID].y = deckPos.y
+        cardsDB.data[cardID].y = deckPos.y;
 
         playFieldElem.appendChild(cardsDB.data[cardID].elem)
+
+        let zIndex = cardIDs.length - index
+        const matrix = returnOrientationMatrix('center', 'closed')
+        setCssTransform(cardsDB.data[cardID], matrix, zIndex);
+
+        
     })
 }
 
 
-function createDeckElement(cardID, pos, dimensions, zIndex){
+function setCssTransform(card, matrix, zIndex){
 
-    const cardElem = createCard(cardID);
-    const matrix = returnOrientationMatrix('center', flipped=true)
+    // const cardElem = createCardElem(cardID);
+    // const matrix = returnOrientationMatrix(orientation, flipped=true)
     // Scaling 1.001 to keep images crisp //
-    cardElem.style = `transform: matrix3d(
+    card.elem.style = `transform: matrix3d(
         ${matrix[0]},
         ${matrix[1]},
         ${matrix[2]},
@@ -642,21 +622,23 @@ function createDeckElement(cardID, pos, dimensions, zIndex){
         0,
         ${matrix[6]},
         0,
-        ${pos.x},
-        ${pos.y},
+        ${card.x},
+        ${card.y},
         0,
         1.001
-        ); width: ${dimensions.width}px; height: ${dimensions.height}px; z-index: ${zIndex};`; 
+        ); width: ${cardsDB.width}px; height: ${cardsDB.height}px; z-index: ${zIndex};`; 
+    
+    // //// Card Event Listeners ////
     
     // // add hover mouse event //
     // mouseOverEvent(cardElem);
     // // add click card event //
     // cardClickEvent(cardElem);
-    return cardElem;
+    // return cardElem;
 }
     
 
-function createCard(cardID){
+function createCardElem(cardID){
     
     const cardElem = createElement('div');
     addClassToElement(cardElem, 'card');
@@ -705,27 +687,33 @@ function addChildElement(parentElem, childElem){
     parentElem.appendChild(childElem);
 }
 
-// cards-in-hands has been removed in 31Multi //
-// cards is now [{suit: clubs, label: 8},]
-// cardsDB now holds the x and y position of the card //
 
-function calcCardPositions(player, stacked=true){
-    // let cardsInHand = player['cards-in-hand'];
+function setCardsPosition(player, stacked=true){
+    const numPlayersCards = player.data.cards.length
+    const offsetStacked = 40
+    const handWidth = {'stacked': (cardsDB.width + ((numPlayersCards -1) * offsetStacked)), 'unstacked': (numPlayersCards * cardsDB.width)};
+    const zonesPos = {
+        'south': vh - cardsDB.height,
+        'west': (cardsDB.height - cardsDB.width) /2,
+        'north': 0,
+        'east': (vw - cardsDB.height + ((cardsDB.height - cardsDB.width) /2))
+    }
+    
     const cardsInHand = player.data.cards
     let widthHand = 0;
     let cardOffSet = 0;
 
     if (stacked){
         widthHand = handWidth.stacked;
-        cardOffSet = offset.stacked;
+        cardOffSet = offsetStacked;
     }
     else{
         widthHand = handWidth.unstacked;
-        cardOffSet = cardDimensions.width;
+        cardOffSet = cardsDB.width;
     }
     
-    let emptySpaceX = ((cssViewPort.width * viewPortDimension.width) - widthHand) / 2;
-    let emptySpaceY = ((cssViewPort.height * viewPortDimension.height) - widthHand) / 2 - (offset.stacked / 2);
+    let emptySpaceX = (vw - widthHand) / 2;
+    let emptySpaceY = (vh - widthHand) / 2 - (offsetStacked / 2);
 
     if (player.location == 'south'){
         cardsInHand.forEach((card, index) => {
@@ -760,110 +748,33 @@ function calcCardPositions(player, stacked=true){
     if (player.location == 'center'){
         cardsInHand.forEach((card, index) => {
             cardsDB.data[cardToId(card)].x = emptySpaceX + (index * cardOffSet);
-            cardsDB.data[cardToId(card)].y = deckPos.y;
+            // cardsDB.data[cardToId(card)].y = deckPos.y;
+            cardsDB.data[cardToId(card)].y = (vh / 2) - (cardsDB.height / 2);
         })
 
     }
 }
 
-
+// Local Function //
 function dealCardsToPlayers(){
     
-    // Calculate Card Positions //
+    // Calculate Player Cards Positions //
     players.forEach(player => {
         if(player.location === 'center'){
-            calcCardPositions(player, stacked=false)
+            setCardsPosition(player, stacked=false)
         }
         else {
-            calcCardPositions(player, stacked=true)
+            setCardsPosition(player, stacked=true)
         }
     })
 
     // Deal Cards to Players CSS Animation //
     handOutDeckCards(300)
     
-    
 }
 
 
-// // Actually css animation trigger //
-// function repositionCards(playersArr=[]){
-//     let zIndex = 1;
-
-//     playersArr.forEach(player=> {
-//         const orientation = returnOrientationMatrix(player.orientation);
-//         // const cardsID = Object.keys(player['cards-in-hand'])
-
-//         player.data.cards.forEach(card =>{
-//             const cardID = cardToId(card)
-//             const cardElem = cardsDB.data[cardID].elem;
-//             // const cardPos = player['cards-in-hand'][cardID];
-
-//             // Scaling 1.001 to keep images crisp //
-//             cardElem.style = `transform: matrix3d(
-//                 ${orientation[0]},
-//                 ${orientation[1]},
-//                 ${orientation[2]},
-//                 0,
-//                 ${orientation[3]},
-//                 ${orientation[4]},
-//                 0,
-//                 0,
-//                 ${orientation[5]},
-//                 0,
-//                 ${orientation[6]},
-//                 0,
-//                 ${cardsDB.data[cardID].x},
-//                 ${cardsDB.data[cardID].y},
-//                 0,
-//                 1.001
-//                 ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px; z-index: ${zIndex};`;
-            
-//             zIndex += 1;
-//         });
-//     })
-// }
-
-// function addDeckCardsToPlayers(){
-//     const allCardElems = createDeckElements(cardsInGame, matrix0Flipped, deckPos);
-//     // Create card values and id's
-//     const deckCardValues = createRandomDeckValues(allCardElems.length, '7');
-//     // let playersID = Object.keys(players)
-//     // let players = Object.values(players); 
-//     let playerIndex = 0;
-
-//     allCardElems.forEach((cardElem, index) =>{
-//         // pick a card //
-//         let cardID = deckCardValues[index];
-
-//         // Add Correct Card Images to image Elements //
-//         const frontElem = cardElem.getElementsByClassName('front');
-//         const frontImg = frontElem[0].children[0];
-//         frontImg.src = `./src/img/${cardID}.png`;
-//         const backElem = cardElem.getElementsByClassName('back');
-//         const backImg = backElem[0].children[0];
-//         backImg.src = './src/img/back-blue.png';
-        
-//         // add card to DB //
-//         addCardToCardDB(cardID, cardElem);
-        
-//         // add card to player hand //
-//         players[playerIndex]['cards-in-hand'][cardID] = {'x':deckPos.x, 'y':deckPos.y};
-//         cardsDB.data[cardID].location = players[playerIndex].location;
-        
-//         if (players[playerIndex].name == 'Bank' || players[playerIndex].location == 'south'){
-//             cardsDB.data[cardID].access = true;
-//         }
-        
-//         playerIndex += 1;
-
-//         if (playerIndex == players.length){
-//             playerIndex = 0;
-//         }
-//     })  
-// }
-
-
+// Actuall Trigger for the CSS Animation //
 function handOutDeckCards(timing=0){
     let i = 0;
     let playerIndex = 0;
@@ -892,33 +803,36 @@ function handOutDeckCards(timing=0){
         // const orientation = player.orientation;
 
 
-        let isFlipped = true
+        let flipSide = 'closed';
         if(player.location == 'south' || player.location == 'center'){
-            isFlipped = false
+            flipSide = 'open';
+            card.access = true
         }
-        const orientation = returnOrientationMatrix(player.location, isFlipped)
 
-        const cardElem = card.elem;
+        // const cardElem = card.elem;
+        const matrix = returnOrientationMatrix(player.location, flipSide)
+        setCssTransform(card, matrix, zIndex)
 
-        // Scaling 1.001 to keep images crisp //
-        cardElem.style = `transform: matrix3d(
-            ${orientation[0]},
-            ${orientation[1]},
-            ${orientation[2]},
-            0,
-            ${orientation[3]},
-            ${orientation[4]},
-            0,
-            0,
-            ${orientation[5]},
-            0,
-            ${orientation[6]},
-            0,
-            ${card.x},
-            ${card.y},
-            0,
-            1.001
-            ); width: ${cardDimensions.width}px; height: ${cardDimensions.height}px; z-index: ${zIndex};`;
+        
+        // // Scaling 1.001 to keep images crisp //
+        // cardElem.style = `transform: matrix3d(
+        //     ${orientation[0]},
+        //     ${orientation[1]},
+        //     ${orientation[2]},
+        //     0,
+        //     ${orientation[3]},
+        //     ${orientation[4]},
+        //     0,
+        //     0,
+        //     ${orientation[5]},
+        //     0,
+        //     ${orientation[6]},
+        //     0,
+        //     ${card.x},
+        //     ${card.y},
+        //     0,
+        //     1.001
+        //     ); width: ${cardsDB.width}px; height: ${cardsDB.height}px; z-index: ${zIndex};`;
         
         zIndex += 1;
         playerIndex += 1;
@@ -933,61 +847,206 @@ function handOutDeckCards(timing=0){
 }
 
 
+////////////////////////////////////// CARD EVENTS ///////////////////////////////////////////////
 
-// function dealDeckCards(timing){
-//     const bankPlayer = filterPlayers('name', 'Bank', false);
-//     const nonBankPlayers = filterPlayers('name', 'Bank', true);
+function mouseOverEvent(elem){
+
+    elem.addEventListener(
+        "mouseenter",
+        (event) => {
+            // Hover UP //
+            const cardID = findCardID(elem);
+            // console.log('UP',cardID)
+            if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
+                event.target.style = cardHoverEffect(event.target, cardID,'up');
+            }
+        },
+        false,
+      );
+
+      elem.addEventListener(
+        "mouseleave",
+        (event) => {
+            // Hover DOWN //
+            const cardID = findCardID(elem);
+            // console.log('DOWN',cardID)
+            if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
+                event.target.style = cardHoverEffect(event.target, cardID,'reverse');
+            }
+        },
+        false,
+      );
+}
+
+
+function cardClickEvent(elem){
+    elem.addEventListener('click', (event)=>{
+        const cardID = findCardID(event.target.parentElement.parentElement);
     
-//     addDeckCardsToPlayers(players);
+        if (cardsDB[cardID].data.access && players[0].data.active){
+            pickCardEffect(event.target.parentElement.parentElement);
+        }
 
-//     // Calculate Card Positions //
-//     players.forEach(player =>{
-//         if (player.name == 'Bank'){
-//             calcCardPositions(player, stacked=false);
+        // // Not Working no cardID attached to element //
+        // if (cardsDB[cardID].data.access && players[0].data.active){
+        //     pickCardEffect(event.target.parentElement.parentElement);
+        // }
+
+        if (cardPickedBank.length == 1 && cardPickedPlayer.length == 1){
+            // enableDisablePlayHoldBtn(holdCardsBtn, 'hidden');
+            // enableDisablePlayHoldBtn(playCardsBtn, 'visible');
+        }else{
+            // enableDisablePlayHoldBtn(playCardsBtn, 'hidden');
+            // enableDisablePlayHoldBtn(holdCardsBtn, 'visible');
+        }
+    })
+}
+
+
+///////////////////////////////////////// CARD EFFECTS ///////////////////////////////////////////////////
+
+function pickCardEffect(pickedElem){
+    const cardID = findCardID(pickedElem);
+    const location = cardsDB[cardID].location;
+    let pickCardArray = [];
+
+    if (location == 'center'){
+        pickCardArray =  cardPickedBank;
+    }
+
+    if (location == 'south'){
+        pickCardArray = cardPickedPlayer;
+    }
+
+    if (pickCardArray.length == 0){
+        pickCardArray.push(cardID);
+        cardsDB[cardID].picked = true;
+    }else{
+        if (cardID == pickCardArray[0]){
+            const unPickSameID = pickCardArray.pop();
+            cardsDB[unPickSameID].picked = false;
+        }else{
+            const unPickCardID = pickCardArray.pop();
+            cardsDB[unPickCardID].picked = false;
+            pickCardArray.push(cardID);
+            cardsDB[cardID].picked = true;
+            mouseLeaveEffect(cardsDB[unPickCardID].elem);
+        }
+    }             
+}
+
+function cardHoverEffect(hoverElem, cardID ,effect){
+    // console.log(cardID, effect)
+    let matrixStr = ''
+    let targetStyle = hoverElem.getAttribute('style').split(/\s/);
+    targetStyle = targetStyle.map(item => item.replace(',',''));
+    const transform = targetStyle[0];
+    const matrix3D = targetStyle.slice(1, targetStyle.length-6);
+    const trailing = targetStyle.slice(targetStyle.length -6);
+    // const offset = {'stacked':40, 'hoverx':5, 'hovery':40};
+    let hoverX = 5
+    let hoverY = 40
+
+    if (effect === 'up'){
+        // console.log("UP")
+        if(!cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
+            matrix3D[12] = Number(matrix3D[12]) - hoverX;
+            matrix3D[13] = Number(matrix3D[13]) - hoverY;
+            cardsDB.data[cardID].hover = true;
+        }
+    }
+
+    if (effect === 'reverse'){
+        // console.log('DOWN')
+        if(cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
+            matrix3D[12] = Number(matrix3D[12]) + hoverX;
+            matrix3D[13] = Number(matrix3D[13]) + hoverY;
+            cardsDB.data[cardID].hover = false;
+        }
+    }
+
+    matrixStr = `${transform} ${matrix3D.toString()} ${trailing.toString().replace(/,/g, ' ')}}`;
+    return matrixStr;
+}
+
+
+// function cardHoverEffect(hoverElem, effect){
+//     let matrixStr = ''
+//     let targetStyle = hoverElem.getAttribute('style').split(/\s/);
+//     targetStyle = targetStyle.map(item => item.replace(',',''));
+//     const transform = targetStyle[0];
+//     const matrix3D = targetStyle.slice(1, targetStyle.length-6);
+//     const trailing = targetStyle.slice(targetStyle.length -6);
+//     // const offset = {'stacked':40, 'hoverx':5, 'hovery':40};
+//     let hoverX = 5
+//     let hoverY = 40
+
+//     if (effect === 'reverse'){
+//         // If card did not recieved a mouseenter event //
+//         if (Number.parseInt(matrix3D[13]) == parseInt(deckPos.y) || Number.parseInt(matrix3D[13]) == parseInt(zonesPos.south)){
+//             hoverX = 0;
+//             hoverY = 0;
 //         }else{
-//             calcCardPositions(player);
-//         }  
-//     })
-    
+//             hoverX = -1 * hoverX;
+//             hoverY = -1 * hoverY;
+//         }
+        
+//     }
 
-//     handOutDeckCards(nonBankPlayers, timing);
-//     setTimeout(()=>{
-//         handOutDeckCards(bankPlayer, timing);
-//     },(cardsInGame + 1) * timing);
+//     matrix3D[12] = Number(matrix3D[12]) - hoverX;
+//     matrix3D[13] = Number(matrix3D[13]) - hoverY;
+
+//     matrixStr = `${transform} ${matrix3D.toString()} ${trailing.toString().replace(/,/g, ' ')}}`;
+//     return matrixStr;
 // }
 
 
-function loadGame(){
-    // Recalculated variables when newgame() //
-    // calculateVariables();
-
-    // intro = true;
-    // const playerName = document.getElementById('player-name');
-    // const playerEntry = document.getElementById('player-entry');
-
-    // // Display Elements //
-    // setTimeout(()=>{
-    //     if (playerEntry){
-    //         players[0].name = playerName.value;
-    //         players[0].auto = false;
-    //         playerEntry.remove();
-    //     }   
-    // }, 500);
-
-    // playCardsBtn = createPlayCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
-    // holdCardsBtn = createHoldCardsBtn(((cssViewPort.width * viewPortDimension.width) / 2 - (handWidth.stacked / 2) - btnDimensions.width - 20), zonesPos.south + 0.5 * cardDimensions.height);
-    // swapBankBtn = createSwapBankBtn(((cssViewPort.width * viewPortDimension.width) / 2 + (handWidth.stacked / 2) + 20), zonesPos.south + 0.5 * cardDimensions.height);
-
-    // Deal Cards //
-    // setTimeout(()=>{
-        
-    //     dealDeckCards(300);
-    // }, 1000);
-
-    // // only after cards are dealt 
-    // setTimeout(()=>{
-    //     players[0].active = true;
-    //     enableDisablePlayHoldBtn(holdCardsBtn, 'visible');
-    //     enableDisablePlayHoldBtn(swapBankBtn, 'visible');
-    // }, 8000);  
+// Card Pick Should leave card in Hover UP state //
+function mouseLeaveEffect(elem){
+    const hoverDown = new Event("mouseleave");
+    elem.dispatchEvent(hoverDown);
 }
+
+
+/////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////
+
+function findCardID(cardElem){
+    const returnID = Object.keys(cardsDB.data).filter(cardID => cardsDB.data[cardID].elem == cardElem)[0];   
+    return returnID;
+}
+
+
+// function findCardIdByAttr(cardsInHand, matchAttr, lowHigh){
+//     let cardFoundID = 'None';
+//     let attr = 'icon';
+//     let currentValue = 0;
+//     let newValue = 0;
+//     const cardSymbols = ['club', 'diamond', 'heart', 'spade'];
+
+//     if(cardSymbols.includes(matchAttr)){
+//         attr = 'symbol';
+//     }
+
+//     Object.keys(cardsInHand).forEach(cardID =>{
+//         if (cardsDB[cardID][attr] == matchAttr){
+//             if (cardFoundID == 'None'){
+//                 cardFoundID = cardID;
+//             } else{
+//                 currentValue = cardsDB[cardFoundID].value;
+//                 newValue = cardsDB[cardID].value;
+//                 if (lowHigh == 'high'){
+//                     if (newValue > currentValue){
+//                         cardFoundID = cardID;
+//                     }
+//                 }
+//                 if (lowHigh == 'low'){
+//                     if (newValue < currentValue){
+//                         cardFoundID = cardID;
+//                     }
+//                 }  
+//             } 
+//         }
+//     })
+
+//     return cardFoundID;
+// }

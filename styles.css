@@ -81,12 +81,12 @@ body {
 
 .playfield{
     position: absolute;
-    width: 98vw;
-    height: 98vh;
-    margin-left: 1vw;
-    margin-right: 1vw;
-    margin-top: 1vh;
-    margin-bottom: 1vh;
+    width: 100vw;
+    height: 100vh;
+    /* margin-left: 1vw; */
+    /* margin-right: 1vw; */
+    /* margin-top: 1vh; */
+    /* margin-bottom: 1vh; */
     background-image: url("./src/img/wood-texture.jpg");
     padding: 5px;
 }
