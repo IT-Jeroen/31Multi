@@ -276,7 +276,7 @@ function setConnectionEvents(c) {
     c.on('data', function (data) {
         // console.log("Data recieved:", data);
         if (data.type === 'waiting-room'){
-            updateWaitingRoom(data.data)
+            updatePlayerList(data.data)
             // renderApp(createWaitingRoom(returnPlayerList()), c.peer.id)
             renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
         }
@@ -403,7 +403,7 @@ function createPlayerLabel(player) {
 }
 
 
-function updateWaitingRoom(playersHost){
+function updatePlayerList(playersHost){
     const shuffledHost = shuffleHostArray(playersHost)
     players.forEach((player, index) => {
         player.name = shuffledHost[index].name;
@@ -625,25 +625,57 @@ function createElem(elemType, classNames=[], idName){
 }
 
 
+// // Local Function //
+// function createDeck(component){
+//     const centerPos = {'x': vw / 2,'y': vh / 2};
+//     const deckPos = {'x': centerPos.x - (cardsDB.width / 2), 'y': centerPos.y - (cardsDB.height /2)};
+//     const cardIDs = Object.keys(cardsDB.data) 
+//     cardIDs.forEach((cardID, index) => {
+
+//         const cardElem = createCardElem(cardID);
+        
+//         //// Card Event Listeners ////
+//         mouseOverEvent(cardElem);
+//         cardClickEvent(cardElem);
+
+//         cardsDB.data[cardID].elem = cardElem
+//         cardsDB.data[cardID].location = 'center';
+//         cardsDB.data[cardID].x = deckPos.x;
+//         cardsDB.data[cardID].y = deckPos.y;
+
+//         component.appendChild(cardsDB.data[cardID].elem)
+
+//         let zIndex = cardIDs.length - index
+//         const matrix = returnOrientationMatrix('center', 'closed')
+//         setCssTransform(cardsDB.data[cardID], matrix, zIndex);
+
+//     })
+// }
+
+
 // Local Function //
-function createDeck(playFieldElem){
+function createDeck(component){
     const centerPos = {'x': vw / 2,'y': vh / 2};
     const deckPos = {'x': centerPos.x - (cardsDB.width / 2), 'y': centerPos.y - (cardsDB.height /2)};
     const cardIDs = Object.keys(cardsDB.data) 
     cardIDs.forEach((cardID, index) => {
 
-        const cardElem = createCardElem(cardID);
+        // const cardElem = createCardElem(cardID);
         
         //// Card Event Listeners ////
-        mouseOverEvent(cardElem, cardID);
-        cardClickEvent(cardElem, cardID);
+        // mouseOverEvent(cardElem);
+        // cardClickEvent(cardElem);
 
-        cardsDB.data[cardID].elem = cardElem
+        cardsDB.data[cardID].elem = createCardElem(cardID);
         cardsDB.data[cardID].location = 'center';
         cardsDB.data[cardID].x = deckPos.x;
         cardsDB.data[cardID].y = deckPos.y;
 
-        playFieldElem.appendChild(cardsDB.data[cardID].elem)
+        // console.log('ELEM',cardsDB.data[cardID].elem)
+        mouseOverEvent(cardID, setCardHoverEffect);
+        cardClickEvent(cardID, pickCardEffect, setCardHoverEffect)
+
+        component.appendChild(cardsDB.data[cardID].elem)
 
         let zIndex = cardIDs.length - index
         const matrix = returnOrientationMatrix('center', 'closed')
@@ -832,27 +864,63 @@ function handOutDeckCards(timing=0){
 
 ////////////////////////////////////// CARD EVENTS ///////////////////////////////////////////////
 
-function mouseOverEvent(elem){
+// function mouseOverEvent(elem){
 
-    elem.addEventListener(
+//     elem.addEventListener(
+//         "mouseenter",
+//         (event) => {
+//             // Hover UP //
+//             const cardID = findCardID(elem);
+//             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
+//                 event.target.style = cardHoverEffect(event.target, cardID,'up');
+//             }
+//         },
+//         false,
+//       );
+
+//       elem.addEventListener(
+//         "mouseleave",
+//         (event) => {
+//             // Hover DOWN //
+//             const cardID = findCardID(elem);
+//             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
+//                 event.target.style = cardHoverEffect(event.target, cardID,'reverse');
+//             }
+//         },
+//         false,
+//       );
+// }
+
+
+function mouseOverEvent(cardID, cb){
+
+    cardsDB.data[cardID].elem.addEventListener(
         "mouseenter",
         (event) => {
             // Hover UP //
-            const cardID = findCardID(elem);
+            
+            // const cardID = findCardID(elem);
             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-                event.target.style = cardHoverEffect(event.target, cardID,'up');
+                // event.target.style = cardHoverEffect(event.target, cardID,'up');
+                // setCardHoverEffect(event.target, cardID,'up');
+                // setCardHoverEffect(cardID,'up');
+                cb(cardID,'up');
             }
         },
         false,
       );
 
-      elem.addEventListener(
+      cardsDB.data[cardID].elem.addEventListener(
         "mouseleave",
         (event) => {
             // Hover DOWN //
-            const cardID = findCardID(elem);
+            
+            // const cardID = findCardID(elem);
             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-                event.target.style = cardHoverEffect(event.target, cardID,'reverse');
+                // event.target.style = cardHoverEffect(event.target, cardID,'reverse');
+                // setCardHoverEffect(event.target, cardID,'reverse');
+                // setCardHoverEffect(cardID,'reverse');
+                cb(cardID,'reverse');
             }
         },
         false,
@@ -860,26 +928,69 @@ function mouseOverEvent(elem){
 }
 
 
-function cardClickEvent(elem){
-    elem.addEventListener('click', (event)=>{
-        const cardID = findCardID(event.target.parentElement.parentElement);
+// function cardClickEvent(elem){
+//     elem.addEventListener('click', (event)=>{
+//         const cardID = findCardID(event.target.parentElement.parentElement);
+//         if (cardsDB.data[cardID].access && players[0].data.active){
+//             pickCardEffect(cardID)
+//         
+//         }
+//     })
+// }
+
+
+function cardClickEvent(cardID, cb, cb_1){
+    cardsDB.data[cardID].elem.addEventListener('click', (event)=>{
+        // const cardID = findCardID(event.target.parentElement.parentElement);
         if (cardsDB.data[cardID].access && players[0].data.active){
-            pickCardEffect(cardID)
+            // Pick Card Event //
+            cb(cardID, cb_1)
         }
     })
 }
 
 
+
+// cardClickEvent(elem, cardID, pickCardEffect(cardHoverEffect))
+
 ///////////////////////////////////////// CARD EFFECTS ///////////////////////////////////////////////////
 
-function pickCardEffect(cardID){
-    // console.log('pickCardEffect', cardID)
+// function pickCardEffect(cardID){
+//     // console.log('pickCardEffect', cardID)
+//     // If picked card in local player's hand unpick all cards //
+//     if(players[0].data.cards.includes(cardID)){
+//         // console.log('Local Player Card Picked')
+//         players[0].data.cards.forEach(id => {
+//             cardsDB.data[id].picked = false
+//             // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+//             setCardHoverEffect(id,'reverse');
+//         })
+//     }
+
+//     // If picked card in bank's hand unpick all cards //
+//     if(players[4].data.cards.includes(cardID)){
+//         // console.log('Bank Card Picked')
+//         players[4].data.cards.forEach(id => {
+//             cardsDB.data[id].picked = false
+//             // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+//             setCardHoverEffect(id,'reverse');
+//         })
+//     }
+
+//     // cardsDB.data[cardID].elem.style = cardHoverEffect(cardsDB.data[cardID].elem, cardID,'up');
+//     setCardHoverEffect(cardID,'up');
+//     cardsDB.data[cardID].picked = true;
+
+// }
+
+function pickCardEffect(cardID, cb){
     // If picked card in local player's hand unpick all cards //
     if(players[0].data.cards.includes(cardID)){
         // console.log('Local Player Card Picked')
         players[0].data.cards.forEach(id => {
             cardsDB.data[id].picked = false
-            cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+            // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+            cb(id,'reverse');
         })
     }
 
@@ -888,19 +999,56 @@ function pickCardEffect(cardID){
         // console.log('Bank Card Picked')
         players[4].data.cards.forEach(id => {
             cardsDB.data[id].picked = false
-            cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+            // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+
+            // setCardHoverEffect //
+            cb(id,'reverse');
         })
     }
 
-    cardsDB.data[cardID].elem.style = cardHoverEffect(cardsDB.data[cardID].elem, cardID,'up');
+    // cardsDB.data[cardID].elem.style = cardHoverEffect(cardsDB.data[cardID].elem, cardID,'up');
+    cb(cardID,'up');
     cardsDB.data[cardID].picked = true;
 
 }
 
 
-function cardHoverEffect(hoverElem, cardID ,effect){
+
+// function cardHoverEffect(hoverElem, cardID ,effect){
+//     let matrixStr = ''
+//     let targetStyle = hoverElem.getAttribute('style').split(/\s/);
+//     targetStyle = targetStyle.map(item => item.replace(',',''));
+//     const transform = targetStyle[0];
+//     const matrix3D = targetStyle.slice(1, targetStyle.length-6);
+//     const trailing = targetStyle.slice(targetStyle.length -6);
+
+//     let hoverX = 5
+//     let hoverY = 40
+
+//     if (effect === 'up'){
+//         if(!cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
+//             matrix3D[12] = Number(matrix3D[12]) - hoverX;
+//             matrix3D[13] = Number(matrix3D[13]) - hoverY;
+//             cardsDB.data[cardID].hover = true;
+//         }
+//     }
+
+//     if (effect === 'reverse'){
+//         if(cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
+//             matrix3D[12] = Number(matrix3D[12]) + hoverX;
+//             matrix3D[13] = Number(matrix3D[13]) + hoverY;
+//             cardsDB.data[cardID].hover = false;
+//         }
+//     }
+
+//     matrixStr = `${transform} ${matrix3D.toString()} ${trailing.toString().replace(/,/g, ' ')}}`;
+//     return matrixStr;
+// }
+
+
+function setCardHoverEffect(cardID ,effect){
     let matrixStr = ''
-    let targetStyle = hoverElem.getAttribute('style').split(/\s/);
+    let targetStyle = cardsDB.data[cardID].elem.getAttribute('style').split(/\s/);
     targetStyle = targetStyle.map(item => item.replace(',',''));
     const transform = targetStyle[0];
     const matrix3D = targetStyle.slice(1, targetStyle.length-6);
@@ -926,7 +1074,8 @@ function cardHoverEffect(hoverElem, cardID ,effect){
     }
 
     matrixStr = `${transform} ${matrix3D.toString()} ${trailing.toString().replace(/,/g, ' ')}}`;
-    return matrixStr;
+    cardsDB.data[cardID].elem.style = matrixStr
+    // return matrixStr;
 }
 
 
