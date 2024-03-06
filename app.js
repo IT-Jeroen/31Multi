@@ -90,15 +90,43 @@ function renderApp(component) {
 renderApp(createNameInput(handleNameSubmitted));
 
 
-function createPlayfield(){
+// function createPlayfield(){
+//     const playfield = document.createElement('div')
+//     playfield.id = 'playfield'
+//     addClassToElement(playfield, 'playfield')
+
+//     createDeck(playfield)
+
+//     renderApp(playfield)
+
+//     dealCardsToPlayers()
+// }
+
+function createPlayfield(cb){
     const playfield = document.createElement('div')
     playfield.id = 'playfield'
     addClassToElement(playfield, 'playfield')
 
-    createDeck(playfield)
+    cb(playfield)
 
-    renderApp(playfield)
+    return playfield
+}
 
+
+/// Doesn't Apply to Clients, only Host ///
+function initializeGame(){
+    prepCards(3)
+    .then(cardsInGame => {
+        // dealCards => pushData => c.send(data) should catch errors and return a promise //
+        dealCards(cardsInGame);
+        startGame()
+    })
+    .catch(err => console.log(err)) 
+}
+
+
+function startGame(){
+    renderApp(createPlayfield(createDeck))
     dealCardsToPlayers()
 }
 
@@ -303,13 +331,14 @@ function createWaitingRoom(data, peerName){
         startGameBtn.innerText ='Start Game';
 
         startGameBtn.addEventListener('click', () => {
-            startGame()
+            initializeGame()
         })
         waitingRoomDiv.appendChild(startGameBtn);
     }
     
     return waitingRoomDiv
 }
+
 
 
 function createPlayerList(playerNames) {
@@ -501,14 +530,14 @@ function addCardsToCardDB(cards){
 
 //////////////////////////// 31 Single //////////////////////////////////////
 
-function startGame(){
-    prepCards(3)
-    .then(cardsInGame => {
-        dealCards(cardsInGame);
-        createPlayfield()
-    })
-    .catch(err => console.log(err)) 
-}
+// function startGame(){
+//     prepCards(3)
+//     .then(cardsInGame => {
+//         dealCards(cardsInGame);
+//         createPlayfield()
+//     })
+//     .catch(err => console.log(err)) 
+// }
 
 
 function createElem(elemType, classNames=[], idName){
