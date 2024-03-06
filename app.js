@@ -174,7 +174,8 @@ function setupConnection(playerName){
             players[0].data.id = result.c.connectionId;
 
             setConnectionEvents(result.c)
-            renderApp(createWaitingRoom(playersList(),result.p.id));
+            // renderApp(createWaitingRoom(returnPlayerList(),result.p.id));
+            renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
         }
         else{
             result.p.destroy();
@@ -205,7 +206,8 @@ function setAsHost(playerName){
             pushData(clientPlayer.p2p.c, playersData(), 'waiting-room')
         })
 
-        renderApp(createWaitingRoom(playersList(), hostName))
+        // renderApp(createWaitingRoom(returnPlayerList(), hostName))
+        renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
     })
 
     peer.on('error', err => {console.log('PEER ERROR:', err)});
@@ -213,7 +215,8 @@ function setAsHost(playerName){
     players[0].name = playerName;
     players[0].p2p.p = peer;
     players[0].data.id = hostName;
-    renderApp(createWaitingRoom(playersList(), hostName));
+    // renderApp(createWaitingRoom(returnPlayerList(), hostName));
+    renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
 
 }
 
@@ -262,7 +265,8 @@ function setConnectionEvents(c) {
         // console.log("Data recieved:", data);
         if (data.type === 'waiting-room'){
             updateWaitingRoom(data.data)
-            renderApp(createWaitingRoom(playersList()), c.peer.id)
+            // renderApp(createWaitingRoom(returnPlayerList()), c.peer.id)
+            renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
         }
 
         if (data.type == 'players-data'){
@@ -275,7 +279,7 @@ function setConnectionEvents(c) {
 
         if (data.type == 'start-game'){
             updatePlayerData(data.data)
-            createPlayfield()
+            startGame()
             // temp hardcoded activation //
             players[0].data.active=true
         }
@@ -321,29 +325,59 @@ function pushData(c, data, type){
 
 //////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
 
-function createWaitingRoom(data, peerName){
+// function createWaitingRoom(data, peerName){
+//     const waitingRoomDiv = document.createElement('div');
+//     waitingRoomDiv.id = 'waiting-room';
+//     waitingRoomDiv.append(...createPlayerList(data))
+
+//     if (peerName === hostName){
+//         const startGameBtn = document.createElement('button');
+//         startGameBtn.innerText ='Start Game';
+
+//         startGameBtn.addEventListener('click', () => {
+//             startGame()
+//         })
+//         waitingRoomDiv.appendChild(startGameBtn);
+//     }
+    
+//     return waitingRoomDiv
+// }
+
+
+function createWaitingRoom(cb_1, cb_2){
     const waitingRoomDiv = document.createElement('div');
     waitingRoomDiv.id = 'waiting-room';
-    waitingRoomDiv.append(...createPlayerList(data))
+    // data is always returnPlayerList() //
+    waitingRoomDiv.append(...cb_1())
 
-    if (peerName === hostName){
-        const startGameBtn = document.createElement('button');
-        startGameBtn.innerText ='Start Game';
-
-        startGameBtn.addEventListener('click', () => {
-            initializeGame()
-        })
-        waitingRoomDiv.appendChild(startGameBtn);
-    }
+    cb_2(waitingRoomDiv)
     
     return waitingRoomDiv
 }
 
 
+function createStartGameBtn(component){
+    if (players[0].p2p.p._id === hostName){
+        const startGameBtn = document.createElement('button');
+        startGameBtn.innerText ='Start Game';
+        
+        startGameBtn.addEventListener('click', () => {
+            initializeGame()
+        })
+        component.appendChild(startGameBtn);
+    }
+}
 
-function createPlayerList(playerNames) {
+
+// function createPlayerList(playerNames) {
+//     // console.log('PLAYER NAMES', playerNames);
+//     return playerNames.map(player => createPlayerLabel(player))
+// }
+
+
+function createPlayerList() {
     // console.log('PLAYER NAMES', playerNames);
-    return playerNames.map(player => createPlayerLabel(player))
+    return returnPlayerList().map(player => createPlayerLabel(player))
 }
 
 
@@ -367,7 +401,7 @@ function updateWaitingRoom(playersHost){
 
 ///////////////////////////////////// PLAYERS //////////////////////////////////////////
 
-function playersList(){
+function returnPlayerList(){
     return players.map(player => player.name)
 }
 
