@@ -107,21 +107,30 @@ function createPlayfield(cb){
     playfield.id = 'playfield'
     addClassToElement(playfield, 'playfield')
 
+    // createDeck //
     cb(playfield)
 
     return playfield
 }
 
 
+// /// Doesn't Apply to Clients, only Host ///
+// function initializeGame(){
+//     // prepCards(3)
+//     prepCards(createRandomDeckValues, addCardsToCardDB, pushData)
+//     .then(cardsInGame => {
+//         // dealCards => pushData => c.send(data) should catch errors and return a promise //
+//         dealCards(cardsInGame);
+//         startGame()
+//     })
+//     .catch(err => console.log(err)) 
+// }
+
+
 /// Doesn't Apply to Clients, only Host ///
 function initializeGame(){
-    prepCards(3)
-    .then(cardsInGame => {
-        // dealCards => pushData => c.send(data) should catch errors and return a promise //
-        dealCards(cardsInGame);
-        startGame()
-    })
-    .catch(err => console.log(err)) 
+    dealCards(prepCards(createRandomDeckValues, addCardsToCardDB, pushData))
+    startGame()
 }
 
 
@@ -202,16 +211,19 @@ function setAsHost(playerName){
 
         addNewConnection(c)
 
+        // Trigger waiting room at Client //
         players.forEach(clientPlayer => {
             pushData(clientPlayer.p2p.c, playersData(), 'waiting-room')
         })
 
+        // Update Waiting Room //
         // renderApp(createWaitingRoom(returnPlayerList(), hostName))
         renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
     })
 
     peer.on('error', err => {console.log('PEER ERROR:', err)});
 
+    // Create Waiting Room //
     players[0].name = playerName;
     players[0].p2p.p = peer;
     players[0].data.id = hostName;
@@ -347,9 +359,10 @@ function pushData(c, data, type){
 function createWaitingRoom(cb_1, cb_2){
     const waitingRoomDiv = document.createElement('div');
     waitingRoomDiv.id = 'waiting-room';
-    // data is always returnPlayerList() //
+    // createPlayersList //
     waitingRoomDiv.append(...cb_1())
 
+    // createStartGameBtn //
     cb_2(waitingRoomDiv)
     
     return waitingRoomDiv
@@ -486,24 +499,49 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 }
 
 
+// // Host function //
+// function prepCards(numPlayerCards){
+//     return new Promise((resolve, reject) => {
+//         const maxCards = players.length * numPlayerCards
+//         const cardsInGame = createRandomDeckValues(maxCards, '7');
+//         if (cardsInGame.length / players.length == numPlayerCards){
+//             addCardsToCardDB(cardsInGame);
+//             players.forEach(player => {
+//                 pushData(player.p2p.c, cardsDB.data, 'card-data');
+//             })
+//             resolve(cardsInGame)
+//         }
+//         else {
+//             console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayerCards);
+//             reject(new Error('CARDS ON TABLE DOES NOT MATCH PLAYERS'))
+//         }
+//     })
+// }
+
+
 // Host function //
-function prepCards(numPlayerCards){
-    return new Promise((resolve, reject) => {
-        const maxCards = players.length * numPlayerCards
-        const cardsInGame = createRandomDeckValues(maxCards, '7');
-        if (cardsInGame.length / players.length == numPlayerCards){
-            addCardsToCardDB(cardsInGame);
-            players.forEach(player => {
-                pushData(player.p2p.c, cardsDB.data, 'card-data');
-            })
-            resolve(cardsInGame)
-        }
-        else {
-            console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayerCards);
-            reject(new Error('CARDS ON TABLE DOES NOT MATCH PLAYERS'))
-        }
-    })
+function prepCards(deckValues, toDB, pushCards){
+    const numPlayerCards = 3
+    const maxCards = players.length * numPlayerCards
+    // createRandomDeckValues //
+    const cardsInGame = deckValues(maxCards, '7');
+    if (cardsInGame.length / players.length == numPlayerCards){
+        // addCardsToCardDB //
+        toDB(cardsInGame);
+        players.forEach(player => {
+            // pushData //
+            pushCards(player.p2p.c, cardsDB.data, 'card-data');
+        })
+        return cardsInGame
+    }
+    else {
+        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayerCards);
+        return []
+    }
 }
+
+
+
 
 // Host function //
 function dealCards(cardsInGame){
