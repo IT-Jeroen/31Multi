@@ -4,7 +4,7 @@
     --width-height-offset: calc(9em * 0.4467 * 0.5);
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1007px) {
     :root {
         --card-width: 6em;
         --card-height: calc(6em * 1.4467);
@@ -12,9 +12,18 @@
     }
 }
 
+@media screen and (max-width: 640px) {
+    :root {
+        --card-width: 4em;
+        --card-height: calc(4em * 1.4467);
+        --width-height-offset: calc(4em * 0.4467 * 0.5);
+    }
+}
+
 body {
     padding: 0em;
     margin:0em;
+    offset: none;
 }
 
 #background {
@@ -94,7 +103,7 @@ body {
 }
 
 #table {
-    position: relative;
+    position: absolute;
     width: 100vw;
     height: 100vh;
     background-image: url("./src/img/wood-texture.jpg");
@@ -113,13 +122,16 @@ body {
     background-image: url("./src/img/wood-texture.jpg");
     padding: 5px;
 } */
+
+
 .card{
+    position:relative;
     width: var(--card-width);
     height: var(--card-height);
     transform-style: preserve-3d;
     box-shadow: 1px 1px 10px 3px rgba(0,0,0,.2);
-    border-radius: 10%;
-    background-color: brown;
+    border-radius: 5%;
+    /* padding: 5%; */
     transition: left 0.3s ease-in-out,
             right 0.3s ease-in-out,
             top 0.3s ease-in-out,
@@ -134,20 +146,26 @@ body {
 }
 
 .front{
-    position: absolute;
+    position: inherit;
     backface-visibility: hidden;
-    border-radius: 8px;
+    border-radius: 5%;
     background-color: white;
-    padding: 5px;
+    padding: 5%;
+    /* margin: 5%; */
+    /* width: inherit; */
+    /* height: inherit; */
 }
 
 .back{
-    position: absolute;
+    position: inherit;
     transform: rotateY(180deg);
     backface-visibility: hidden;
-    border-radius: 8px;
+    border-radius: 5%;
     background-color: white;
-    padding: 5px;
+    padding: 5%;
+    /* margin: 5%; */
+    /* width: inherit; */
+    /* height: inherit; */
 }
 
 
@@ -333,4 +351,19 @@ body {
     left: calc(50% - 0.5 * var(--card-width));
     top: calc(50% - 0.5 * var(--card-height));
     transform: rotateY(180deg);
+}
+
+.center:hover {
+    border: 3px red solid;
+    top: calc(50% - 0.5 * var(--card-height) - 3em);
+}
+
+.center ~ .center:hover {
+    border: 3px red solid;
+    top: calc(50% - 0.5 * var(--card-height) - 3em);
+}
+
+.south:hover {
+    border: 3px red solid;
+    bottom: 3em;
 }
