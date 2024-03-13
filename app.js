@@ -75,7 +75,7 @@ function createNameInput(cb) {
     return wrapper;
 }
 
-// CallBack function //
+
 function handleNameSubmitted(playerName) {
     setupConnection(playerName);
 }
@@ -85,57 +85,30 @@ function renderApp(component) {
     document.getElementById('root').replaceChildren(component);
 }
 
-// cb = handleNameSubmitted
-// component = createNameInput())
+// Start Page //
 renderApp(createNameInput(handleNameSubmitted));
 
 
-// function createPlayfield(){
-//     const playfield = document.createElement('div')
-//     playfield.id = 'playfield'
-//     addClassToElement(playfield, 'playfield')
-
-//     createDeck(playfield)
-
-//     renderApp(playfield)
-
-//     dealCardsToPlayers()
-// }
-
-function createPlayfield(cb){
+function createPlayfield(){
     const playfield = document.createElement('div')
     playfield.id = 'playfield'
     addClassToElement(playfield, 'playfield')
 
-    // createDeck //
-    cb(playfield)
+    createDeck(playfield)
 
     return playfield
 }
 
 
-// /// Doesn't Apply to Clients, only Host ///
-// function initializeGame(){
-//     // prepCards(3)
-//     prepCards(createRandomDeckValues, addCardsToCardDB, pushData)
-//     .then(cardsInGame => {
-//         // dealCards => pushData => c.send(data) should catch errors and return a promise //
-//         dealCards(cardsInGame);
-//         startGame()
-//     })
-//     .catch(err => console.log(err)) 
-// }
-
-
 /// Doesn't Apply to Clients, only Host ///
 function initializeGame(){
-    dealCards(prepCards(createRandomDeckValues, addCardsToCardDB, pushData))
+    dealCards(prepCards())
     startGame()
 }
 
 
 function startGame(){
-    renderApp(createPlayfield(createDeck))
+    renderApp(createPlayfield())
     dealCardsToPlayers()
 }
 
@@ -148,7 +121,6 @@ function testHost(playerName){
         })
 
         peer.on('open', function (id) {
-            // console.log('TEST PEER', peer)
             const connection = peer.connect(hostName, {
                 reliable: true
             })
@@ -175,16 +147,13 @@ function setupConnection(playerName){
     p2pObject
     .then(result => {
         if (!result.ishost){
-            // console.log('HOST FOUND')
-
             players[0].name = playerName;
             players[0].p2p.p = result.p;
             players[0].p2p.c = result.c;
             players[0].data.id = result.c.connectionId;
 
             setConnectionEvents(result.c)
-            // renderApp(createWaitingRoom(returnPlayerList(),result.p.id));
-            renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
+            renderApp(createWaitingRoom())
         }
         else{
             result.p.destroy();
@@ -201,8 +170,6 @@ function setupConnection(playerName){
 
 
 function setAsHost(playerName){
-    // console.log('SET AS HOST')
-
     const peer = new Peer(hostName, {
         debug: 2
         })
@@ -217,8 +184,7 @@ function setAsHost(playerName){
         })
 
         // Update Waiting Room //
-        // renderApp(createWaitingRoom(returnPlayerList(), hostName))
-        renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
+        renderApp(createWaitingRoom())
     })
 
     peer.on('error', err => {console.log('PEER ERROR:', err)});
@@ -227,18 +193,14 @@ function setAsHost(playerName){
     players[0].name = playerName;
     players[0].p2p.p = peer;
     players[0].data.id = hostName;
-    // renderApp(createWaitingRoom(returnPlayerList(), hostName));
-    renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
+    renderApp(createWaitingRoom())
 
 }
 
 
 
 function addNewConnection(c){
-    // console.log('ADD NEW CLIENT CONNECTION:', connection.connectionId)
-
     const excistingPlayer = players.some(playerHost => {
-        // console.log("PLAYERHOST:", playerHost)
         if (playerHost.p2p.c){
             
             if (playerHost.p2p.c.connectionId === c.connectionId){
@@ -260,7 +222,6 @@ function addNewConnection(c){
             players[autoPlayerIndex].p2p.c = c;
             players[autoPlayerIndex].data.auto = false;
             players[autoPlayerIndex].data.id = c.connectionId;
-            // console.log('ADD PLAYERS:', players)
         }
         
     }
@@ -274,11 +235,9 @@ function addNewConnection(c){
 function setConnectionEvents(c) {
 
     c.on('data', function (data) {
-        // console.log("Data recieved:", data);
         if (data.type === 'waiting-room'){
             updatePlayerList(data.data)
-            // renderApp(createWaitingRoom(returnPlayerList()), c.peer.id)
-            renderApp(createWaitingRoom(createPlayerList, createStartGameBtn))
+            renderApp(createWaitingRoom())
         }
 
         if (data.type == 'players-data'){
@@ -337,59 +296,42 @@ function pushData(c, data, type){
 
 //////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
 
-// function createWaitingRoom(data, peerName){
-//     const waitingRoomDiv = document.createElement('div');
-//     waitingRoomDiv.id = 'waiting-room';
-//     waitingRoomDiv.append(...createPlayerList(data))
-
-//     if (peerName === hostName){
-//         const startGameBtn = document.createElement('button');
-//         startGameBtn.innerText ='Start Game';
-
-//         startGameBtn.addEventListener('click', () => {
-//             startGame()
-//         })
-//         waitingRoomDiv.appendChild(startGameBtn);
-//     }
-    
-//     return waitingRoomDiv
-// }
-
-
-function createWaitingRoom(cb_1, cb_2){
+function createWaitingRoom(){
     const waitingRoomDiv = document.createElement('div');
     waitingRoomDiv.id = 'waiting-room';
-    // createPlayersList //
-    waitingRoomDiv.append(...cb_1())
+    waitingRoomDiv.append(...createPlayerList())
 
-    // createStartGameBtn //
-    cb_2(waitingRoomDiv)
+    const startBtn = canStartGame()
+    if (startBtn){
+        waitingRoomDiv.append(startBtn())
+    }
     
     return waitingRoomDiv
 }
 
 
-function createStartGameBtn(component){
+function canStartGame(){
     if (players[0].p2p.p._id === hostName){
-        const startGameBtn = document.createElement('button');
-        startGameBtn.innerText ='Start Game';
-        
-        startGameBtn.addEventListener('click', () => {
-            initializeGame()
-        })
-        component.appendChild(startGameBtn);
+        return createStartGameBtn;
+    }
+    else {
+        return null;
     }
 }
 
 
-// function createPlayerList(playerNames) {
-//     // console.log('PLAYER NAMES', playerNames);
-//     return playerNames.map(player => createPlayerLabel(player))
-// }
+function createStartGameBtn(){
+    const startGameBtn = document.createElement('button');
+    startGameBtn.innerText ='Start Game';
+    
+    startGameBtn.addEventListener('click', () => {
+        initializeGame()
+    })
+    return startGameBtn
+}
 
 
 function createPlayerList() {
-    // console.log('PLAYER NAMES', playerNames);
     return returnPlayerList().map(player => createPlayerLabel(player))
 }
 
@@ -433,7 +375,6 @@ function shuffleHostArray(playersHost){
     const theRest = playersHost.slice(0, clientAtIndex)
     const bank = playersHost[4]
     const shuffledHost = [...clientFirst,...theRest, bank]
-    // console.log('MAP PLAYER OBJECTS:', shuffledHost)
 
     return shuffledHost
 }
@@ -441,7 +382,6 @@ function shuffleHostArray(playersHost){
 
 
 function findPlayerById(playersArr,id){
-    // console.log("ID", id)
     return playersArr.find(player => player.data.id == id)
 }
 
@@ -449,7 +389,6 @@ function findPlayerById(playersArr,id){
 function updatePlayerData(playersHost){
     players.forEach(player => {
         const hostPlayer = findPlayerById(playersHost,player.data.id);
-        // console.log('PLAYER FOUND', hostPlayer)
         player.data = hostPlayer.data
     })
 }
@@ -477,7 +416,6 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 
     cardLabelRange.forEach(label => {
         cardSuits.forEach(suit => {
-            // cardsInDeck.push({suit: suit, label: label})
             cardsInDeck.push(`${suit}_${label}`)
         })
     })
@@ -489,48 +427,27 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
         [cardsInDeck[index], cardsInDeck[randomIndex]] = [cardsInDeck[randomIndex], cardsInDeck[index]]
         
       }
-    // console.log(cardsInDeck);
+
     const pickIndex = Math.floor(Math.random() * (cardsInDeck.length - numCards));
     const  cardsInGame = cardsInDeck.slice(pickIndex, pickIndex + numCards);
-    
-    // console.log(cardsInGame);
 
     return cardsInGame;
 }
 
-
-// // Host function //
-// function prepCards(numPlayerCards){
-//     return new Promise((resolve, reject) => {
-//         const maxCards = players.length * numPlayerCards
-//         const cardsInGame = createRandomDeckValues(maxCards, '7');
-//         if (cardsInGame.length / players.length == numPlayerCards){
-//             addCardsToCardDB(cardsInGame);
-//             players.forEach(player => {
-//                 pushData(player.p2p.c, cardsDB.data, 'card-data');
-//             })
-//             resolve(cardsInGame)
-//         }
-//         else {
-//             console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayerCards);
-//             reject(new Error('CARDS ON TABLE DOES NOT MATCH PLAYERS'))
-//         }
-//     })
-// }
-
+// prepCards(createRandomDeckValues, addCardsToCardDB, pushData)
 
 // Host function //
-function prepCards(deckValues, toDB, pushCards){
+function prepCards(){
     const numPlayerCards = 3
     const maxCards = players.length * numPlayerCards
     // createRandomDeckValues //
-    const cardsInGame = deckValues(maxCards, '7');
+    const cardsInGame = createRandomDeckValues(maxCards, '7');
     if (cardsInGame.length / players.length == numPlayerCards){
         // addCardsToCardDB //
-        toDB(cardsInGame);
+        addCardsToCardDB(cardsInGame);
         players.forEach(player => {
             // pushData //
-            pushCards(player.p2p.c, cardsDB.data, 'card-data');
+            pushData(player.p2p.c, cardsDB.data, 'card-data');
         })
         return cardsInGame
     }
@@ -549,7 +466,6 @@ function dealCards(cardsInGame){
     players.forEach((player, index) => {
         player.data.cards = [cardsInGame[index], cardsInGame[index + players.length], cardsInGame[index + 2 * players.length]]
     })
-    // console.log('DEALING CARDS:', players)
 
     players.forEach(player => {
         pushData(player.p2p.c, playersData(), 'start-game');
@@ -571,11 +487,6 @@ function setCardsDB(data){
 }
 
 
-// function old_cardToId(card){
-//     return `${card.suit}_${card.label}`
-// }
-
-
 function returnCardValue(card){
     const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
     let cardValue = Number(card.label);
@@ -591,9 +502,7 @@ function returnCardValue(card){
 function addCardsToCardDB(cards){
     cardsDB.data = {};
     cards.forEach(card => {
-        // const cardID = card;
         const cardValue = returnCardValue(card)
-        // cardsDB.data[cardID] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: card.suit, icon: card.label, location: 'center', x: 0, y: 0};
         const splitID = card.split('_')
         cardsDB.data[card] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'center', x: 0, y: 0};
     })
@@ -601,15 +510,6 @@ function addCardsToCardDB(cards){
 
 
 //////////////////////////// 31 Single //////////////////////////////////////
-
-// function startGame(){
-//     prepCards(3)
-//     .then(cardsInGame => {
-//         dealCards(cardsInGame);
-//         createPlayfield()
-//     })
-//     .catch(err => console.log(err)) 
-// }
 
 
 function createElem(elemType, classNames=[], idName){
@@ -625,34 +525,6 @@ function createElem(elemType, classNames=[], idName){
 }
 
 
-// // Local Function //
-// function createDeck(component){
-//     const centerPos = {'x': vw / 2,'y': vh / 2};
-//     const deckPos = {'x': centerPos.x - (cardsDB.width / 2), 'y': centerPos.y - (cardsDB.height /2)};
-//     const cardIDs = Object.keys(cardsDB.data) 
-//     cardIDs.forEach((cardID, index) => {
-
-//         const cardElem = createCardElem(cardID);
-        
-//         //// Card Event Listeners ////
-//         mouseOverEvent(cardElem);
-//         cardClickEvent(cardElem);
-
-//         cardsDB.data[cardID].elem = cardElem
-//         cardsDB.data[cardID].location = 'center';
-//         cardsDB.data[cardID].x = deckPos.x;
-//         cardsDB.data[cardID].y = deckPos.y;
-
-//         component.appendChild(cardsDB.data[cardID].elem)
-
-//         let zIndex = cardIDs.length - index
-//         const matrix = returnOrientationMatrix('center', 'closed')
-//         setCssTransform(cardsDB.data[cardID], matrix, zIndex);
-
-//     })
-// }
-
-
 // Local Function //
 function createDeck(component){
     const centerPos = {'x': vw / 2,'y': vh / 2};
@@ -660,18 +532,11 @@ function createDeck(component){
     const cardIDs = Object.keys(cardsDB.data) 
     cardIDs.forEach((cardID, index) => {
 
-        // const cardElem = createCardElem(cardID);
-        
-        //// Card Event Listeners ////
-        // mouseOverEvent(cardElem);
-        // cardClickEvent(cardElem);
-
         cardsDB.data[cardID].elem = createCardElem(cardID);
         cardsDB.data[cardID].location = 'center';
         cardsDB.data[cardID].x = deckPos.x;
         cardsDB.data[cardID].y = deckPos.y;
 
-        // console.log('ELEM',cardsDB.data[cardID].elem)
         mouseOverEvent(cardID, setCardHoverEffect);
         cardClickEvent(cardID, pickCardEffect, setCardHoverEffect)
 
@@ -864,33 +729,6 @@ function handOutDeckCards(timing=0){
 
 ////////////////////////////////////// CARD EVENTS ///////////////////////////////////////////////
 
-// function mouseOverEvent(elem){
-
-//     elem.addEventListener(
-//         "mouseenter",
-//         (event) => {
-//             // Hover UP //
-//             const cardID = findCardID(elem);
-//             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-//                 event.target.style = cardHoverEffect(event.target, cardID,'up');
-//             }
-//         },
-//         false,
-//       );
-
-//       elem.addEventListener(
-//         "mouseleave",
-//         (event) => {
-//             // Hover DOWN //
-//             const cardID = findCardID(elem);
-//             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-//                 event.target.style = cardHoverEffect(event.target, cardID,'reverse');
-//             }
-//         },
-//         false,
-//       );
-// }
-
 
 function mouseOverEvent(cardID, cb){
 
@@ -898,12 +736,8 @@ function mouseOverEvent(cardID, cb){
         "mouseenter",
         (event) => {
             // Hover UP //
-            
-            // const cardID = findCardID(elem);
             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-                // event.target.style = cardHoverEffect(event.target, cardID,'up');
-                // setCardHoverEffect(event.target, cardID,'up');
-                // setCardHoverEffect(cardID,'up');
+                // setCardHoverEffect //
                 cb(cardID,'up');
             }
         },
@@ -914,12 +748,8 @@ function mouseOverEvent(cardID, cb){
         "mouseleave",
         (event) => {
             // Hover DOWN //
-            
-            // const cardID = findCardID(elem);
             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-                // event.target.style = cardHoverEffect(event.target, cardID,'reverse');
-                // setCardHoverEffect(event.target, cardID,'reverse');
-                // setCardHoverEffect(cardID,'reverse');
+                // setCardHoverEffect //
                 cb(cardID,'reverse');
             }
         },
@@ -928,20 +758,8 @@ function mouseOverEvent(cardID, cb){
 }
 
 
-// function cardClickEvent(elem){
-//     elem.addEventListener('click', (event)=>{
-//         const cardID = findCardID(event.target.parentElement.parentElement);
-//         if (cardsDB.data[cardID].access && players[0].data.active){
-//             pickCardEffect(cardID)
-//         
-//         }
-//     })
-// }
-
-
 function cardClickEvent(cardID, cb, cb_1){
     cardsDB.data[cardID].elem.addEventListener('click', (event)=>{
-        // const cardID = findCardID(event.target.parentElement.parentElement);
         if (cardsDB.data[cardID].access && players[0].data.active){
             // Pick Card Event //
             cb(cardID, cb_1)
@@ -950,100 +768,32 @@ function cardClickEvent(cardID, cb, cb_1){
 }
 
 
-
-// cardClickEvent(elem, cardID, pickCardEffect(cardHoverEffect))
-
 ///////////////////////////////////////// CARD EFFECTS ///////////////////////////////////////////////////
 
-// function pickCardEffect(cardID){
-//     // console.log('pickCardEffect', cardID)
-//     // If picked card in local player's hand unpick all cards //
-//     if(players[0].data.cards.includes(cardID)){
-//         // console.log('Local Player Card Picked')
-//         players[0].data.cards.forEach(id => {
-//             cardsDB.data[id].picked = false
-//             // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
-//             setCardHoverEffect(id,'reverse');
-//         })
-//     }
-
-//     // If picked card in bank's hand unpick all cards //
-//     if(players[4].data.cards.includes(cardID)){
-//         // console.log('Bank Card Picked')
-//         players[4].data.cards.forEach(id => {
-//             cardsDB.data[id].picked = false
-//             // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
-//             setCardHoverEffect(id,'reverse');
-//         })
-//     }
-
-//     // cardsDB.data[cardID].elem.style = cardHoverEffect(cardsDB.data[cardID].elem, cardID,'up');
-//     setCardHoverEffect(cardID,'up');
-//     cardsDB.data[cardID].picked = true;
-
-// }
 
 function pickCardEffect(cardID, cb){
     // If picked card in local player's hand unpick all cards //
     if(players[0].data.cards.includes(cardID)){
-        // console.log('Local Player Card Picked')
         players[0].data.cards.forEach(id => {
             cardsDB.data[id].picked = false
-            // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
+            // setCardHoverEffect //
             cb(id,'reverse');
         })
     }
 
     // If picked card in bank's hand unpick all cards //
     if(players[4].data.cards.includes(cardID)){
-        // console.log('Bank Card Picked')
         players[4].data.cards.forEach(id => {
             cardsDB.data[id].picked = false
-            // cardsDB.data[id].elem.style = cardHoverEffect(cardsDB.data[id].elem, id,'reverse');
-
             // setCardHoverEffect //
             cb(id,'reverse');
         })
     }
 
-    // cardsDB.data[cardID].elem.style = cardHoverEffect(cardsDB.data[cardID].elem, cardID,'up');
     cb(cardID,'up');
     cardsDB.data[cardID].picked = true;
 
 }
-
-
-
-// function cardHoverEffect(hoverElem, cardID ,effect){
-//     let matrixStr = ''
-//     let targetStyle = hoverElem.getAttribute('style').split(/\s/);
-//     targetStyle = targetStyle.map(item => item.replace(',',''));
-//     const transform = targetStyle[0];
-//     const matrix3D = targetStyle.slice(1, targetStyle.length-6);
-//     const trailing = targetStyle.slice(targetStyle.length -6);
-
-//     let hoverX = 5
-//     let hoverY = 40
-
-//     if (effect === 'up'){
-//         if(!cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
-//             matrix3D[12] = Number(matrix3D[12]) - hoverX;
-//             matrix3D[13] = Number(matrix3D[13]) - hoverY;
-//             cardsDB.data[cardID].hover = true;
-//         }
-//     }
-
-//     if (effect === 'reverse'){
-//         if(cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
-//             matrix3D[12] = Number(matrix3D[12]) + hoverX;
-//             matrix3D[13] = Number(matrix3D[13]) + hoverY;
-//             cardsDB.data[cardID].hover = false;
-//         }
-//     }
-
-//     matrixStr = `${transform} ${matrix3D.toString()} ${trailing.toString().replace(/,/g, ' ')}}`;
-//     return matrixStr;
-// }
 
 
 function setCardHoverEffect(cardID ,effect){
