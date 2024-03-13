@@ -1,6 +1,20 @@
+:root {
+    --card-width: 9em;
+    --card-height: calc(9em * 1.4467);
+    --width-height-offset: calc(9em * 0.4467 * 0.5);
+}
+
+@media screen and (max-width: 768px) {
+    :root {
+        --card-width: 6em;
+        --card-height: calc(6em * 1.4467);
+        --width-height-offset: calc(6em * 0.4467 * 0.5);
+    }
+}
+
 body {
-    padding: 0;
-    margin:0;
+    padding: 0em;
+    margin:0em;
 }
 
 #background {
@@ -79,29 +93,44 @@ body {
     text-align: center;
 }
 
-.playfield{
+#table {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-image: url("./src/img/wood-texture.jpg");
+}
+
+.playfield {
+    position: relative;
+    height: calc(100vh - 2em);
+    margin: 1em;
+}
+
+/* .playfield{
     position: absolute;
     width: 100vw;
     height: 100vh;
-    /* margin-left: 1vw; */
-    /* margin-right: 1vw; */
-    /* margin-top: 1vh; */
-    /* margin-bottom: 1vh; */
     background-image: url("./src/img/wood-texture.jpg");
     padding: 5px;
-}
-
+} */
 .card{
-    position: absolute;
-    transition: transform 0.3s ease-in-out;
+    width: var(--card-width);
+    height: var(--card-height);
     transform-style: preserve-3d;
     box-shadow: 1px 1px 10px 3px rgba(0,0,0,.2);
-    border-radius: 8px;
+    border-radius: 10%;
+    background-color: brown;
+    transition: left 0.3s ease-in-out,
+            right 0.3s ease-in-out,
+            top 0.3s ease-in-out,
+            bottom 0.3s ease-in-out,
+            transform 0.3s ease-in-out;
 }
 
 .card img{
     width : 100%;
     height: 100%;
+    /* object-fit: fill; */
 }
 
 .front{
@@ -160,4 +189,148 @@ body {
 }
 .play-hold-swap-btn:active{
     background-color: blue;
+}
+
+
+
+
+/* .quater-screen {
+    position:absolute;
+    width: 50%;
+    height: 50%;
+    background-color: blue;
+} */
+
+/* .card{
+    position: absolute;
+    transition: transform 0.3s ease-in-out;
+    transform-style: preserve-3d;
+    box-shadow: 1px 1px 10px 3px rgba(0,0,0,.2);
+    border-radius: 8px;
+} */
+
+
+.north {
+    position: absolute;
+    top: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) - 2em);
+    transform: rotateY(180deg);
+    z-index: 1;
+}
+
+.north ~ .north{
+    position: absolute;
+    top: 0rem;
+    left: calc(50% - 0.5 * var(--card-width));
+    transform: rotateY(180deg);
+    z-index: 2;
+}
+
+.north ~ .north ~ .north {
+    position: absolute;
+    top: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) + 2em);
+    transform: rotateY(180deg);
+    z-index: 3;
+}
+
+.south {
+    position: absolute;
+    bottom: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) - 2em);
+    z-index: 1;
+}
+
+.south ~ .south{
+    position: absolute;
+    bottom: 0rem;
+    left: calc(50% - 0.5 * var(--card-width));
+    z-index: 2;
+}
+
+.south ~ .south ~ .south {
+    position: absolute;
+    bottom: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) + 2em);
+    z-index: 3;
+}
+
+.west {
+    position: absolute;
+    left: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) - 2em);
+    transform: rotateZ(90deg) rotateY(180deg);
+    z-index: 1;
+}
+
+.west ~ .west{
+    position: absolute;
+    left: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height));
+    transform: rotateZ(90deg) rotateY(180deg);
+    z-index: 2;
+}
+
+.west ~ .west ~ .west{
+    position: absolute;
+    left: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) + 2em);
+    transform: rotateZ(90deg) rotateY(180deg);
+    z-index: 3;
+}
+
+.east {
+    position: absolute;
+    right: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) - 2em);
+    transform: rotateZ(90deg) rotateY(180deg);
+    z-index: 1;
+}
+
+.east ~ .east{
+    position: absolute;
+    right: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height));
+    transform: rotateZ(90deg) rotateY(180deg);
+    z-index: 2;
+}
+
+.east ~ .east ~ .east{
+    position: absolute;
+    right: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) + 2em);
+    transform: rotateZ(90deg) rotateY(180deg);
+    z-index: 3;
+}
+
+.center {
+    position: absolute;
+    left: calc(50% - 1.5 * var(--card-width) - 0.5em);
+    top: calc(50% - 0.5 * var(--card-height));
+    z-index: 1;
+}
+
+.center ~ .center{
+    position: absolute;
+    left: calc(50% - 0.5 * var(--card-width));
+    top: calc(50% - 0.5 * var(--card-height));
+    z-index: 2;
+}
+
+.center ~ .center ~ .center{
+    position: absolute;
+    left: calc(50% + 0.5 * var(--card-width) + 0.5em);
+    top: calc(50% - 0.5 * var(--card-height));
+    z-index: 3;
+}
+
+.flipped {
+    transform: rotateY(180deg);
+}
+
+.deck{
+    position: absolute;
+    left: calc(50% - 0.5 * var(--card-width));
+    top: calc(50% - 0.5 * var(--card-height));
+    transform: rotateY(180deg);
 }

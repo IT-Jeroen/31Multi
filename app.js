@@ -82,7 +82,7 @@ function handleNameSubmitted(playerName) {
 
 
 function renderApp(component) {
-    document.getElementById('root').replaceChildren(component);
+    document.getElementById('table').replaceChildren(component);
 }
 
 // Start Page //
@@ -504,7 +504,8 @@ function addCardsToCardDB(cards){
     cards.forEach(card => {
         const cardValue = returnCardValue(card)
         const splitID = card.split('_')
-        cardsDB.data[card] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'center', x: 0, y: 0};
+        // cardsDB.data[card] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'center', x: 0, y: 0};
+        cardsDB.data[card] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'deck'};
     })
 }
 
@@ -527,24 +528,25 @@ function createElem(elemType, classNames=[], idName){
 
 // Local Function //
 function createDeck(component){
-    const centerPos = {'x': vw / 2,'y': vh / 2};
-    const deckPos = {'x': centerPos.x - (cardsDB.width / 2), 'y': centerPos.y - (cardsDB.height /2)};
+    // const centerPos = {'x': vw / 2,'y': vh / 2};
+    // const deckPos = {'x': centerPos.x - (cardsDB.width / 2), 'y': centerPos.y - (cardsDB.height /2)};
     const cardIDs = Object.keys(cardsDB.data) 
     cardIDs.forEach((cardID, index) => {
 
         cardsDB.data[cardID].elem = createCardElem(cardID);
-        cardsDB.data[cardID].location = 'center';
-        cardsDB.data[cardID].x = deckPos.x;
-        cardsDB.data[cardID].y = deckPos.y;
+        cardsDB.data[cardID].location = 'deck';
+        // cardsDB.data[cardID].x = deckPos.x;
+        // cardsDB.data[cardID].y = deckPos.y;
 
-        mouseOverEvent(cardID, setCardHoverEffect);
-        cardClickEvent(cardID, pickCardEffect, setCardHoverEffect)
+        // mouseOverEvent(cardID, setCardHoverEffect);
+        // cardClickEvent(cardID, pickCardEffect, setCardHoverEffect)
 
+        cardsDB.data[cardID].elem.classList.add('deck');
         component.appendChild(cardsDB.data[cardID].elem)
 
-        let zIndex = cardIDs.length - index
-        const matrix = returnOrientationMatrix('center', 'closed')
-        setCssTransform(cardsDB.data[cardID], matrix, zIndex);
+        // let zIndex = cardIDs.length - index
+        // const matrix = returnOrientationMatrix('center', 'closed')
+        // setCssTransform(cardsDB.data[cardID], matrix, zIndex);
 
     })
 }
@@ -668,15 +670,15 @@ function setCardsPosition(player, stacked=true){
 // Local Function //
 function dealCardsToPlayers(){
     
-    // Calculate Player Cards Positions //
-    players.forEach(player => {
-        if(player.location === 'center'){
-            setCardsPosition(player, stacked=false)
-        }
-        else {
-            setCardsPosition(player, stacked=true)
-        }
-    })
+    // // Calculate Player Cards Positions //
+    // players.forEach(player => {
+    //     if(player.location === 'center'){
+    //         setCardsPosition(player, stacked=false)
+    //     }
+    //     else {
+    //         setCardsPosition(player, stacked=true)
+    //     }
+    // })
 
     // Deal Cards to Players CSS Animation //
     handOutDeckCards(300)
@@ -705,16 +707,18 @@ function handOutDeckCards(timing=0){
         const cardID = player.data.cards[cardIndex];
         const card = cardsDB.data[cardID]
 
-        let flipSide = 'closed';
-        if(player.location == 'south' || player.location == 'center'){
-            flipSide = 'open';
-            card.access = true
-        }
+        card.elem.className = `card ${player.location}`
 
-        const matrix = returnOrientationMatrix(player.location, flipSide)
-        setCssTransform(card, matrix, zIndex)
+        // let flipSide = 'closed';
+        // if(player.location == 'south' || player.location == 'center'){
+        //     flipSide = 'open';
+        //     card.access = true
+        // }
+
+        // const matrix = returnOrientationMatrix(player.location, flipSide)
+        // setCssTransform(card, matrix, zIndex)
         
-        zIndex += 1;
+        // zIndex += 1;
         playerIndex += 1;
 
         if (playerIndex == players.length){
