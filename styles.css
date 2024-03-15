@@ -51,7 +51,6 @@ body {
     background-color: white;
     border: 0;
     font: 1.0em sans-serif;
-    /* border-radius: 8px; */
     text-align: center;
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -115,15 +114,6 @@ body {
     margin: 1em;
 }
 
-/* .playfield{
-    position: absolute;
-    width: 100vw;
-    height: 100vh;
-    background-image: url("./src/img/wood-texture.jpg");
-    padding: 5px;
-} */
-
-
 .card{
     position:relative;
     width: var(--card-width);
@@ -131,7 +121,6 @@ body {
     transform-style: preserve-3d;
     box-shadow: 1px 1px 10px 3px rgba(0,0,0,.2);
     border-radius: 5%;
-    /* padding: 5%; */
     transition: left 0.3s ease-in-out,
             right 0.3s ease-in-out,
             top 0.3s ease-in-out,
@@ -142,7 +131,6 @@ body {
 .card img{
     width : 100%;
     height: 100%;
-    /* object-fit: fill; */
 }
 
 .front{
@@ -151,9 +139,6 @@ body {
     border-radius: 5%;
     background-color: white;
     padding: 5%;
-    /* margin: 5%; */
-    /* width: inherit; */
-    /* height: inherit; */
 }
 
 .back{
@@ -163,9 +148,6 @@ body {
     border-radius: 5%;
     background-color: white;
     padding: 5%;
-    /* margin: 5%; */
-    /* width: inherit; */
-    /* height: inherit; */
 }
 
 
@@ -194,9 +176,6 @@ body {
     font-family: sans-serif;
     color: white;
     text-align: center;
-    /* border-radius: 1em;
-    padding-top: 1em;
-    padding-bottom: 1em; */
     z-index: 100;
 }
 
@@ -208,24 +187,6 @@ body {
 .play-hold-swap-btn:active{
     background-color: blue;
 }
-
-
-
-
-/* .quater-screen {
-    position:absolute;
-    width: 50%;
-    height: 50%;
-    background-color: blue;
-} */
-
-/* .card{
-    position: absolute;
-    transition: transform 0.3s ease-in-out;
-    transform-style: preserve-3d;
-    box-shadow: 1px 1px 10px 3px rgba(0,0,0,.2);
-    border-radius: 8px;
-} */
 
 
 .north {
@@ -354,27 +315,34 @@ body {
 }
 
 .center:hover {
-    border: 3px red solid;
     top: calc(50% - 0.5 * var(--card-height) - 3em);
 }
 
 .center ~ .center:hover {
-    border: 3px red solid;
     top: calc(50% - 0.5 * var(--card-height) - 3em);
 }
 
 .center.clicked {
-    border: 3px rgb(1, 47, 255) solid;
+    top: calc(50% - 0.5 * var(--card-height) - 3em);
+}
+
+.center ~ .center.clicked {
     top: calc(50% - 0.5 * var(--card-height) - 3em);
 }
 
 
 .south:hover {
-    border: 3px red solid;
+    bottom: 3em;
+}
+
+.south ~ .south:hover {
     bottom: 3em;
 }
 
 .south.clicked {
-    border: 3px rgb(0, 38, 255) solid;
+    bottom: 3em;
+}
+
+.south ~ .south.clicked {
     bottom: 3em;
 }

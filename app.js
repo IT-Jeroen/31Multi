@@ -1,6 +1,4 @@
 const hostName = '31-multi-host-id';
-const vw = window.innerWidth // Need to be set at start of the game
-const vh = window.innerHeight // Need to be set at start of the game
 const cardsDB = {width: 169, height: 244, data: null}; // width and height could differ per player
 
 const players = [
@@ -10,41 +8,6 @@ const players = [
     {'name':'Auto 3', 'location': 'east', 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
     {'name':'Bank', 'location': 'center', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
-
-
-// function returnOrientationMatrix(location, flipSide){
-//     switch (location){
-//         case 'south':
-//             if (flipSide == 'closed'){
-//                 return [-1,0,0,0,1,0,-1]; // 180 DEGREE Y-AXIS 0 degree z axis
-//             }
-//             return  [1,0,0,0,1,0,1]; // 0 DEGREE Y-AXIS 0 degree z axis
-
-//         case 'west':
-//             if (flipSide == 'closed'){
-//                 return [0,-1,0,1,0,0,-1]; // 180 DEGREE Y-AXIS 90 degree z axis
-//             }
-//             return [0,1,0,-1,0,0,1]; // 0 DEGREE Y-AXIS 90 degree z axis
-
-//         case 'north':
-//             if (flipSide == 'closed'){
-//                 return [1,0,0,0,-1,0,-1]; // 180 DEGREE Y-AXIS  180 degree z axis
-//             }
-//             return [-1,0,0,0,-1,0,1]; // 0 DEGREE Y-AXIS 180 degree z axis
-
-//         case 'east':
-//             if (flipSide == 'closed'){
-//                 return [0,1,0,-1,0,0,-1]; // 180 DEGREE Y-AXIS 270 degree z axis
-//             }
-//             return [0,-1,0,1,0,0,1]; // 0 DEGREE Y-AXIS 270 degree z axis
-
-//         case 'center':
-//             if (flipSide == 'closed'){
-//                 return [-1,0,0,0,1,0,-1]; // 180 DEGREE Y-AXIS 0 degree z axis
-//             }
-//             return  [1,0,0,0,1,0,1]; // 0 DEGREE Y-AXIS 0 degree z axis
-//     }
-// }
 
 
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
@@ -92,7 +55,7 @@ renderApp(createNameInput(handleNameSubmitted));
 function createPlayfield(){
     const playfield = document.createElement('div')
     playfield.id = 'playfield'
-    addClassToElement(playfield, 'playfield')
+    playfield.classList.add('playfield')
 
     createDeck(playfield)
 
@@ -109,7 +72,7 @@ function initializeGame(){
 
 function startGame(){
     renderApp(createPlayfield())
-    dealCardsToPlayers()
+    handOutDeckCards(300)
 }
 
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
@@ -434,19 +397,17 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
     return cardsInGame;
 }
 
-// prepCards(createRandomDeckValues, addCardsToCardDB, pushData)
 
 // Host function //
 function prepCards(){
     const numPlayerCards = 3
     const maxCards = players.length * numPlayerCards
-    // createRandomDeckValues //
     const cardsInGame = createRandomDeckValues(maxCards, '7');
+
     if (cardsInGame.length / players.length == numPlayerCards){
-        // addCardsToCardDB //
         addCardsToCardDB(cardsInGame);
+
         players.forEach(player => {
-            // pushData //
             pushData(player.p2p.c, cardsDB.data, 'card-data');
         })
         return cardsInGame
@@ -456,8 +417,6 @@ function prepCards(){
         return []
     }
 }
-
-
 
 
 // Host function //
@@ -517,29 +476,23 @@ function createElem(elemType, classNames=[], idName){
     const elem = document.createElement(elemType);
 
     for (let className of classNames){
-        addClassToElement(elem, className);
+        elem.classList.add(className)
     }
     
-    addIdToElement(elem, idName);
+    elem.id = idName
 
     return elem;
 }
 
 
 // Local Function //
-function createDeck(component){
-    // const centerPos = {'x': vw / 2,'y': vh / 2};
-    // const deckPos = {'x': centerPos.x - (cardsDB.width / 2), 'y': centerPos.y - (cardsDB.height /2)};
+function createDeck(component){;
     const cardIDs = Object.keys(cardsDB.data) 
     cardIDs.forEach((cardID, index) => {
 
         cardsDB.data[cardID].elem = createCardElem(cardID);
         cardsDB.data[cardID].location = 'deck';
-        // cardsDB.data[cardID].x = deckPos.x;
-        // cardsDB.data[cardID].y = deckPos.y;
 
-        // mouseOverEvent(cardID, setCardHoverEffect);
-        // cardClickEvent(cardID, pickCardEffect, setCardHoverEffect)
         cardsDB.data[cardID].elem.addEventListener('click',e => {
             cardClickEvent(e)
         })
@@ -547,16 +500,11 @@ function createDeck(component){
         cardsDB.data[cardID].elem.classList.add('deck');
         component.appendChild(cardsDB.data[cardID].elem)
 
-        // let zIndex = cardIDs.length - index
-        // const matrix = returnOrientationMatrix('center', 'closed')
-        // setCssTransform(cardsDB.data[cardID], matrix, zIndex);
-
     })
 }
 
 
 function cardClickEvent(e){
-    // console.log('className',e.currentTarget.className);
     const classes = e.currentTarget.classList;
     const south = classes.contains('south');
     const center = classes.contains('center');
@@ -596,147 +544,36 @@ function swapCard(){
     }
 
 }
-
-
-// function setCssTransform(card, matrix, zIndex){
-//     // Scaling 1.001 to keep images crisp //
-//     card.elem.style = `transform: matrix3d(
-//         ${matrix[0]},
-//         ${matrix[1]},
-//         ${matrix[2]},
-//         0,
-//         ${matrix[3]},
-//         ${matrix[4]},
-//         0,
-//         0,
-//         ${matrix[5]},
-//         0,
-//         ${matrix[6]},
-//         0,
-//         ${card.x},
-//         ${card.y},
-//         0,
-//         1.001
-//         ); width: ${cardsDB.width}px; height: ${cardsDB.height}px; z-index: ${zIndex};`; 
-
-// }
-    
+ 
 
 function createCardElem(cardID){
     
-    const cardElem = createElement('div');
-    addClassToElement(cardElem, 'card');
+    const cardElem = document.createElement('div');
+    cardElem.classList.add('card')
 
-    const frontElem = createElement('div');
-    addClassToElement(frontElem, 'front');
-    const frontImg = createElement('img');
+    const frontElem = document.createElement('div');
+    frontElem.classList.add('front')
+    const frontImg = document.createElement('img');
     frontImg.src = `./src/img/${cardID}.png`;
 
-    const backElem = createElement('div');
-    addClassToElement(backElem, 'back');
-    const backImg = createElement('img');
+    const backElem = document.createElement('div');
+    backElem.classList.add('back')
+    const backImg = document.createElement('img');
     backImg.src = './src/img/back-blue.png';
 
-    addChildElement(frontElem,frontImg);
-    addChildElement(backElem, backImg);
-    addChildElement(cardElem, frontElem);
-    addChildElement(cardElem, backElem);
+    frontElem.appendChild(frontImg);
+    backElem.appendChild(backImg);
+    cardElem.appendChild(frontElem);
+    cardElem.appendChild(backElem);
 
     return cardElem;
 }
 
 
-// function setCardsPosition(player, stacked=true){
-//     const numPlayersCards = player.data.cards.length
-//     const offsetStacked = 40
-//     const handWidth = {'stacked': (cardsDB.width + ((numPlayersCards -1) * offsetStacked)), 'unstacked': (numPlayersCards * cardsDB.width)};
-//     const zonesPos = {
-//         'south': vh - cardsDB.height,
-//         'west': (cardsDB.height - cardsDB.width) /2,
-//         'north': 0,
-//         'east': (vw - cardsDB.height + ((cardsDB.height - cardsDB.width) /2))
-//     }
-    
-//     const cardsInHand = player.data.cards
-//     let widthHand = 0;
-//     let cardOffSet = 0;
-
-//     if (stacked){
-//         widthHand = handWidth.stacked;
-//         cardOffSet = offsetStacked;
-//     }
-//     else{
-//         widthHand = handWidth.unstacked;
-//         cardOffSet = cardsDB.width;
-//     }
-    
-//     let emptySpaceX = (vw - widthHand) / 2;
-//     let emptySpaceY = (vh - widthHand) / 2 - (offsetStacked / 2);
-
-//     if (player.location == 'south'){
-//         cardsInHand.forEach((card, index) => {
-//             cardsDB.data[card].y = zonesPos.south;
-//             cardsDB.data[card].x = emptySpaceX + (index * cardOffSet);
-//         })
-//     }
-
-//     if (player.location == 'west'){
-//         cardsInHand.forEach((card, index) => {
-//             cardsDB.data[card].x = zonesPos.west;
-//             cardsDB.data[card].y = emptySpaceY + (index * cardOffSet);
-//         })
-
-//     }
-
-//     if (player.location == 'north'){
-//         cardsInHand.forEach((card, index) => {
-//             cardsDB.data[card].y = zonesPos.north;
-//             cardsDB.data[card].x = emptySpaceX + (index * cardOffSet);
-//         })
-
-//     }
-//     if (player.location == 'east'){
-//         cardsInHand.forEach((card, index) => {
-//             cardsDB.data[card].x = zonesPos.east;
-//             cardsDB.data[card].y = emptySpaceY + (index * cardOffSet);
-//         })
-
-//     }
-
-//     if (player.location == 'center'){
-//         cardsInHand.forEach((card, index) => {
-//             cardsDB.data[card].x = emptySpaceX + (index * cardOffSet);
-//             cardsDB.data[card].y = (vh / 2) - (cardsDB.height / 2);
-//         })
-
-//     }
-// }
-
-
-// Local Function //
-function dealCardsToPlayers(){
-    
-    // // Calculate Player Cards Positions //
-    // players.forEach(player => {
-    //     if(player.location === 'center'){
-    //         setCardsPosition(player, stacked=false)
-    //     }
-    //     else {
-    //         setCardsPosition(player, stacked=true)
-    //     }
-    // })
-
-    // Deal Cards to Players CSS Animation //
-    handOutDeckCards(300)
-    
-}
-
-
-// Actuall Trigger for the CSS Animation //
+// Actuall Trigger for the Deck CSS Animation //
 function handOutDeckCards(timing=0){
     let i = 0;
     let playerIndex = 0;
-    // let zIndex = 1;
     let cardIndex = 0;
     let numCardsToDeal = 0;
     
@@ -754,17 +591,6 @@ function handOutDeckCards(timing=0){
         const card = cardsDB.data[cardID]
 
         card.elem.className = `card ${player.location}`
-
-        // let flipSide = 'closed';
-        // if(player.location == 'south' || player.location == 'center'){
-        //     flipSide = 'open';
-        //     card.access = true
-        // }
-
-        // const matrix = returnOrientationMatrix(player.location, flipSide)
-        // setCssTransform(card, matrix, zIndex)
-        
-        // zIndex += 1;
         playerIndex += 1;
 
         if (playerIndex == players.length){
@@ -774,151 +600,4 @@ function handOutDeckCards(timing=0){
 
         i += 1;
     }, timing);
-}
-
-
-////////////////////////////////////// CARD EVENTS ///////////////////////////////////////////////
-
-
-// function mouseOverEvent(cardID, cb){
-
-//     cardsDB.data[cardID].elem.addEventListener(
-//         "mouseenter",
-//         (event) => {
-//             // Hover UP //
-//             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-//                 // setCardHoverEffect //
-//                 cb(cardID,'up');
-//             }
-//         },
-//         false,
-//       );
-
-//       cardsDB.data[cardID].elem.addEventListener(
-//         "mouseleave",
-//         (event) => {
-//             // Hover DOWN //
-//             if (cardsDB.data[cardID].access && players[0].data.active && !cardsDB.data[cardID].picked){
-//                 // setCardHoverEffect //
-//                 cb(cardID,'reverse');
-//             }
-//         },
-//         false,
-//       );
-// }
-
-
-// function cardClickEvent(cardID, cb, cb_1){
-//     cardsDB.data[cardID].elem.addEventListener('click', (event)=>{
-//         if (cardsDB.data[cardID].access && players[0].data.active){
-//             // Pick Card Event //
-//             cb(cardID, cb_1)
-//         }
-//     })
-// }
-
-
-///////////////////////////////////////// CARD EFFECTS ///////////////////////////////////////////////////
-
-
-// function pickCardEffect(cardID, cb){
-//     // If picked card in local player's hand unpick all cards //
-//     if(players[0].data.cards.includes(cardID)){
-//         players[0].data.cards.forEach(id => {
-//             cardsDB.data[id].picked = false
-//             // setCardHoverEffect //
-//             cb(id,'reverse');
-//         })
-//     }
-
-//     // If picked card in bank's hand unpick all cards //
-//     if(players[4].data.cards.includes(cardID)){
-//         players[4].data.cards.forEach(id => {
-//             cardsDB.data[id].picked = false
-//             // setCardHoverEffect //
-//             cb(id,'reverse');
-//         })
-//     }
-
-//     cb(cardID,'up');
-//     cardsDB.data[cardID].picked = true;
-
-// }
-
-
-// function setCardHoverEffect(cardID ,effect){
-//     let matrixStr = ''
-//     let targetStyle = cardsDB.data[cardID].elem.getAttribute('style').split(/\s/);
-//     targetStyle = targetStyle.map(item => item.replace(',',''));
-//     const transform = targetStyle[0];
-//     const matrix3D = targetStyle.slice(1, targetStyle.length-6);
-//     const trailing = targetStyle.slice(targetStyle.length -6);
-
-//     let hoverX = 5
-//     let hoverY = 40
-
-//     if (effect === 'up'){
-//         if(!cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
-//             matrix3D[12] = Number(matrix3D[12]) - hoverX;
-//             matrix3D[13] = Number(matrix3D[13]) - hoverY;
-//             cardsDB.data[cardID].hover = true;
-//         }
-//     }
-
-//     if (effect === 'reverse'){
-//         if(cardsDB.data[cardID].hover && !cardsDB.data[cardID].picked){
-//             matrix3D[12] = Number(matrix3D[12]) + hoverX;
-//             matrix3D[13] = Number(matrix3D[13]) + hoverY;
-//             cardsDB.data[cardID].hover = false;
-//         }
-//     }
-
-//     matrixStr = `${transform} ${matrix3D.toString()} ${trailing.toString().replace(/,/g, ' ')}}`;
-//     cardsDB.data[cardID].elem.style = matrixStr
-//     // return matrixStr;
-// }
-
-
-
-/////////////////////////////////// HELPER FUNCTION ///////////////////////////////////////////////
-
-function findCardID(cardElem){
-    const returnID = Object.keys(cardsDB.data).filter(cardID => cardsDB.data[cardID].elem == cardElem)[0];   
-    return returnID;
-}
-
-
-function createElement(elemType){
-    return document.createElement(elemType);
-}
-
-
-function removeElements(elems=[]){
-    elems.forEach(elem => {
-        if (elem){
-            elem.remove()
-        }
-    })
-    
-}
-
-
-function addClassToElement(elem, className){
-    elem.classList.add(className);
-    
-}
-
-
-function removeClassFromElement(elem, className){
-    elem.classList.remove(className);
-}
-
-
-function addIdToElement(elem, idName){
-    elem.id = idName;
-}
-
-
-function addChildElement(parentElem, childElem){
-    parentElem.appendChild(childElem);
 }
