@@ -363,7 +363,18 @@ body {
     top: calc(50% - 0.5 * var(--card-height) - 3em);
 }
 
+.center.clicked {
+    border: 3px rgb(1, 47, 255) solid;
+    top: calc(50% - 0.5 * var(--card-height) - 3em);
+}
+
+
 .south:hover {
     border: 3px red solid;
+    bottom: 3em;
+}
+
+.south.clicked {
+    border: 3px rgb(0, 38, 255) solid;
     bottom: 3em;
 }
