@@ -1,5 +1,6 @@
 const hostName = '31-multi-host-id';
-const cardsDB = {width: 169, height: 244, data: null}; // width and height could differ per player
+// const cardsDB = {width: 169, height: 244, data: null}; // width and height could differ per player
+// cardsDB.data[card] = {value: cardValue, suit: splitID[0], icon: splitID[1]};
 
 const players = [
     {'name':'Local', 'location': 'south', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
@@ -8,6 +9,13 @@ const players = [
     {'name':'Auto 3', 'location': 'east', 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
     {'name':'Bank', 'location': 'center', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
+
+const gameData = {
+    players: players,
+    cards: null,
+    pickedHand: null,
+    pickedBank: null,
+}
 
 
 /////////////////////////// GAME INTRO PAGE /////////////////////////////////
@@ -110,18 +118,18 @@ function setupConnection(playerName){
     p2pObject
     .then(result => {
         if (!result.ishost){
-            players[0].name = playerName;
-            players[0].p2p.p = result.p;
-            players[0].p2p.c = result.c;
-            players[0].data.id = result.c.connectionId;
+            gameData.players[0].name = playerName;
+            gameData.players[0].p2p.p = result.p;
+            gameData.players[0].p2p.c = result.c;
+            gameData.players[0].data.id = result.c.connectionId;
 
             setConnectionEvents(result.c)
             renderApp(createWaitingRoom())
         }
         else{
             result.p.destroy();
-            players[0].p2p.c = null;
-            players[0].p2p.p = null;
+            gameData.players[0].p2p.c = null;
+            gameData.players[0].p2p.p = null;
             setAsHost(playerName);
         }
         
@@ -142,7 +150,7 @@ function setAsHost(playerName){
         addNewConnection(c)
 
         // Trigger waiting room at Client //
-        players.forEach(clientPlayer => {
+        gameData.players.forEach(clientPlayer => {
             pushData(clientPlayer.p2p.c, playersData(), 'waiting-room')
         })
 
@@ -153,9 +161,9 @@ function setAsHost(playerName){
     peer.on('error', err => {console.log('PEER ERROR:', err)});
 
     // Create Waiting Room //
-    players[0].name = playerName;
-    players[0].p2p.p = peer;
-    players[0].data.id = hostName;
+    gameData.players[0].name = playerName;
+    gameData.players[0].p2p.p = peer;
+    gameData.players[0].data.id = hostName;
     renderApp(createWaitingRoom())
 
 }
@@ -163,7 +171,7 @@ function setAsHost(playerName){
 
 
 function addNewConnection(c){
-    const excistingPlayer = players.some(playerHost => {
+    const excistingPlayer = gameData.players.some(playerHost => {
         if (playerHost.p2p.c){
             
             if (playerHost.p2p.c.connectionId === c.connectionId){
@@ -174,17 +182,17 @@ function addNewConnection(c){
     })
 
     if(!excistingPlayer){
-        const autoPlayerIndex = players.findIndex(playerHost => playerHost.data.auto)
+        const autoPlayerIndex = gameData.players.findIndex(playerHost => playerHost.data.auto)
         
         if (autoPlayerIndex == -1){
             console.log('CANNOT ADD CONNECTION:', c.metadata)
             // c.send('CANNOT ADD CLIENT')
         }
         else{
-            players[autoPlayerIndex].name = c.metadata;
-            players[autoPlayerIndex].p2p.c = c;
-            players[autoPlayerIndex].data.auto = false;
-            players[autoPlayerIndex].data.id = c.connectionId;
+            gameData.players[autoPlayerIndex].name = c.metadata;
+            gameData.players[autoPlayerIndex].p2p.c = c;
+            gameData.players[autoPlayerIndex].data.auto = false;
+            gameData.players[autoPlayerIndex].data.id = c.connectionId;
         }
         
     }
@@ -215,7 +223,7 @@ function setConnectionEvents(c) {
             updatePlayerData(data.data)
             startGame()
             // temp hardcoded activation //
-            players[0].data.active=true
+            gameData.players[0].data.active=true
         }
         
     });
@@ -274,7 +282,7 @@ function createWaitingRoom(){
 
 
 function canStartGame(){
-    if (players[0].p2p.p._id === hostName){
+    if (gameData.players[0].p2p.p._id === hostName){
         return createStartGameBtn;
     }
     else {
@@ -310,7 +318,7 @@ function createPlayerLabel(player) {
 
 function updatePlayerList(playersHost){
     const shuffledHost = shuffleHostArray(playersHost)
-    players.forEach((player, index) => {
+    gameData.players.forEach((player, index) => {
         player.name = shuffledHost[index].name;
         player.data = shuffledHost[index].data;
     })
@@ -320,19 +328,19 @@ function updatePlayerList(playersHost){
 ///////////////////////////////////// PLAYERS //////////////////////////////////////////
 
 function returnPlayerList(){
-    return players.map(player => player.name)
+    return gameData.players.map(player => player.name)
 }
 
 
 function playersData(){
-    return players.map(player => {
+    return gameData.players.map(player => {
         return {"name": player.name, "data": player.data}
     })    
 }
 
 
 function shuffleHostArray(playersHost){
-    const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.id === players[0].data.id);
+    const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.id === gameData.players[0].data.id);
 
     const clientFirst = playersHost.slice(clientAtIndex, 4)
     const theRest = playersHost.slice(0, clientAtIndex)
@@ -350,7 +358,7 @@ function findPlayerById(playersArr,id){
 
 
 function updatePlayerData(playersHost){
-    players.forEach(player => {
+    gameData.players.forEach(player => {
         const hostPlayer = findPlayerById(playersHost,player.data.id);
         player.data = hostPlayer.data
     })
@@ -401,19 +409,19 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 // Host function //
 function prepCards(){
     const numPlayerCards = 3
-    const maxCards = players.length * numPlayerCards
+    const maxCards = gameData.players.length * numPlayerCards
     const cardsInGame = createRandomDeckValues(maxCards, '7');
 
-    if (cardsInGame.length / players.length == numPlayerCards){
+    if (cardsInGame.length / gameData.players.length == numPlayerCards){
         addCardsToCardDB(cardsInGame);
 
-        players.forEach(player => {
-            pushData(player.p2p.c, cardsDB.data, 'card-data');
+        gameData.players.forEach(player => {
+            pushData(player.p2p.c, gameData.cards, 'card-data');
         })
         return cardsInGame
     }
     else {
-        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, players.length, numPlayerCards);
+        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, gameData.players.length, numPlayerCards);
         return []
     }
 }
@@ -422,14 +430,14 @@ function prepCards(){
 // Host function //
 function dealCards(cardsInGame){
 
-    players.forEach((player, index) => {
-        player.data.cards = [cardsInGame[index], cardsInGame[index + players.length], cardsInGame[index + 2 * players.length]]
+    gameData.players.forEach((player, index) => {
+        player.data.cards = [cardsInGame[index], cardsInGame[index + gameData.players.length], cardsInGame[index + 2 * gameData.players.length]]
     })
 
-    players.forEach(player => {
+    gameData.players.forEach(player => {
         pushData(player.p2p.c, playersData(), 'start-game');
         // temp hardcoded activation //
-        players[0].data.active=true
+        gameData.players[0].data.active=true
     })
 }
 
@@ -438,8 +446,8 @@ function dealCards(cardsInGame){
 
 
 function setCardsDB(data){
-    if (!cardsDB.data){
-        cardsDB.data = data
+    if (!gameData.cards){
+        gameData.cards = data
     } else{
         console.log('UPDATE CARDSDB WHAT HAPPEND ???')
     }
@@ -459,12 +467,13 @@ function returnCardValue(card){
 
 
 function addCardsToCardDB(cards){
-    cardsDB.data = {};
+    gameData.cards = {};
     cards.forEach(card => {
         const cardValue = returnCardValue(card)
         const splitID = card.split('_')
         // cardsDB.data[card] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'center', x: 0, y: 0};
-        cardsDB.data[card] = {elem: null, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'deck'};
+        // cardsDB.data[card] = {elem: null, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'deck'};
+        gameData.cards[card] = {value: cardValue, suit: splitID[0], icon: splitID[1]};
     })
 }
 
@@ -485,23 +494,56 @@ function createElem(elemType, classNames=[], idName){
 }
 
 
-// Local Function //
-function createDeck(component){;
-    const cardIDs = Object.keys(cardsDB.data) 
-    cardIDs.forEach((cardID, index) => {
+// // Local Function //
+// function createDeck(component){;
+//     const cardIDs = Object.keys(cardsDB.data) 
+//     cardIDs.forEach((cardID, index) => {
 
-        cardsDB.data[cardID].elem = createCardElem(cardID);
-        cardsDB.data[cardID].location = 'deck';
+//         cardsDB.data[cardID].elem = createCardElem(cardID);
+//         cardsDB.data[cardID].location = 'deck';
 
-        cardsDB.data[cardID].elem.addEventListener('click',e => {
-            cardClickEvent(e)
-        })
+//         cardsDB.data[cardID].elem.addEventListener('click',e => {
+//             cardClickEvent(e)
+//         })
 
-        cardsDB.data[cardID].elem.classList.add('deck');
-        component.appendChild(cardsDB.data[cardID].elem)
+//         cardsDB.data[cardID].elem.classList.add('deck');
+//         component.appendChild(cardsDB.data[cardID].elem)
 
-    })
-}
+//     })
+// }
+
+
+// function cardClickEvent(e){
+//     const classes = e.currentTarget.classList;
+//     const south = classes.contains('south');
+//     const center = classes.contains('center');
+
+//     if (south){
+//         const cards = [...document.getElementsByClassName('south')];
+//         cards.forEach(card => {
+//             card.classList.remove('clicked');
+//         })
+//         e.currentTarget.classList.add('clicked');
+//     }
+
+//     if (center){
+//         const cards = [...document.getElementsByClassName('center')];
+//         cards.forEach(card => {
+//             card.classList.remove('clicked');
+//         })
+//         e.currentTarget.classList.add('clicked');
+//     }
+// }
+
+
+
+// const gameData = {
+//     players: players,
+//     cards: null,
+//     pickedHand: null,
+//     pickedBank: null,
+// }
+
 
 
 function cardClickEvent(e){
@@ -510,40 +552,66 @@ function cardClickEvent(e){
     const center = classes.contains('center');
 
     if (south){
-        const cards = [...document.getElementsByClassName('south')];
-        cards.forEach(card => {
-            card.classList.remove('clicked');
-        })
+        if (gameData.pickedHand){
+            document.getElementById(gameData.pickedHand).classList.remove('clicked');
+        }
+        gameData.pickedHand = e.currentTarget.id;
+
         e.currentTarget.classList.add('clicked');
     }
 
     if (center){
-        const cards = [...document.getElementsByClassName('center')];
-        cards.forEach(card => {
-            card.classList.remove('clicked');
-        })
+        if (gameData.pickedBank){
+            document.getElementById(gameData.pickedBank).classList.remove('clicked');
+        }
+
+        gameData.pickedBank = e.currentTarget.id;
         e.currentTarget.classList.add('clicked');
     }
 }
 
+
 function swapCard(){
-    const clicked = [...document.getElementsByClassName('clicked')]
+    if (gameData.pickedHand && gameData.pickedBank){
+        const cardHand = document.getElementById(gameData.pickedHand);
+        cardHand.classList.remove('clicked');
+        const handCss = cardHand.className;
 
-    if (clicked.length == 2){
-        const _a = clicked[0].className;
-        const _b = clicked[1].className;
-    
-        clicked[0].className = _b;
-        clicked[1].className = _a;
+        const cardBank = document.getElementById(gameData.pickedBank);
+        cardBank.classList.remove('clicked');
+        const bankCss = cardBank.className
 
-        clicked[0].classList.remove('clicked');
-        clicked[1].classList.remove('clicked');
+        cardHand.className = bankCss;
+        cardBank.className = handCss;
+
+        gameData.pickedHand = null;
+        gameData.pickedBank = null;
+        
     }
     else {
         console.log('Please Select Two Cards!');
     }
 
 }
+
+// function swapCard(){
+//     const clicked = [...document.getElementsByClassName('clicked')]
+
+//     if (clicked.length == 2){
+//         const _a = clicked[0].className;
+//         const _b = clicked[1].className;
+    
+//         clicked[0].className = _b;
+//         clicked[1].className = _a;
+
+//         clicked[0].classList.remove('clicked');
+//         clicked[1].classList.remove('clicked');
+//     }
+//     else {
+//         console.log('Please Select Two Cards!');
+//     }
+
+// }
  
 
 function createCardElem(cardID){
@@ -570,30 +638,87 @@ function createCardElem(cardID){
 }
 
 
+// // Actuall Trigger for the Deck CSS Animation //
+// // Classes card deck
+// function handOutDeckCards(timing=0){
+//     let i = 0;
+//     let playerIndex = 0;
+//     let cardIndex = 0;
+//     let numCardsToDeal = 0;
+    
+//     players.forEach(player => {
+//         numCardsToDeal += player.data.cards.length;
+//     })
+
+//     const intervalID = setInterval(()=>{
+//         if (i == numCardsToDeal -1){
+//             clearInterval(intervalID);
+//         }
+        
+//         let player = players[playerIndex];
+//         const cardID = player.data.cards[cardIndex];
+//         const card = cardsDB.data[cardID]
+
+//         card.elem.className = `card ${player.location}`
+//         playerIndex += 1;
+
+//         if (playerIndex == players.length){
+//             cardIndex += 1;
+//             playerIndex = 0;
+//         }
+
+//         i += 1;
+//     }, timing);
+// }
+
+
+// Local Function //
+function createDeck(component){;
+    const cardIDs = Object.keys(gameData.cards) 
+    cardIDs.forEach(cardID => {
+
+        const cardElem = createCardElem(cardID);
+        cardElem.id = cardID
+        cardElem.classList.add('deck')
+        // cardsDB.data[cardID].location = 'deck';
+
+        cardElem.addEventListener('click',e => {
+            cardClickEvent(e)
+        })
+
+        
+        component.appendChild(cardElem)
+
+    })
+}
+
+
 // Actuall Trigger for the Deck CSS Animation //
+// Classes card deck
 function handOutDeckCards(timing=0){
     let i = 0;
     let playerIndex = 0;
     let cardIndex = 0;
     let numCardsToDeal = 0;
     
-    players.forEach(player => {
+    gameData.players.forEach(player => {
         numCardsToDeal += player.data.cards.length;
     })
+
 
     const intervalID = setInterval(()=>{
         if (i == numCardsToDeal -1){
             clearInterval(intervalID);
         }
         
-        let player = players[playerIndex];
+        let player = gameData.players[playerIndex];
         const cardID = player.data.cards[cardIndex];
-        const card = cardsDB.data[cardID]
+        const card = document.getElementById(cardID)
 
-        card.elem.className = `card ${player.location}`
+        card.className = `card ${player.location}`
         playerIndex += 1;
 
-        if (playerIndex == players.length){
+        if (playerIndex == gameData.players.length){
             cardIndex += 1;
             playerIndex = 0;
         }
