@@ -79,8 +79,12 @@ function initializeGame(){
 
 
 function startGame(){
-    renderApp(createPlayfield())
-    handOutDeckCards(300)
+    renderApp(createPlayfield());
+    handOutDeckCards(300);
+    // temp hardcoded activation //
+    gameData.players[0].data.active=true
+
+    setActivePlayer();
 }
 
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
@@ -224,6 +228,8 @@ function setConnectionEvents(c) {
             startGame()
             // temp hardcoded activation //
             gameData.players[0].data.active=true
+
+            setActivePlayer();
         }
         
     });
@@ -235,6 +241,47 @@ function setConnectionEvents(c) {
         // set player to auto ???
         // rename player to auto ???
     });
+}
+
+
+function setActivePlayer(){
+    removePlayerLabels();
+    gameData.players.forEach(player => {
+        setPlayerLabels(player);
+    })
+}
+
+
+function removePlayerLabels(){
+    const removeInactive = [...document.getElementsByClassName('inactive-label')];
+    removeInactive.forEach(label => label.remove());
+}
+
+
+function setPlayerLabels(player){
+    const playFieldElem = document.getElementById('playfield');
+
+    if(player.name != 'Bank'){
+
+        if(!player.data.active){
+            const inActiveLabel = `
+            <div class="player-label player-${player.location}">
+                ${player.name}
+            </div>`
+            playFieldElem.insertAdjacentHTML('afterbegin',inActiveLabel);
+            
+        }
+
+        else {
+            if(player.location != 'south'){
+                const activeLabel = `
+                <div class="player-label player-${player.location} player-active">
+                    ${player.name}
+                </div>`
+                playFieldElem.insertAdjacentHTML('afterbegin',activeLabel);
+            }
+        }
+    }
 }
 
 
@@ -437,7 +484,8 @@ function dealCards(cardsInGame){
     gameData.players.forEach(player => {
         pushData(player.p2p.c, playersData(), 'start-game');
         // temp hardcoded activation //
-        gameData.players[0].data.active=true
+        // gameData.players[0].data.active=true
+        // setActivePlayer();
     })
 }
 
@@ -551,27 +599,31 @@ function cardClickEvent(e){
     const south = classes.contains('south');
     const center = classes.contains('center');
 
-    if (south){
-        if (gameData.pickedHand){
-            document.getElementById(gameData.pickedHand).classList.remove('clicked');
+    if (gameData.players[0].data.active){
+        if (south){
+            if (gameData.pickedHand){
+                document.getElementById(gameData.pickedHand).classList.remove('clicked');
+            }
+            gameData.pickedHand = e.currentTarget.id;
+    
+            e.currentTarget.classList.add('clicked');
         }
-        gameData.pickedHand = e.currentTarget.id;
-
-        e.currentTarget.classList.add('clicked');
+    
+        if (center){
+            if (gameData.pickedBank){
+                document.getElementById(gameData.pickedBank).classList.remove('clicked');
+            }
+    
+            gameData.pickedBank = e.currentTarget.id;
+            e.currentTarget.classList.add('clicked');
+        }
     }
 
-    if (center){
-        if (gameData.pickedBank){
-            document.getElementById(gameData.pickedBank).classList.remove('clicked');
-        }
 
-        gameData.pickedBank = e.currentTarget.id;
-        e.currentTarget.classList.add('clicked');
-    }
 }
 
 
-function swapCard(){
+function swapCards(){
     if (gameData.pickedHand && gameData.pickedBank){
         const cardHand = document.getElementById(gameData.pickedHand);
         cardHand.classList.remove('clicked');
