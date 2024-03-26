@@ -406,3 +406,14 @@ body {
     top: calc(50% - var(--overlap));
     transform: rotateZ(270deg);
 }
+
+#play-cards{
+    position: absolute;
+    background-color: blue;
+    color: white;
+    padding: 1em;
+    z-index: 200;
+    bottom: 1em;
+    left: calc(50% + var(--card-width));
+
+}

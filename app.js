@@ -231,6 +231,11 @@ function setConnectionEvents(c) {
 
             setActivePlayer();
         }
+
+        // if (data.type = 'game-data'){
+        //     updatePlayerData(data.data)
+        //     updateGame()
+        // }
         
     });
 
@@ -617,11 +622,34 @@ function cardClickEvent(e){
             gameData.pickedBank = e.currentTarget.id;
             e.currentTarget.classList.add('clicked');
         }
+
+        if (gameData.pickedBank && gameData.pickedHand){
+            createPlayCardsBtn()
+        }
     }
 
 
 }
 
+
+function createPlayCardsBtn(){
+    const btn = `<button id="play-cards">Play Cards</button>`
+    document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+
+    document.getElementById('play-cards').addEventListener('click', _ => {
+        swapCards()
+    })
+}
+
+
+function removePlayCardsBtn(){
+    document.getElementById('play-cards').remove();
+}
+
+
+// function sendCardData(){
+
+// }
 
 function swapCards(){
     if (gameData.pickedHand && gameData.pickedBank){
@@ -636,8 +664,11 @@ function swapCards(){
         cardHand.className = bankCss;
         cardBank.className = handCss;
 
+        // pushData(clientPlayer.p2p.c, gameData, 'game-data')
         gameData.pickedHand = null;
         gameData.pickedBank = null;
+
+        removePlayCardsBtn();
         
     }
     else {
