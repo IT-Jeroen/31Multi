@@ -34,6 +34,8 @@ const gameData = {
     pickedHand: null,
     pickedBank: null,
     isHost: null,
+    activePLayer: null,
+    prevActivePlayer: null,
 }
 
 
@@ -101,7 +103,7 @@ function startGame(){
     renderApp(createPlayfield());
     handOutDeckCards(300);
     // temp hardcoded activation //
-    gameData.players[0].data.active=true
+    // gameData.players[0].data.active=true
 
     setActivePlayer();
 }
@@ -247,34 +249,30 @@ function addNewConnection(c){
 // Client Side (Only one connection) //
 function setConnectionEvents(c) {
 
-    c.on('data', function (data) {
-        if (data.type === 'waiting-room'){
-            console.log('Waiting Room Data', data);
-            updatePlayerList(data.data)
+    c.on('data', function (received) {
+        if (received.type === 'waiting-room'){
+            // gameData //
+            updatePlayerData(received.data.players)
+            gameData.isHost = received.data.isHost;
             renderApp(createWaitingRoom())
         }
 
-        if (data.type == 'players-data'){
-            updatePlayerData(data.data)
+        if (received.type == 'players-data'){
+            updatePlayerData(received.data)
         }
 
-        if (data.type == 'card-data'){
-            setCardsDB(data.data)
+        if (received.type == 'card-data'){
+            setCardsDB(received.data)
         }
 
-        if (data.type == 'start-game'){
-            updatePlayerData(data.data)
+        if (received.type == 'start-game'){
+            // gameData
+            updatePlayerData(received.data.players) 
+            gameData.activePLayer = received.data.activePLayer;
             startGame()
-            // temp hardcoded activation //
-            gameData.players[0].data.active=true
 
             setActivePlayer();
         }
-
-        // if (data.type = 'game-data'){
-        //     updatePlayerData(data.data)
-        //     updateGame()
-        // }
         
     });
 
@@ -407,9 +405,11 @@ function createPlayerLabel(player) {
     return playerDiv;
 }
 
-
-function updatePlayerList(playersHost){
-    const shuffledHost = shuffleHostArray(playersHost)
+// gameData.players
+function updatePlayerData(gameDataPlayers){
+    console.log(gameDataPlayers)
+    const shuffledHost = shuffleHostArray(gameDataPlayers)
+    console.log(shuffledHost)
     gameData.players.forEach((player, index) => {
         player.name = shuffledHost[index].name;
         player.data = shuffledHost[index].data;
@@ -430,13 +430,13 @@ function playersData(){
     })    
 }
 
+// gameData.players
+function shuffleHostArray(gameDataPlayers){
+    const clientAtIndex = gameDataPlayers.findIndex(player =>  player.data.connectionId === gameData.players[0].data.connectionId);
 
-function shuffleHostArray(playersHost){
-    const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.connectionId === gameData.players[0].data.connectionId);
-
-    const clientFirst = playersHost.slice(clientAtIndex, 4)
-    const theRest = playersHost.slice(0, clientAtIndex)
-    const bank = playersHost[4]
+    const clientFirst = gameDataPlayers.slice(clientAtIndex, 4)
+    const theRest = gameDataPlayers.slice(0, clientAtIndex)
+    const bank = gameDataPlayers[4]
     const shuffledHost = [...clientFirst,...theRest, bank]
 
     return shuffledHost
@@ -449,12 +449,12 @@ function findPlayerByConnectionId(playersArr,id){
 }
 
 
-function updatePlayerData(playersHost){
-    gameData.players.forEach(player => {
-        const hostPlayer = findPlayerByConnectionId(playersHost,player.data.connectionId);
-        player.data = hostPlayer.data
-    })
-}
+// function updatePlayerData(playersHost){
+//     gameData.players.forEach(player => {
+//         const hostPlayer = findPlayerByConnectionId(playersHost,player.data.connectionId);
+//         player.data = hostPlayer.data
+//     })
+// }
 
 
 ////////////////////////////////// DEAL CARDS ///////////////////////////////////////////
@@ -537,7 +537,10 @@ function dealCards(cardsInGame){
     // })
 
     connections.forEach(connection => {
-        pushData(connection.c, playersData(), 'start-game');
+        // pushData(connection.c, playersData(), 'start-game');
+        gameData.activePLayer = gameData.players[0].name;
+        gameData.players[0].data.active = true;
+        pushData(connection.c, gameData, 'start-game');
     })
 }
 
@@ -844,7 +847,6 @@ function handOutDeckCards(timing=0){
         let player = gameData.players[playerIndex];
         const cardID = player.data.cards[cardIndex];
         const card = document.getElementById(cardID)
-
         card.className = `card ${player.location}`
         playerIndex += 1;
 
