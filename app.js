@@ -2,12 +2,30 @@ const hostName = '31-multi-host-id';
 // const cardsDB = {width: 169, height: 244, data: null}; // width and height could differ per player
 // cardsDB.data[card] = {value: cardValue, suit: splitID[0], icon: splitID[1]};
 
+// Peer-JS binarypack.ts doesn't like this data (TypeError: t is undefined) //
+// Peer-JS doesn't like sending the connection and or peer objects //
+// const players = [
+//     {'name':'Local', 'location': 'south', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+//     {'name':'Auto 1', 'location': 'west', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+//     {'name':'Auto 2', 'location': 'north', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+//     {'name':'Auto 3', 'location': 'east', 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+//     {'name':'Bank', 'location': 'center', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+// ]
+
+const connections = [
+    {'name':'Local', 'connectionId': null, 'p': null, 'c': null},
+    {'name':'Auto 1', 'connectionId': null, 'p': null, 'c': null},
+    {'name':'Auto 2', 'connectionId': null, 'p': null, 'c': null},
+    {'name':'Auto 3', 'connectionId': null, 'p': null, 'c': null},
+    {'name':'Bank', 'connectionId': null, 'p': null, 'c': null},
+]
+
 const players = [
-    {'name':'Local', 'location': 'south', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'local', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
-    {'name':'Auto 1', 'location': 'west', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 2', 'location': 'north', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 3', 'location': 'east', 'p2p':{'p': null, 'c': null},'data':{ 'id': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Bank', 'location': 'center', 'p2p':{'p': null, 'c': null}, 'data':{ 'id': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+    {'name':'Local', 'location': 'south', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+    {'name':'Auto 1', 'location': 'west', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 2', 'location': 'north', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 3', 'location': 'east', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
 
 const gameData = {
@@ -15,6 +33,7 @@ const gameData = {
     cards: null,
     pickedHand: null,
     pickedBank: null,
+    isHost: null,
 }
 
 
@@ -123,17 +142,23 @@ function setupConnection(playerName){
     .then(result => {
         if (!result.ishost){
             gameData.players[0].name = playerName;
-            gameData.players[0].p2p.p = result.p;
-            gameData.players[0].p2p.c = result.c;
-            gameData.players[0].data.id = result.c.connectionId;
+            connections[0].name = playerName;
+            connections[0].p = result.p;
+            connections[0].c = result.c;
+            connections[0].connectionId = result.c.connectionId;
+            // gameData.players[0].p2p.p = result.p;
+            // gameData.players[0].p2p.c = result.c;
+            gameData.players[0].data.connectionId = result.c.connectionId;
 
             setConnectionEvents(result.c)
             renderApp(createWaitingRoom())
         }
         else{
             result.p.destroy();
-            gameData.players[0].p2p.c = null;
-            gameData.players[0].p2p.p = null;
+            connections[0].c = null;
+            connections[0].p = null;
+            // gameData.players[0].p2p.c = null;
+            // gameData.players[0].p2p.p = null;
             setAsHost(playerName);
         }
         
@@ -153,9 +178,16 @@ function setAsHost(playerName){
 
         addNewConnection(c)
 
-        // Trigger waiting room at Client //
-        gameData.players.forEach(clientPlayer => {
-            pushData(clientPlayer.p2p.c, playersData(), 'waiting-room')
+        // // Trigger waiting room at Client //
+        // gameData.players.forEach(clientPlayer => {
+        //     // pushData(clientPlayer.p2p.c, playersData(), 'waiting-room')
+        //     // Peer-JS binarypack.ts doesn't like this data (TypeError: t is undefined) //
+        //     // Peer-JS doesn't like sending the connection and or peer objects //
+        //     pushData(clientPlayer.p2p.c, gameData, '')
+        // })
+
+        connections.forEach(connection => {
+            pushData(connection.c, gameData, 'waiting-room');
         })
 
         // Update Waiting Room //
@@ -166,8 +198,10 @@ function setAsHost(playerName){
 
     // Create Waiting Room //
     gameData.players[0].name = playerName;
-    gameData.players[0].p2p.p = peer;
-    gameData.players[0].data.id = hostName;
+    // gameData.players[0].p2p.p = peer;
+    connections[0].p = peer;
+    gameData.players[0].data.connectionId = peer._id;
+    gameData.isHost = playerName;
     renderApp(createWaitingRoom())
 
 }
@@ -175,10 +209,10 @@ function setAsHost(playerName){
 
 
 function addNewConnection(c){
-    const excistingPlayer = gameData.players.some(playerHost => {
-        if (playerHost.p2p.c){
+    const excistingPlayer = gameData.players.some(player => {
+        if (player.connectionId){
             
-            if (playerHost.p2p.c.connectionId === c.connectionId){
+            if (player.connectionId === c.connectionId){
                 return true
             }
         }
@@ -186,7 +220,7 @@ function addNewConnection(c){
     })
 
     if(!excistingPlayer){
-        const autoPlayerIndex = gameData.players.findIndex(playerHost => playerHost.data.auto)
+        const autoPlayerIndex = gameData.players.findIndex(player => player.data.auto)
         
         if (autoPlayerIndex == -1){
             console.log('CANNOT ADD CONNECTION:', c.metadata)
@@ -194,9 +228,13 @@ function addNewConnection(c){
         }
         else{
             gameData.players[autoPlayerIndex].name = c.metadata;
-            gameData.players[autoPlayerIndex].p2p.c = c;
+            // gameData.players[autoPlayerIndex].p2p.c = c;
             gameData.players[autoPlayerIndex].data.auto = false;
-            gameData.players[autoPlayerIndex].data.id = c.connectionId;
+            gameData.players[autoPlayerIndex].data.connectionId = c.connectionId;
+
+            connections[autoPlayerIndex].name = c.metadata;
+            connections[autoPlayerIndex].connectionId = c.connectionId;
+            connections[autoPlayerIndex].c = c;
         }
         
     }
@@ -211,6 +249,7 @@ function setConnectionEvents(c) {
 
     c.on('data', function (data) {
         if (data.type === 'waiting-room'){
+            console.log('Waiting Room Data', data);
             updatePlayerList(data.data)
             renderApp(createWaitingRoom())
         }
@@ -334,7 +373,8 @@ function createWaitingRoom(){
 
 
 function canStartGame(){
-    if (gameData.players[0].p2p.p._id === hostName){
+    // if (gameData.players[0].p2p.p._id === hostName){
+    if (gameData.players[0].data.connectionId === hostName){
         return createStartGameBtn;
     }
     else {
@@ -392,7 +432,7 @@ function playersData(){
 
 
 function shuffleHostArray(playersHost){
-    const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.id === gameData.players[0].data.id);
+    const clientAtIndex = playersHost.findIndex(playerHost =>  playerHost.data.connectionId === gameData.players[0].data.connectionId);
 
     const clientFirst = playersHost.slice(clientAtIndex, 4)
     const theRest = playersHost.slice(0, clientAtIndex)
@@ -404,14 +444,14 @@ function shuffleHostArray(playersHost){
 
 
 
-function findPlayerById(playersArr,id){
-    return playersArr.find(player => player.data.id == id)
+function findPlayerByConnectionId(playersArr,id){
+    return playersArr.find(player => player.data.connectionId == id)
 }
 
 
 function updatePlayerData(playersHost){
     gameData.players.forEach(player => {
-        const hostPlayer = findPlayerById(playersHost,player.data.id);
+        const hostPlayer = findPlayerByConnectionId(playersHost,player.data.connectionId);
         player.data = hostPlayer.data
     })
 }
@@ -467,8 +507,11 @@ function prepCards(){
     if (cardsInGame.length / gameData.players.length == numPlayerCards){
         addCardsToCardDB(cardsInGame);
 
-        gameData.players.forEach(player => {
-            pushData(player.p2p.c, gameData.cards, 'card-data');
+        // gameData.players.forEach(player => {
+        //     pushData(player.p2p.c, gameData.cards, 'card-data');
+        // })
+        connections.forEach(connection => {
+            pushData(connection.c, gameData.cards, 'card-data');
         })
         return cardsInGame
     }
@@ -486,11 +529,15 @@ function dealCards(cardsInGame){
         player.data.cards = [cardsInGame[index], cardsInGame[index + gameData.players.length], cardsInGame[index + 2 * gameData.players.length]]
     })
 
-    gameData.players.forEach(player => {
-        pushData(player.p2p.c, playersData(), 'start-game');
-        // temp hardcoded activation //
-        // gameData.players[0].data.active=true
-        // setActivePlayer();
+    // gameData.players.forEach(player => {
+    //     pushData(player.p2p.c, playersData(), 'start-game');
+    //     // temp hardcoded activation //
+    //     // gameData.players[0].data.active=true
+    //     // setActivePlayer();
+    // })
+
+    connections.forEach(connection => {
+        pushData(connection.c, playersData(), 'start-game');
     })
 }
 
