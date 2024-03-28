@@ -286,7 +286,7 @@ function setConnectionEvents(c) {
 
         // only clients recieve this data type //
         if (received.type == 'game-data'){
-            console.log('CLIENT RECIEVED GAME DATA', received.data)
+            // console.log('CLIENT RECIEVED GAME DATA', received.data)
             updateGame(received.data)
             
         }
@@ -297,7 +297,7 @@ function setConnectionEvents(c) {
             if (gameData.players[0].data.connectionId == hostName){
                 console.log('HOST RECIEVED HOST DATA', received.data)
                 updateHost(received.data);
-                sendGameData();
+                sendGameData('host');
                 gameData.pickedBank = null;
                 gameData.pickedHand = null;
             }
@@ -675,7 +675,7 @@ function createPlayCardsBtn(){
 
     document.getElementById('play-cards').addEventListener('click', _ => {
         // swapCards()
-        playCards('Button')
+        // // playCards('Button')
         // swapCardsArray();
         removePlayCardsBtn();
         // sendGameData();
@@ -686,6 +686,44 @@ function createPlayCardsBtn(){
 
 function removePlayCardsBtn(){
     document.getElementById('play-cards').remove();
+}
+
+
+
+
+function nextPlayer(){
+    if (gameData.singlePlayer){
+        swapCards();
+        swapCardsArray();
+
+        // reset picked cards //
+        gameData.pickedBank = null;
+        gameData.pickedHand = null;
+
+        // set next player active //
+        setNextPlayerActive();
+
+        // update game labels //
+        updatePlayerLabels();
+    }
+    else {
+        if (gameData.players[0].data.connectionId == hostName){
+            swapCards();
+            swapCardsArray();
+            setNextPlayerActive();
+            updatePlayerLabels();
+            sendGameData('host')
+        }
+        else {
+            // swapCards();
+            // updatePlayerLabels();
+            sendGameData('client');
+        }
+        // setNextPlayerActive();
+        // // swapCardsArray();
+        // updatePlayerLabels();
+        // sendGameData();
+    }
 }
 
 
@@ -710,7 +748,7 @@ function setNextPlayerActive(){
         
         if (index == 2){
             index = 0;
-            gameData.prevActivePlayerId = 'temp'
+            // gameData.prevActivePlayerId = 'temp'
         }
         
         // set next player in line to activePlayerId //
@@ -735,41 +773,34 @@ function findPlayerById(connectionId){
 }
 
 
-function nextPlayer(){
-    if (gameData.singlePlayer){
-        // reset picked cards //
-        gameData.pickedBank = null;
-        gameData.pickedHand = null;
 
-        // set next player active //
-        setNextPlayerActive();
-
-        // update game labels //
-        updatePlayerLabels();
-    }
-    else {
-        setNextPlayerActive();
-        // swapCardsArray();
-        updatePlayerLabels();
-        sendGameData();
-    }
-}
 
 // doesn't work for single player mode //
 // There are no connections //
-function sendGameData(){
+function sendGameData(id){
     // if (gameData.activePlayerId === hostName){
-    if (gameData.players[0].data.connectionId === hostName){
+    console.log('--------------------------------------------');
+
+    if (id == 'host'){
         console.log('HOST SEND GAME DATA', gameData)
         connections.forEach(connection => {
             pushData(connection.c, gameData, 'game-data')
         })
     }
-    else {
+    if (id == 'client') {
         // pushData(connections[0].c, gameData, 'game-data')
         console.log('CLIENT SEND GAME DATA', gameData)
         pushData(connections[0].c, gameData, 'host-data')
     }
+    gameData.players.forEach(player => {
+        if (player.name.slice(0,4) != 'Auto'){
+            console.log(player.name, player.data.cards);
+        }
+    })
+    // console.log('HOST:',gameData.players[0].data.cards);
+    // console.log('CLIENT 01:',gameData.players[1].data.cards);
+    // console.log('BANK:',gameData.players[4].data.cards);
+    console.log('--------------------------------------------');
 }
 
 
@@ -780,12 +811,14 @@ function updateHost(clientData){
     gameData.pickedBank = clientData.pickedBank
     gameData.pickedHand = clientData.pickedHand
     
-    playCards('Update Host');
-    setNextPlayerActive()
-    updatePlayerLabels()
+    // playCards('Update Host');
+    swapCards();
+    swapCardsArray();
+    setNextPlayerActive();
+    updatePlayerLabels();
 }
 
-
+// TRANSFORM INTO SHUFFLED COPY OF GAME DATA //
 // on 'data' type == game-data //
 function updateGame(receivedGameData){
     // update game data //
@@ -795,15 +828,18 @@ function updateGame(receivedGameData){
     gameData.prevActivePlayerId = receivedGameData.prevActivePlayerId
     gameData.pickedBank = receivedGameData.pickedBank;
     gameData.pickedHand = receivedGameData.pickedHand
+    
     // swapCards //
-    playCards('Update Game')
+    swapCards()
+    // playCards('Update Game')
+    // update game labels //
+    updatePlayerLabels()
 
     // Reset Picked Cards //
     gameData.pickedHand = null;
     gameData.pickedBank = null;
 
-    // update game labels //
-    updatePlayerLabels()
+    
 }
 
 
@@ -817,7 +853,7 @@ function isPreviousActive(){
 function swapCardsArray(){
     const bank = findPlayerById('bank').player;
     const player = findPlayerById(gameData.activePlayerId).player;
-    
+
     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
     
@@ -835,39 +871,95 @@ function swapCardsArray(){
     
 }
 
+// function swapCardsArray(){
+//     const bank = findPlayerById('bank').player;
+//     const player = findPlayerById(gameData.activePlayerId).player;
+
+//     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
+//     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
+    
+//     // if (bankArray.length == 2 && playerArray.length == 2){
+//         bankArray.push(gameData.pickedHand);
+//         playerArray.push(gameData.pickedBank);
+        
+//         bank.data.cards = bankArray;
+//         player.data.cards = playerArray;
+//     // }
+//     // else {
+//     //     console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
+//     //     console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
+//     // }
+    
+// }
+
 
 function swapCards(){
-    if (gameData.pickedHand && gameData.pickedBank){
-        const cardHand = document.getElementById(gameData.pickedHand);
-        cardHand.classList.remove('clicked');
-        const handCss = cardHand.className;
+    // if(!isPreviousActive()){
+        if (gameData.pickedHand && gameData.pickedBank){
+            const cardHand = document.getElementById(gameData.pickedHand);
+            cardHand.classList.remove('clicked');
+            const handCss = cardHand.className;
 
-        const cardBank = document.getElementById(gameData.pickedBank);
-        cardBank.classList.remove('clicked');
-        const bankCss = cardBank.className
+            const cardBank = document.getElementById(gameData.pickedBank);
+            cardBank.classList.remove('clicked');
+            const bankCss = cardBank.className
 
-        cardHand.className = bankCss;
-        cardBank.className = handCss;
-        
-    }
-    else {
-        console.log('Please Select Two Cards!');
-    }
+            cardHand.className = bankCss;
+            cardBank.className = handCss;
+            
+        }
+        else {
+            console.log('Please Select Two Cards!');
+        }
+    // }
 
 }
 
 
-function playCards(_){
-    console.log(`PLAY CARDS, ${_}`,gameData.pickedBank, gameData.pickedHand)
-    console.log(`PLAY CARDS, ${_}`,gameData)
-    console.log('PLAY CARDS Previous Active', gameData.prevActivePlayerId)
-    if(!isPreviousActive()){
-        console.log('PLAY CARDS, Not Previous Active')
-        swapCards()
-        // should happen on host //
-        swapCardsArray()
-    }
-}
+// function playCards(_){
+//     // console.log(`PLAY CARDS, ${_}`,gameData.pickedBank, gameData.pickedHand)
+//     // console.log(`PLAY CARDS, ${_}`,gameData)
+//     console.log('PLAY CARDS Previous Active:', gameData.prevActivePlayerId, 'Active:', gameData.activePlayerId)
+//     if(!isPreviousActive()){
+//         // console.log('PLAY CARDS, Not Previous Active')
+//         swapCards()
+//         // should happen on host //
+//         swapCardsArray()
+//     }
+// }
+
+
+// function playCards(_){
+//     console.log('PLAY CARDS Previous Active:', gameData.prevActivePlayerId, 'Active:', gameData.activePlayerId);
+
+//     const bank = findPlayerById('bank').player;
+//     // const player = findPlayerById(gameData.activePlayerId).player;
+//     let player;
+
+//     // first round fail safe //
+//     if(!gameData.prevActivePlayerId){
+//         player = findPlayerById(gameData.activePlayerId).player;
+//     }
+//     else {
+//         player = findPlayerById(gameData.prevActivePlayerId).player;
+//     }
+
+//     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
+//     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
+
+//     if (bankArray.length == 2 && playerArray.length == 2){
+//         swapCards();
+//         swapCardsArray();
+//     }
+//     else {
+//         console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
+//         console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
+//     }
+// }
+
+
+
+
 
 
 function createCardElem(cardID){
