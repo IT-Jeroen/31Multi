@@ -21,12 +21,13 @@ const connections = [
 ]
 
 const players = [
-    {'name':'Local', 'location': 'south', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
-    {'name':'Auto 1', 'location': 'west', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 2', 'location': 'north', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 3', 'location': 'east', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': null, 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+    {'name':'Local', 'location': 'south', 'data':{ 'connectionId': 'local', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+    {'name':'Auto 1', 'location': 'west', 'data':{ 'connectionId': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 2', 'location': 'north', 'data':{ 'connectionId': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 3', 'location': 'east', 'data':{ 'connectionId': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
+
 
 const gameData = {
     players: players,
@@ -34,8 +35,9 @@ const gameData = {
     pickedHand: null,
     pickedBank: null,
     isHost: null,
-    activePLayer: null,
-    prevActivePlayer: null,
+    activePlayerId: null,
+    prevActivePlayerId: null,
+    singlePlayer: true,
 }
 
 
@@ -95,6 +97,9 @@ function createPlayfield(){
 /// Doesn't Apply to Clients, only Host ///
 function initializeGame(){
     dealCards(prepCards())
+    // temp hardcoded activation //
+    gameData.activePlayerId = gameData.players[0].data.connectionId;
+    gameData.players[0].data.active = true;
     startGame()
 }
 
@@ -102,10 +107,7 @@ function initializeGame(){
 function startGame(){
     renderApp(createPlayfield());
     handOutDeckCards(300);
-    // temp hardcoded activation //
-    // gameData.players[0].data.active=true
-
-    setActivePlayer();
+    updatePlayerLabels();
 }
 
 ////////////////////////// CHECK FOR EXISTING HARD CODED HOST ////////////////////////////////
@@ -177,7 +179,7 @@ function setAsHost(playerName){
         })
 
     peer.on('connection', (c)=>{
-
+        gameData.singlePlayer = false;
         addNewConnection(c)
 
         // // Trigger waiting room at Client //
@@ -252,14 +254,14 @@ function setConnectionEvents(c) {
     c.on('data', function (received) {
         if (received.type === 'waiting-room'){
             // gameData //
-            updatePlayerData(received.data.players)
+            updatePlayers(received.data.players)
             gameData.isHost = received.data.isHost;
             renderApp(createWaitingRoom())
         }
 
-        if (received.type == 'players-data'){
-            updatePlayerData(received.data)
-        }
+        // if (received.type == 'players-data'){
+        //     updatePlayers(received.data)
+        // }
 
         if (received.type == 'card-data'){
             setCardsDB(received.data)
@@ -267,11 +269,24 @@ function setConnectionEvents(c) {
 
         if (received.type == 'start-game'){
             // gameData
-            updatePlayerData(received.data.players) 
-            gameData.activePLayer = received.data.activePLayer;
+            updateDataPlayers(received.data.players) 
+            gameData.activePlayerId = received.data.activePlayerId;
             startGame()
 
-            setActivePlayer();
+            // updatePlayerLabels();
+        }
+
+        if (received.type == 'game-data'){
+            updateGame()
+            
+        }
+
+        if (received.type == 'host-data'){
+            if (gameData.players[0].data.connectionId == hostName){
+                updateHost()
+                setNextPlayerActive()
+                sendGameData()
+            }
         }
         
     });
@@ -286,7 +301,7 @@ function setConnectionEvents(c) {
 }
 
 
-function setActivePlayer(){
+function updatePlayerLabels(){
     removePlayerLabels();
     gameData.players.forEach(player => {
         setPlayerLabels(player);
@@ -295,7 +310,7 @@ function setActivePlayer(){
 
 
 function removePlayerLabels(){
-    const removeInactive = [...document.getElementsByClassName('inactive-label')];
+    const removeInactive = [...document.getElementsByClassName('player-label')];
     removeInactive.forEach(label => label.remove());
 }
 
@@ -406,13 +421,21 @@ function createPlayerLabel(player) {
 }
 
 // gameData.players
-function updatePlayerData(gameDataPlayers){
-    console.log(gameDataPlayers)
+function updatePlayers(gameDataPlayers){
+    // console.log(gameDataPlayers)
     const shuffledHost = shuffleHostArray(gameDataPlayers)
-    console.log(shuffledHost)
+    // console.log(shuffledHost)
     gameData.players.forEach((player, index) => {
         player.name = shuffledHost[index].name;
         player.data = shuffledHost[index].data;
+    })
+}
+
+
+function updateDataPlayers(gameDataPlayers){
+    gameDataPlayers.forEach(player => {
+        const local = findPlayerById(player.data.connectionId);
+        local.player.data = player.data;
     })
 }
 
@@ -449,7 +472,7 @@ function findPlayerByConnectionId(playersArr,id){
 }
 
 
-// function updatePlayerData(playersHost){
+// function updatePlayers(playersHost){
 //     gameData.players.forEach(player => {
 //         const hostPlayer = findPlayerByConnectionId(playersHost,player.data.connectionId);
 //         player.data = hostPlayer.data
@@ -533,13 +556,12 @@ function dealCards(cardsInGame){
     //     pushData(player.p2p.c, playersData(), 'start-game');
     //     // temp hardcoded activation //
     //     // gameData.players[0].data.active=true
-    //     // setActivePlayer();
+    //     // updatePlayerLabels();
     // })
 
     connections.forEach(connection => {
         // pushData(connection.c, playersData(), 'start-game');
-        gameData.activePLayer = gameData.players[0].name;
-        gameData.players[0].data.active = true;
+        
         pushData(connection.c, gameData, 'start-game');
     })
 }
@@ -687,7 +709,11 @@ function createPlayCardsBtn(){
     document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
 
     document.getElementById('play-cards').addEventListener('click', _ => {
-        swapCards()
+        // swapCards()
+        playCards()
+        removePlayCardsBtn();
+        // sendGameData();
+        nextPlayer();
     })
 }
 
@@ -697,9 +723,183 @@ function removePlayCardsBtn(){
 }
 
 
-// function sendCardData(){
+// // HOST FUNCTION //
+// function setActivePlayer(){
+//     // set current active to prevActivePlayerId //
+//     gameData.prevActivePlayerId = gameData.activePlayerId
+//     // set current active to false
+//     const active = findPlayerById(gameData.activePlayerId);
+//     const index = active.index
+//     active.player.data.active = false
 
+//     // if (index >=3){
+//     //     index = 0;
+//     // }
+//     // else {
+//     //     index += 1;
+//     // }
+
+//     // temp to bypass auto players //
+//     if (index == 0){
+//         index = 1
+//     }
+//     if (index == 1){
+//         index = 0
+//     }
+    
+//     // set next player in line to activePlayerId //
+//     // gameData.activePlayerId = gameData.players[index.name]
+//     gameData.activePlayerId = gameData.players[index].data.connectionId
+//     // set next player in line active to true // 
+//     gameData.players[index].data.active = true
 // }
+
+
+// HOST FUNCTION //
+function setNextPlayerActive(){
+    if (gameData.players[0].data.connectionId == hostName){
+        // set current active to prevActivePlayerId //
+        gameData.prevActivePlayerId = gameData.activePlayerId
+        // set current active to false
+        const active = findPlayerById(gameData.activePlayerId);
+        let index = active.index
+        active.player.data.active = false
+
+        // if (index >=3){
+        //     index = 0;
+        // }
+        // else {
+        //     index += 1;
+        // }
+
+        // temp to bypass auto players //
+        if (index == 0){
+            index = 1
+        }
+        
+        // set next player in line to activePlayerId //
+        // gameData.activePlayerId = gameData.players[index.name]
+        gameData.activePlayerId = gameData.players[index].data.connectionId
+        // set next player in line active to true // 
+        gameData.players[index].data.active = true
+        }
+}
+
+
+// function findPlayerById(){
+//     gameData.players.forEach((player, index) => {
+//         if (player.data.active){
+//             return index
+//         }
+//     })
+// }
+
+
+function findPlayerById(connectionId){
+    const result = {index: '', player: ''}
+    gameData.players.forEach((player, index) => {
+        if (player.data.connectionId === connectionId){
+            // return {index: index, player: player}
+            result.index = index;
+            result.player = player
+        }
+    })
+    return result
+}
+
+
+function nextPlayer(){
+    if (gameData.singlePlayer){
+        // reset picked cards //
+        gameData.pickedBank = null;
+        gameData.pickedHand = null;
+
+        // set next player active //
+        setNextPlayerActive();
+
+        // update game labels //
+        updatePlayerLabels()
+    }
+    else {
+        sendGameData()
+    }
+}
+
+// doesn't work for single player mode //
+// There are no connections //
+function sendGameData(){
+    // if (gameData.activePlayerId === hostName){
+    if (gameData.players[0].data.connectionId === hostName){
+        connections.forEach(connection => {
+            pushData(connection.c, gameData, 'game-data')
+        })
+    }
+    else {
+        // pushData(connections[0].c, gameData, 'game-data')
+        pushData(connections[0].c, gameData, 'host-data')
+    }
+}
+
+
+// on 'data type == 'host-data //
+function updateHost(clientData){
+    // setNextPlayerActive()
+
+    gameData.pickedBank = clientData.pickedBank
+    gameData.pickedHand = clientData.pickedHand
+    
+    // swapCards()
+    playCards();
+    swapCardsArray();
+
+    // send data to clients //
+    // sendGameData();
+
+    // update game labels //
+    updatePlayerLabels()
+}
+
+
+// on 'data' type == game-data //
+function updateGame(receivedGameData){
+    // update game data //
+    updateDataPlayers(receivedGameData.players)
+    // update active player //
+    gameData.activePlayerId = receivedGameData.activePlayerId;
+    gameData.prevActivePlayerId = receivedGameData.prevActivePlayerId
+    // swapCards //
+    playCards()
+
+    // Rest Picked Cards //
+    gameData.pickedHand = null;
+    gameData.pickedBank = null;
+
+    // update game labels //
+    updatePlayerLabels()
+}
+
+
+function isPreviousActive(){
+    if (gameData.prevActivePlayerId == gameData.players[0].data.connectionId){
+        return true
+    }
+    return false
+}
+
+function swapCardsArray(){
+    const bank = findPlayerById('bank').player;
+    const player = findPlayerById(gameData.activePlayerId).player;
+    
+    const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
+    const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
+    
+    bankArray.push(gameData.pickedHand);
+    playerArray.push(gameData.pickedBank);
+    
+    bank.data.cards = bankArray;
+    player.data.cards = playerArray;
+}
+
 
 function swapCards(){
     if (gameData.pickedHand && gameData.pickedBank){
@@ -713,18 +913,21 @@ function swapCards(){
 
         cardHand.className = bankCss;
         cardBank.className = handCss;
-
-        // pushData(clientPlayer.p2p.c, gameData, 'game-data')
-        gameData.pickedHand = null;
-        gameData.pickedBank = null;
-
-        removePlayCardsBtn();
         
     }
     else {
         console.log('Please Select Two Cards!');
     }
 
+}
+
+
+function playCards(){
+    if(!isPreviousActive()){
+        swapCards()
+        // should happen on host //
+        swapCardsArray()
+    }
 }
 
 // function swapCard(){
