@@ -284,20 +284,20 @@ function setConnectionEvents(c) {
             // updatePlayerLabels();
         }
 
+        // only clients recieve this data type //
         if (received.type == 'game-data'){
-            console.log('GAME DATA', received.data)
+            console.log('CLIENT RECIEVED GAME DATA', received.data)
             updateGame(received.data)
             
         }
 
+        // only host recieve this data type //
         if (received.type == 'host-data'){
-            console.log('RECIEVED HOST DATA')
+            // console.log('RECIEVED HOST DATA')
             if (gameData.players[0].data.connectionId == hostName){
                 console.log('HOST RECIEVED HOST DATA', received.data)
-                updateHost(received.data)
-                // setNextPlayerActive()
-                // updatePlayerLabels()
-                sendGameData()
+                updateHost(received.data);
+                sendGameData();
                 gameData.pickedBank = null;
                 gameData.pickedHand = null;
             }
@@ -636,58 +636,6 @@ function createElem(elemType, classNames=[], idName){
 }
 
 
-// // Local Function //
-// function createDeck(component){;
-//     const cardIDs = Object.keys(cardsDB.data) 
-//     cardIDs.forEach((cardID, index) => {
-
-//         cardsDB.data[cardID].elem = createCardElem(cardID);
-//         cardsDB.data[cardID].location = 'deck';
-
-//         cardsDB.data[cardID].elem.addEventListener('click',e => {
-//             cardClickEvent(e)
-//         })
-
-//         cardsDB.data[cardID].elem.classList.add('deck');
-//         component.appendChild(cardsDB.data[cardID].elem)
-
-//     })
-// }
-
-
-// function cardClickEvent(e){
-//     const classes = e.currentTarget.classList;
-//     const south = classes.contains('south');
-//     const center = classes.contains('center');
-
-//     if (south){
-//         const cards = [...document.getElementsByClassName('south')];
-//         cards.forEach(card => {
-//             card.classList.remove('clicked');
-//         })
-//         e.currentTarget.classList.add('clicked');
-//     }
-
-//     if (center){
-//         const cards = [...document.getElementsByClassName('center')];
-//         cards.forEach(card => {
-//             card.classList.remove('clicked');
-//         })
-//         e.currentTarget.classList.add('clicked');
-//     }
-// }
-
-
-
-// const gameData = {
-//     players: players,
-//     cards: null,
-//     pickedHand: null,
-//     pickedBank: null,
-// }
-
-
-
 function cardClickEvent(e){
     const classes = e.currentTarget.classList;
     const south = classes.contains('south');
@@ -741,38 +689,6 @@ function removePlayCardsBtn(){
 }
 
 
-// // HOST FUNCTION //
-// function setActivePlayer(){
-//     // set current active to prevActivePlayerId //
-//     gameData.prevActivePlayerId = gameData.activePlayerId
-//     // set current active to false
-//     const active = findPlayerById(gameData.activePlayerId);
-//     const index = active.index
-//     active.player.data.active = false
-
-//     // if (index >=3){
-//     //     index = 0;
-//     // }
-//     // else {
-//     //     index += 1;
-//     // }
-
-//     // temp to bypass auto players //
-//     if (index == 0){
-//         index = 1
-//     }
-//     if (index == 1){
-//         index = 0
-//     }
-    
-//     // set next player in line to activePlayerId //
-//     // gameData.activePlayerId = gameData.players[index.name]
-//     gameData.activePlayerId = gameData.players[index].data.connectionId
-//     // set next player in line active to true // 
-//     gameData.players[index].data.active = true
-// }
-
-
 // HOST FUNCTION //
 function setNextPlayerActive(){
     if (gameData.players[0].data.connectionId == hostName){
@@ -794,6 +710,7 @@ function setNextPlayerActive(){
         
         if (index == 2){
             index = 0;
+            gameData.prevActivePlayerId = 'temp'
         }
         
         // set next player in line to activePlayerId //
@@ -803,15 +720,6 @@ function setNextPlayerActive(){
         gameData.players[index].data.active = true
         }
 }
-
-
-// function findPlayerById(){
-//     gameData.players.forEach((player, index) => {
-//         if (player.data.active){
-//             return index
-//         }
-//     })
-// }
 
 
 function findPlayerById(connectionId){
@@ -852,38 +760,28 @@ function nextPlayer(){
 function sendGameData(){
     // if (gameData.activePlayerId === hostName){
     if (gameData.players[0].data.connectionId === hostName){
+        console.log('HOST SEND GAME DATA', gameData)
         connections.forEach(connection => {
             pushData(connection.c, gameData, 'game-data')
         })
     }
     else {
         // pushData(connections[0].c, gameData, 'game-data')
-        console.log('SEND HOST DATA')
+        console.log('CLIENT SEND GAME DATA', gameData)
         pushData(connections[0].c, gameData, 'host-data')
     }
 }
 
 
-BUG card arrays do not line up
 
 // on 'data type == 'host-data //
 function updateHost(clientData){
-    // setNextPlayerActive()
 
     gameData.pickedBank = clientData.pickedBank
     gameData.pickedHand = clientData.pickedHand
     
-    // swapCards()
     playCards('Update Host');
-    // swapCardsArray();
-
-    // send data to clients //
-    // sendGameData();
     setNextPlayerActive()
-
-    
-
-    // update game labels //
     updatePlayerLabels()
 }
 
@@ -971,25 +869,6 @@ function playCards(_){
     }
 }
 
-// function swapCard(){
-//     const clicked = [...document.getElementsByClassName('clicked')]
-
-//     if (clicked.length == 2){
-//         const _a = clicked[0].className;
-//         const _b = clicked[1].className;
-    
-//         clicked[0].className = _b;
-//         clicked[1].className = _a;
-
-//         clicked[0].classList.remove('clicked');
-//         clicked[1].classList.remove('clicked');
-//     }
-//     else {
-//         console.log('Please Select Two Cards!');
-//     }
-
-// }
- 
 
 function createCardElem(cardID){
     
@@ -1013,40 +892,6 @@ function createCardElem(cardID){
 
     return cardElem;
 }
-
-
-// // Actuall Trigger for the Deck CSS Animation //
-// // Classes card deck
-// function handOutDeckCards(timing=0){
-//     let i = 0;
-//     let playerIndex = 0;
-//     let cardIndex = 0;
-//     let numCardsToDeal = 0;
-    
-//     players.forEach(player => {
-//         numCardsToDeal += player.data.cards.length;
-//     })
-
-//     const intervalID = setInterval(()=>{
-//         if (i == numCardsToDeal -1){
-//             clearInterval(intervalID);
-//         }
-        
-//         let player = players[playerIndex];
-//         const cardID = player.data.cards[cardIndex];
-//         const card = cardsDB.data[cardID]
-
-//         card.elem.className = `card ${player.location}`
-//         playerIndex += 1;
-
-//         if (playerIndex == players.length){
-//             cardIndex += 1;
-//             playerIndex = 0;
-//         }
-
-//         i += 1;
-//     }, timing);
-// }
 
 
 // Local Function //
