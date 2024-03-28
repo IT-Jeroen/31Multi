@@ -689,8 +689,6 @@ function removePlayCardsBtn(){
 }
 
 
-
-
 function nextPlayer(){
     if (gameData.singlePlayer){
         swapCards();
