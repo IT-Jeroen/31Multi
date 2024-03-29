@@ -1,4 +1,4 @@
-const hostName = '31-multi-host-id';
+const hostName = '31-multi-host-test-id';
 // const cardsDB = {width: 169, height: 244, data: null}; // width and height could differ per player
 // cardsDB.data[card] = {value: cardValue, suit: splitID[0], icon: splitID[1]};
 
@@ -297,9 +297,9 @@ function setConnectionEvents(c) {
             if (gameData.players[0].data.connectionId == hostName){
                 console.log('HOST RECIEVED HOST DATA', received.data)
                 updateHost(received.data);
-                sendGameData('host');
-                gameData.pickedBank = null;
-                gameData.pickedHand = null;
+                // sendGameData('host');
+                // gameData.pickedBank = null;
+                // gameData.pickedHand = null;
             }
         }
         
@@ -689,6 +689,22 @@ function removePlayCardsBtn(){
 }
 
 
+
+
+function autoTest(){
+    setTimeout(()=> {
+        gameData.pickedBank = gameData.players[4].data.cards[0];
+        gameData.pickedHand = findPlayerById(gameData.activePlayerId).player.data.cards[0];
+        updateHost(gameData);
+        // nextPlayer();
+        // setNextPlayerActive();
+        if (gameData.activePlayerId.slice(0,4) == 'auto'){
+            autoTest();
+        }
+    }, 2000);
+    
+}
+
 function nextPlayer(){
     if (gameData.singlePlayer){
         swapCards();
@@ -703,6 +719,11 @@ function nextPlayer(){
 
         // update game labels //
         updatePlayerLabels();
+
+        if (gameData.activePlayerId.slice(0,4) == 'auto'){
+            // setTimeout(()=> autoTest(), 2000);
+            autoTest();
+        }
     }
     else {
         if (gameData.players[0].data.connectionId == hostName){
@@ -742,12 +763,11 @@ function setNextPlayerActive(){
             index += 1;
         }
 
-        // temp to bypass auto players //
-        
-        if (index == 2){
-            index = 0;
-            // gameData.prevActivePlayerId = 'temp'
-        }
+        // // temp to bypass auto players //
+        // if (index == 2){
+        //     index = 0;
+        //     // gameData.prevActivePlayerId = 'temp'
+        // }
         
         // set next player in line to activePlayerId //
         // gameData.activePlayerId = gameData.players[index.name]
@@ -777,7 +797,7 @@ function findPlayerById(connectionId){
 // There are no connections //
 function sendGameData(id){
     // if (gameData.activePlayerId === hostName){
-    console.log('--------------------------------------------');
+    // console.log('--------------------------------------------');
 
     if (id == 'host'){
         console.log('HOST SEND GAME DATA', gameData)
@@ -790,15 +810,15 @@ function sendGameData(id){
         console.log('CLIENT SEND GAME DATA', gameData)
         pushData(connections[0].c, gameData, 'host-data')
     }
-    gameData.players.forEach(player => {
-        if (player.name.slice(0,4) != 'Auto'){
-            console.log(player.name, player.data.cards);
-        }
-    })
+    // gameData.players.forEach(player => {
+    //     if (player.name.slice(0,4) != 'Auto'){
+    //         console.log(player.name, player.data.cards);
+    //     }
+    // })
     // console.log('HOST:',gameData.players[0].data.cards);
     // console.log('CLIENT 01:',gameData.players[1].data.cards);
     // console.log('BANK:',gameData.players[4].data.cards);
-    console.log('--------------------------------------------');
+    // console.log('--------------------------------------------');
 }
 
 
@@ -814,6 +834,14 @@ function updateHost(clientData){
     swapCardsArray();
     setNextPlayerActive();
     updatePlayerLabels();
+
+    sendGameData('host');
+    gameData.pickedBank = null;
+    gameData.pickedHand = null;
+
+    if (gameData.activePlayerId.slice(0,4) == 'auto'){
+        autoTest();
+    }
 }
 
 // TRANSFORM INTO SHUFFLED COPY OF GAME DATA //
