@@ -756,7 +756,7 @@ function setNextPlayerActive(){
         let index = active.index
         active.player.data.active = false
 
-        if (index >=3){
+        if (index >3){
             index = 0;
         }
         else {
