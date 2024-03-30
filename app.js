@@ -101,8 +101,6 @@ function initializeGame(){
     dealCards(prepCards())
     
     connections.forEach(connection => {
-        // pushData(connection.c, playersData(), 'start-game');
-        
         pushData(connection.c, gameData, 'start-game');
     })
     
@@ -156,8 +154,6 @@ function setupConnection(playerName){
             connections[0].p = result.p;
             connections[0].c = result.c;
             connections[0].connectionId = result.c.connectionId;
-            // gameData.players[0].p2p.p = result.p;
-            // gameData.players[0].p2p.c = result.c;
             gameData.players[0].data.connectionId = result.c.connectionId;
 
             setConnectionEvents(result.c)
@@ -167,8 +163,6 @@ function setupConnection(playerName){
             result.p.destroy();
             connections[0].c = null;
             connections[0].p = null;
-            // gameData.players[0].p2p.c = null;
-            // gameData.players[0].p2p.p = null;
             setAsHost(playerName);
         }
         
@@ -189,14 +183,6 @@ function setAsHost(playerName){
         addNewConnection(c)
         setConnectionEvents(c)
 
-        // // Trigger waiting room at Client //
-        // gameData.players.forEach(clientPlayer => {
-        //     // pushData(clientPlayer.p2p.c, playersData(), 'waiting-room')
-        //     // Peer-JS binarypack.ts doesn't like this data (TypeError: t is undefined) //
-        //     // Peer-JS doesn't like sending the connection and or peer objects //
-        //     pushData(clientPlayer.p2p.c, gameData, '')
-        // })
-
         connections.forEach(connection => {
             pushData(connection.c, gameData, 'waiting-room');
         })
@@ -209,7 +195,6 @@ function setAsHost(playerName){
 
     // Create Waiting Room //
     gameData.players[0].name = playerName;
-    // gameData.players[0].p2p.p = peer;
     connections[0].p = peer;
     gameData.players[0].data.connectionId = peer._id;
     gameData.isHost = playerName;
@@ -239,7 +224,6 @@ function addNewConnection(c){
         }
         else{
             gameData.players[autoPlayerIndex].name = c.metadata;
-            // gameData.players[autoPlayerIndex].p2p.c = c;
             gameData.players[autoPlayerIndex].data.auto = false;
             gameData.players[autoPlayerIndex].data.connectionId = c.connectionId;
 
@@ -255,51 +239,33 @@ function addNewConnection(c){
 }
 
 
-// Client Side (Only one connection) //
 function setConnectionEvents(c) {
 
     c.on('data', function (received) {
         if (received.type === 'waiting-room'){
-            // gameData //
-            updatePlayers(received.data.players)
-            gameData.isHost = received.data.isHost;
+            updateGameData(received.data);
             renderApp(createWaitingRoom())
         }
 
-        // if (received.type == 'players-data'){
-        //     updatePlayers(received.data)
-        // }
 
         if (received.type == 'card-data'){
             setCardsDB(received.data)
         }
 
         if (received.type == 'start-game'){
-            // gameData
-            updateDataPlayers(received.data.players) 
-            gameData.activePlayerId = received.data.activePlayerId;
-            gameData.singlePlayer = received.data.singlePlayer;
+            updateGameData(received.data);
             startGame()
-
-            // updatePlayerLabels();
         }
 
-        // only clients recieve this data type //
-        if (received.type == 'game-data'){
-            // console.log('CLIENT RECIEVED GAME DATA', received.data)
-            updateGame(received.data)
+        if (received.type == 'client-data'){
+            updateClient(received.data)
             
         }
 
-        // only host recieve this data type //
         if (received.type == 'host-data'){
-            // console.log('RECIEVED HOST DATA')
             if (gameData.players[0].data.connectionId == hostName){
-                console.log('HOST RECIEVED HOST DATA', received.data)
                 updateHost(received.data);
-                // sendGameData('host');
-                // gameData.pickedBank = null;
-                // gameData.pickedHand = null;
+
             }
         }
         
@@ -344,9 +310,6 @@ function setPlayerLabels(player){
         }
 
         else {
-            // // Rest Picked Cards //
-            // gameData.pickedHand = null;
-            // gameData.pickedBank = null;
             if(player.location != 'south'){
                 const activeLabel = `
                 <div class="player-label player-${player.location} player-active">
@@ -403,7 +366,6 @@ function createWaitingRoom(){
 
 
 function canStartGame(){
-    // if (gameData.players[0].p2p.p._id === hostName){
     if (gameData.players[0].data.connectionId === hostName){
         return createStartGameBtn;
     }
@@ -425,11 +387,11 @@ function createStartGameBtn(){
 
 
 function createPlayerList() {
-    return returnPlayerList().map(player => createPlayerLabel(player))
+    return returnPlayerList().map(player => createPlayerListItem(player))
 }
 
 
-function createPlayerLabel(player) {
+function createPlayerListItem(player) {
     const playerDiv = document.createElement('div');
     const playerHeading = document.createElement('h2');
     playerHeading.innerText = player;
@@ -437,24 +399,6 @@ function createPlayerLabel(player) {
     return playerDiv;
 }
 
-// gameData.players
-function updatePlayers(gameDataPlayers){
-    // console.log(gameDataPlayers)
-    const shuffledHost = shuffleHostArray(gameDataPlayers)
-    // console.log(shuffledHost)
-    gameData.players.forEach((player, index) => {
-        player.name = shuffledHost[index].name;
-        player.data = shuffledHost[index].data;
-    })
-}
-
-
-function updateDataPlayers(gameDataPlayers){
-    gameDataPlayers.forEach(player => {
-        const local = findPlayerById(player.data.connectionId);
-        local.player.data = player.data;
-    })
-}
 
 
 ///////////////////////////////////// PLAYERS //////////////////////////////////////////
@@ -464,37 +408,23 @@ function returnPlayerList(){
 }
 
 
-function playersData(){
-    return gameData.players.map(player => {
-        return {"name": player.name, "data": player.data}
-    })    
-}
-
-// gameData.players
-function shuffleHostArray(gameDataPlayers){
+function shuffleHostPlayers(gameDataPlayers){
     const clientAtIndex = gameDataPlayers.findIndex(player =>  player.data.connectionId === gameData.players[0].data.connectionId);
-
     const clientFirst = gameDataPlayers.slice(clientAtIndex, 4)
     const theRest = gameDataPlayers.slice(0, clientAtIndex)
     const bank = gameDataPlayers[4]
-    const shuffledHost = [...clientFirst,...theRest, bank]
+    const shuffledPlayers = [...clientFirst,...theRest, bank];
 
-    return shuffledHost
+    const locations = ['south', 'west', 'north', 'east', 'center'];
+    shuffledPlayers.forEach((player, index) => player.location = locations[index]);
+
+    return shuffledPlayers
 }
-
 
 
 function findPlayerByConnectionId(playersArr,id){
     return playersArr.find(player => player.data.connectionId == id)
 }
-
-
-// function updatePlayers(playersHost){
-//     gameData.players.forEach(player => {
-//         const hostPlayer = findPlayerByConnectionId(playersHost,player.data.connectionId);
-//         player.data = hostPlayer.data
-//     })
-// }
 
 
 ////////////////////////////////// DEAL CARDS ///////////////////////////////////////////
@@ -547,9 +477,6 @@ function prepCards(){
     if (cardsInGame.length / gameData.players.length == numPlayerCards){
         addCardsToCardDB(cardsInGame);
 
-        // gameData.players.forEach(player => {
-        //     pushData(player.p2p.c, gameData.cards, 'card-data');
-        // })
         connections.forEach(connection => {
             pushData(connection.c, gameData.cards, 'card-data');
         })
@@ -568,19 +495,6 @@ function dealCards(cardsInGame){
     gameData.players.forEach((player, index) => {
         player.data.cards = [cardsInGame[index], cardsInGame[index + gameData.players.length], cardsInGame[index + 2 * gameData.players.length]]
     })
-
-    // gameData.players.forEach(player => {
-    //     pushData(player.p2p.c, playersData(), 'start-game');
-    //     // temp hardcoded activation //
-    //     // gameData.players[0].data.active=true
-    //     // updatePlayerLabels();
-    // })
-
-    // connections.forEach(connection => {
-    //     // pushData(connection.c, playersData(), 'start-game');
-        
-    //     pushData(connection.c, gameData, 'start-game');
-    // })
 }
 
 
@@ -613,8 +527,6 @@ function addCardsToCardDB(cards){
     cards.forEach(card => {
         const cardValue = returnCardValue(card)
         const splitID = card.split('_')
-        // cardsDB.data[card] = {elem: null, picked: false, hover: false, access: false, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'center', x: 0, y: 0};
-        // cardsDB.data[card] = {elem: null, value: cardValue, suit: splitID[0], icon: splitID[1], location: 'deck'};
         gameData.cards[card] = {value: cardValue, suit: splitID[0], icon: splitID[1]};
     })
 }
@@ -664,8 +576,6 @@ function cardClickEvent(e){
             createPlayCardsBtn()
         }
     }
-
-
 }
 
 
@@ -673,12 +583,8 @@ function createPlayCardsBtn(){
     const btn = `<button id="play-cards">Play Cards</button>`
     document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
 
-    document.getElementById('play-cards').addEventListener('click', _ => {
-        // swapCards()
-        // // playCards('Button')
-        // swapCardsArray();
+    document.getElementById('play-cards').addEventListener('click', () => {
         removePlayCardsBtn();
-        // sendGameData();
         nextPlayer();
     })
 }
@@ -688,60 +594,36 @@ function removePlayCardsBtn(){
     document.getElementById('play-cards').remove();
 }
 
-
-
-
+// HOST FUNCTION //
 function autoTest(){
     setTimeout(()=> {
         gameData.pickedBank = gameData.players[4].data.cards[0];
         gameData.pickedHand = findPlayerById(gameData.activePlayerId).player.data.cards[0];
         updateHost(gameData);
-        // nextPlayer();
-        // setNextPlayerActive();
-        if (gameData.activePlayerId.slice(0,4) == 'auto'){
-            autoTest();
-        }
     }, 2000);
     
 }
 
+
 function nextPlayer(){
     if (gameData.singlePlayer){
-        swapCards();
-        swapCardsArray();
+        updateGame();
 
-        // reset picked cards //
         gameData.pickedBank = null;
         gameData.pickedHand = null;
 
-        // set next player active //
-        setNextPlayerActive();
-
-        // update game labels //
-        updatePlayerLabels();
-
         if (gameData.activePlayerId.slice(0,4) == 'auto'){
-            // setTimeout(()=> autoTest(), 2000);
             autoTest();
         }
     }
     else {
         if (gameData.players[0].data.connectionId == hostName){
-            swapCards();
-            swapCardsArray();
-            setNextPlayerActive();
-            updatePlayerLabels();
+            updateGame()
             sendGameData('host')
         }
         else {
-            // swapCards();
-            // updatePlayerLabels();
             sendGameData('client');
         }
-        // setNextPlayerActive();
-        // // swapCardsArray();
-        // updatePlayerLabels();
-        // sendGameData();
     }
 }
 
@@ -756,25 +638,17 @@ function setNextPlayerActive(){
         let index = active.index
         active.player.data.active = false
 
+        index += 1;
+        
         if (index >3){
             index = 0;
         }
-        else {
-            index += 1;
-        }
 
-        // // temp to bypass auto players //
-        // if (index == 2){
-        //     index = 0;
-        //     // gameData.prevActivePlayerId = 'temp'
-        // }
-        
-        // set next player in line to activePlayerId //
-        // gameData.activePlayerId = gameData.players[index.name]
-        gameData.activePlayerId = gameData.players[index].data.connectionId
-        // set next player in line active to true // 
-        gameData.players[index].data.active = true
-        }
+        console.log('ACTIVE INDEX', index)
+        gameData.activePlayerId = gameData.players[index].data.connectionId;
+        gameData.players[index].data.active = true;
+
+    }
 }
 
 
@@ -782,7 +656,6 @@ function findPlayerById(connectionId){
     const result = {index: '', player: ''}
     gameData.players.forEach((player, index) => {
         if (player.data.connectionId === connectionId){
-            // return {index: index, player: player}
             result.index = index;
             result.player = player
         }
@@ -791,49 +664,26 @@ function findPlayerById(connectionId){
 }
 
 
-
-
-// doesn't work for single player mode //
-// There are no connections //
 function sendGameData(id){
-    // if (gameData.activePlayerId === hostName){
-    // console.log('--------------------------------------------');
-
     if (id == 'host'){
-        console.log('HOST SEND GAME DATA', gameData)
         connections.forEach(connection => {
-            pushData(connection.c, gameData, 'game-data')
+            pushData(connection.c, gameData, 'client-data')
         })
     }
     if (id == 'client') {
-        // pushData(connections[0].c, gameData, 'game-data')
-        console.log('CLIENT SEND GAME DATA', gameData)
         pushData(connections[0].c, gameData, 'host-data')
     }
-    // gameData.players.forEach(player => {
-    //     if (player.name.slice(0,4) != 'Auto'){
-    //         console.log(player.name, player.data.cards);
-    //     }
-    // })
-    // console.log('HOST:',gameData.players[0].data.cards);
-    // console.log('CLIENT 01:',gameData.players[1].data.cards);
-    // console.log('BANK:',gameData.players[4].data.cards);
-    // console.log('--------------------------------------------');
 }
 
 
-
+// HOST FUNCTION //
 // on 'data type == 'host-data //
 function updateHost(clientData){
 
-    gameData.pickedBank = clientData.pickedBank
-    gameData.pickedHand = clientData.pickedHand
+    gameData.pickedBank = clientData.pickedBank;
+    gameData.pickedHand = clientData.pickedHand;
     
-    // playCards('Update Host');
-    swapCards();
-    swapCardsArray();
-    setNextPlayerActive();
-    updatePlayerLabels();
+    updateGame();
 
     sendGameData('host');
     gameData.pickedBank = null;
@@ -844,39 +694,41 @@ function updateHost(clientData){
     }
 }
 
-// TRANSFORM INTO SHUFFLED COPY OF GAME DATA //
-// on 'data' type == game-data //
-function updateGame(receivedGameData){
-    // update game data //
-    updateDataPlayers(receivedGameData.players)
-    // update active player //
-    gameData.activePlayerId = receivedGameData.activePlayerId;
-    gameData.prevActivePlayerId = receivedGameData.prevActivePlayerId
-    gameData.pickedBank = receivedGameData.pickedBank;
-    gameData.pickedHand = receivedGameData.pickedHand
-    
-    // swapCards //
-    swapCards()
-    // playCards('Update Game')
-    // update game labels //
-    updatePlayerLabels()
 
-    // Reset Picked Cards //
+function updateGameData(receivedGameData){
+    const shuffledPlayers = shuffleHostPlayers(receivedGameData.players);
+    const newGameData = {...receivedGameData};
+    newGameData.players = shuffledPlayers;
+
+    Object.keys(gameData).forEach(key => {
+        gameData[key] = newGameData[key];
+    })
+}
+
+
+function updateGame(isClient=false){
+    swapDomCards();
+    if (!isClient){
+        swapPlayerCards();
+        setNextPlayerActive();
+    }
+    updatePlayerLabels();
+}
+
+
+// CLIENT FUNCTION //
+// on 'data' type == client-data //
+function updateClient(receivedGameData){
+    const isClient = true;
+    updateGameData(receivedGameData)
+    updateGame(isClient);
+
     gameData.pickedHand = null;
     gameData.pickedBank = null;
-
-    
 }
 
 
-function isPreviousActive(){
-    if (gameData.prevActivePlayerId == gameData.players[0].data.connectionId){
-        return true
-    }
-    return false
-}
-
-function swapCardsArray(){
+function swapPlayerCards(){
     const bank = findPlayerById('bank').player;
     const player = findPlayerById(gameData.activePlayerId).player;
 
@@ -897,95 +749,25 @@ function swapCardsArray(){
     
 }
 
-// function swapCardsArray(){
-//     const bank = findPlayerById('bank').player;
-//     const player = findPlayerById(gameData.activePlayerId).player;
 
-//     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
-//     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
-    
-//     // if (bankArray.length == 2 && playerArray.length == 2){
-//         bankArray.push(gameData.pickedHand);
-//         playerArray.push(gameData.pickedBank);
+function swapDomCards(){
+    if (gameData.pickedHand && gameData.pickedBank){
+        const cardHand = document.getElementById(gameData.pickedHand);
+        cardHand.classList.remove('clicked');
+        const handCss = cardHand.className;
+
+        const cardBank = document.getElementById(gameData.pickedBank);
+        cardBank.classList.remove('clicked');
+        const bankCss = cardBank.className
+
+        cardHand.className = bankCss;
+        cardBank.className = handCss;
         
-//         bank.data.cards = bankArray;
-//         player.data.cards = playerArray;
-//     // }
-//     // else {
-//     //     console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
-//     //     console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
-//     // }
-    
-// }
-
-
-function swapCards(){
-    // if(!isPreviousActive()){
-        if (gameData.pickedHand && gameData.pickedBank){
-            const cardHand = document.getElementById(gameData.pickedHand);
-            cardHand.classList.remove('clicked');
-            const handCss = cardHand.className;
-
-            const cardBank = document.getElementById(gameData.pickedBank);
-            cardBank.classList.remove('clicked');
-            const bankCss = cardBank.className
-
-            cardHand.className = bankCss;
-            cardBank.className = handCss;
-            
-        }
-        else {
-            console.log('Please Select Two Cards!');
-        }
-    // }
-
+    }
+    else {
+        console.log('Please Select Two Cards!');
+    }
 }
-
-
-// function playCards(_){
-//     // console.log(`PLAY CARDS, ${_}`,gameData.pickedBank, gameData.pickedHand)
-//     // console.log(`PLAY CARDS, ${_}`,gameData)
-//     console.log('PLAY CARDS Previous Active:', gameData.prevActivePlayerId, 'Active:', gameData.activePlayerId)
-//     if(!isPreviousActive()){
-//         // console.log('PLAY CARDS, Not Previous Active')
-//         swapCards()
-//         // should happen on host //
-//         swapCardsArray()
-//     }
-// }
-
-
-// function playCards(_){
-//     console.log('PLAY CARDS Previous Active:', gameData.prevActivePlayerId, 'Active:', gameData.activePlayerId);
-
-//     const bank = findPlayerById('bank').player;
-//     // const player = findPlayerById(gameData.activePlayerId).player;
-//     let player;
-
-//     // first round fail safe //
-//     if(!gameData.prevActivePlayerId){
-//         player = findPlayerById(gameData.activePlayerId).player;
-//     }
-//     else {
-//         player = findPlayerById(gameData.prevActivePlayerId).player;
-//     }
-
-//     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
-//     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
-
-//     if (bankArray.length == 2 && playerArray.length == 2){
-//         swapCards();
-//         swapCardsArray();
-//     }
-//     else {
-//         console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
-//         console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
-//     }
-// }
-
-
-
-
 
 
 function createCardElem(cardID){
@@ -1020,13 +802,11 @@ function createDeck(component){;
         const cardElem = createCardElem(cardID);
         cardElem.id = cardID
         cardElem.classList.add('deck')
-        // cardsDB.data[cardID].location = 'deck';
 
         cardElem.addEventListener('click',e => {
             cardClickEvent(e)
         })
-
-        
+   
         component.appendChild(cardElem)
 
     })
