@@ -400,33 +400,6 @@ function createPlayerListItem(player) {
 }
 
 
-
-///////////////////////////////////// PLAYERS //////////////////////////////////////////
-
-function returnPlayerList(){
-    return gameData.players.map(player => player.name)
-}
-
-
-function shuffleHostPlayers(gameDataPlayers){
-    const clientAtIndex = gameDataPlayers.findIndex(player =>  player.data.connectionId === gameData.players[0].data.connectionId);
-    const clientFirst = gameDataPlayers.slice(clientAtIndex, 4)
-    const theRest = gameDataPlayers.slice(0, clientAtIndex)
-    const bank = gameDataPlayers[4]
-    const shuffledPlayers = [...clientFirst,...theRest, bank];
-
-    const locations = ['south', 'west', 'north', 'east', 'center'];
-    shuffledPlayers.forEach((player, index) => player.location = locations[index]);
-
-    return shuffledPlayers
-}
-
-
-function findPlayerByConnectionId(playersArr,id){
-    return playersArr.find(player => player.data.connectionId == id)
-}
-
-
 ////////////////////////////////// DEAL CARDS ///////////////////////////////////////////
 
 
@@ -534,17 +507,79 @@ function addCardsToCardDB(cards){
 
 //////////////////////////// 31 Single //////////////////////////////////////
 
-
-function createElem(elemType, classNames=[], idName){
-    const elem = document.createElement(elemType);
-
-    for (let className of classNames){
-        elem.classList.add(className)
-    }
+function createCardElem(cardID){
     
-    elem.id = idName
+    const cardElem = document.createElement('div');
+    cardElem.classList.add('card')
 
-    return elem;
+    const frontElem = document.createElement('div');
+    frontElem.classList.add('front')
+    const frontImg = document.createElement('img');
+    frontImg.src = `./src/img/${cardID}.png`;
+
+    const backElem = document.createElement('div');
+    backElem.classList.add('back')
+    const backImg = document.createElement('img');
+    backImg.src = './src/img/back-blue.png';
+
+    frontElem.appendChild(frontImg);
+    backElem.appendChild(backImg);
+    cardElem.appendChild(frontElem);
+    cardElem.appendChild(backElem);
+
+    return cardElem;
+}
+
+
+// Local Function //
+function createDeck(component){;
+    const cardIDs = Object.keys(gameData.cards) 
+    cardIDs.forEach(cardID => {
+
+        const cardElem = createCardElem(cardID);
+        cardElem.id = cardID
+        cardElem.classList.add('deck')
+
+        cardElem.addEventListener('click',e => {
+            cardClickEvent(e)
+        })
+   
+        component.appendChild(cardElem)
+
+    })
+}
+
+
+// Actuall Trigger for the Deck CSS Animation //
+function handOutDeckCards(timing=0){
+    let i = 0;
+    let playerIndex = 0;
+    let cardIndex = 0;
+    let numCardsToDeal = 0;
+    
+    gameData.players.forEach(player => {
+        numCardsToDeal += player.data.cards.length;
+    })
+
+
+    const intervalID = setInterval(()=>{
+        if (i == numCardsToDeal -1){
+            clearInterval(intervalID);
+        }
+        
+        let player = gameData.players[playerIndex];
+        const cardID = player.data.cards[cardIndex];
+        const card = document.getElementById(cardID)
+        card.className = `card ${player.location}`
+        playerIndex += 1;
+
+        if (playerIndex == gameData.players.length){
+            cardIndex += 1;
+            playerIndex = 0;
+        }
+
+        i += 1;
+    }, timing);
 }
 
 
@@ -594,14 +629,37 @@ function removePlayCardsBtn(){
     document.getElementById('play-cards').remove();
 }
 
-// HOST FUNCTION //
-function autoTest(){
-    setTimeout(()=> {
-        gameData.pickedBank = gameData.players[4].data.cards[0];
-        gameData.pickedHand = findPlayerById(gameData.activePlayerId).player.data.cards[0];
-        updateHost(gameData);
-    }, 2000);
-    
+
+///////////////////////////////////// PLAYERS //////////////////////////////////////////
+
+function returnPlayerList(){
+    return gameData.players.map(player => player.name)
+}
+
+
+function shuffleHostPlayers(gameDataPlayers){
+    const clientAtIndex = gameDataPlayers.findIndex(player =>  player.data.connectionId === gameData.players[0].data.connectionId);
+    const clientFirst = gameDataPlayers.slice(clientAtIndex, 4)
+    const theRest = gameDataPlayers.slice(0, clientAtIndex)
+    const bank = gameDataPlayers[4]
+    const shuffledPlayers = [...clientFirst,...theRest, bank];
+
+    const locations = ['south', 'west', 'north', 'east', 'center'];
+    shuffledPlayers.forEach((player, index) => player.location = locations[index]);
+
+    return shuffledPlayers
+}
+
+
+function findPlayerById(connectionId){
+    const result = {index: '', player: ''}
+    gameData.players.forEach((player, index) => {
+        if (player.data.connectionId === connectionId){
+            result.index = index;
+            result.player = player
+        }
+    })
+    return result
 }
 
 
@@ -612,9 +670,7 @@ function nextPlayer(){
         gameData.pickedBank = null;
         gameData.pickedHand = null;
 
-        if (gameData.activePlayerId.slice(0,4) == 'auto'){
-            autoTest();
-        }
+        isAutoPlayerNext()
     }
     else {
         if (gameData.players[0].data.connectionId == hostName){
@@ -625,6 +681,23 @@ function nextPlayer(){
             sendGameData('client');
         }
     }
+}
+
+
+function isAutoPlayerNext(){
+    if (gameData.activePlayerId.slice(0,4) == 'auto'){
+        autoTest(findPlayerById(gameData.activePlayerId));
+    }
+}
+
+// HOST FUNCTION //
+function autoTest(active){
+    setTimeout(()=> {
+        gameData.pickedBank = gameData.players[4].data.cards[0];
+        gameData.pickedHand = active.player.data.cards[0];
+        updateHost(gameData);
+    }, 2000);
+    
 }
 
 
@@ -644,34 +717,9 @@ function setNextPlayerActive(){
             index = 0;
         }
 
-        console.log('ACTIVE INDEX', index)
         gameData.activePlayerId = gameData.players[index].data.connectionId;
         gameData.players[index].data.active = true;
 
-    }
-}
-
-
-function findPlayerById(connectionId){
-    const result = {index: '', player: ''}
-    gameData.players.forEach((player, index) => {
-        if (player.data.connectionId === connectionId){
-            result.index = index;
-            result.player = player
-        }
-    })
-    return result
-}
-
-
-function sendGameData(id){
-    if (id == 'host'){
-        connections.forEach(connection => {
-            pushData(connection.c, gameData, 'client-data')
-        })
-    }
-    if (id == 'client') {
-        pushData(connections[0].c, gameData, 'host-data')
     }
 }
 
@@ -689,9 +737,7 @@ function updateHost(clientData){
     gameData.pickedBank = null;
     gameData.pickedHand = null;
 
-    if (gameData.activePlayerId.slice(0,4) == 'auto'){
-        autoTest();
-    }
+    isAutoPlayerNext();
 }
 
 
@@ -713,6 +759,19 @@ function updateGame(isClient=false){
         setNextPlayerActive();
     }
     updatePlayerLabels();
+}
+
+
+function sendGameData(id){
+    if (id == 'host'){
+        connections.forEach(connection => {
+            pushData(connection.c, gameData, 'client-data')
+        })
+    }
+    if (id == 'client') {
+        const clientData = {pickedBank: gameData.pickedBank, pickedHand: gameData.pickedHand}
+        pushData(connections[0].c, clientData, 'host-data')
+    }
 }
 
 
@@ -767,81 +826,4 @@ function swapDomCards(){
     else {
         console.log('Please Select Two Cards!');
     }
-}
-
-
-function createCardElem(cardID){
-    
-    const cardElem = document.createElement('div');
-    cardElem.classList.add('card')
-
-    const frontElem = document.createElement('div');
-    frontElem.classList.add('front')
-    const frontImg = document.createElement('img');
-    frontImg.src = `./src/img/${cardID}.png`;
-
-    const backElem = document.createElement('div');
-    backElem.classList.add('back')
-    const backImg = document.createElement('img');
-    backImg.src = './src/img/back-blue.png';
-
-    frontElem.appendChild(frontImg);
-    backElem.appendChild(backImg);
-    cardElem.appendChild(frontElem);
-    cardElem.appendChild(backElem);
-
-    return cardElem;
-}
-
-
-// Local Function //
-function createDeck(component){;
-    const cardIDs = Object.keys(gameData.cards) 
-    cardIDs.forEach(cardID => {
-
-        const cardElem = createCardElem(cardID);
-        cardElem.id = cardID
-        cardElem.classList.add('deck')
-
-        cardElem.addEventListener('click',e => {
-            cardClickEvent(e)
-        })
-   
-        component.appendChild(cardElem)
-
-    })
-}
-
-
-// Actuall Trigger for the Deck CSS Animation //
-// Classes card deck
-function handOutDeckCards(timing=0){
-    let i = 0;
-    let playerIndex = 0;
-    let cardIndex = 0;
-    let numCardsToDeal = 0;
-    
-    gameData.players.forEach(player => {
-        numCardsToDeal += player.data.cards.length;
-    })
-
-
-    const intervalID = setInterval(()=>{
-        if (i == numCardsToDeal -1){
-            clearInterval(intervalID);
-        }
-        
-        let player = gameData.players[playerIndex];
-        const cardID = player.data.cards[cardIndex];
-        const card = document.getElementById(cardID)
-        card.className = `card ${player.location}`
-        playerIndex += 1;
-
-        if (playerIndex == gameData.players.length){
-            cardIndex += 1;
-            playerIndex = 0;
-        }
-
-        i += 1;
-    }, timing);
 }
