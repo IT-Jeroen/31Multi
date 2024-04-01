@@ -1,16 +1,7 @@
-// 'players.js'
-// import {players} from 'players.js';
 import * as playerHandler from './playerHandler.js';
-// 'p2p.js'
-// import {p2p} from 'p2p.js';
 import * as p2p from './p2p.js';
-// 'gameMechanics.js'
-// import {game} from 'gameMechanics.js'
 import * as game from './gameMechanics.js';
-
 import * as dom from './dom.js';
-
-// const hostName = '31-multi-host-test-id';
 
 export const connections = [
     {'name':'Local', 'connectionId': null, 'p': null, 'c': null},
@@ -40,9 +31,6 @@ export const gameData = {
     activePlayerId: null,
     prevActivePlayerId: null,
 }
-
-
-//////////////////////////////////////////// Cards DB ////////////////////////////////////////////////////////
 
 
 export function setCardsDB(data){
@@ -75,8 +63,7 @@ export function addCardsToCardDB(cards){
     })
 }
 
-// 'dealCards' 'gameMechanics'
-// 'prepCards' 'gameMechanics'
+
 export function initializeGame(){
     gameData.activePlayerId = gameData.players[0].data.connectionId;
     gameData.players[0].data.active = true;
@@ -89,8 +76,7 @@ export function initializeGame(){
     dom.startGame()
 }
 
-// 'updateGame' 'gameMechanics.js'
-// 'isAutoPlayerNext' ' players.js'
+
 // HOST FUNCTION //
 // on 'data type == 'host-data //
 export function updateHost(clientData){
@@ -108,7 +94,6 @@ export function updateHost(clientData){
 }
 
 
-// 'updateGame' 'gameMechanics'
 // CLIENT FUNCTION //
 // on 'data' type == client-data //
 export function updateClient(receivedGameData){
@@ -121,7 +106,6 @@ export function updateClient(receivedGameData){
 }
 
 
-// 'shuffleHostPlayers' 'players.js'
 export function updateGameData(receivedGameData){
     const shuffledPlayers = playerHandler.shuffleHostPlayers(receivedGameData.players);
     const newGameData = {...receivedGameData};
@@ -132,8 +116,7 @@ export function updateGameData(receivedGameData){
     })
 }
 
-// CAN MOVE TO P2P.JS ??? //
-// 'pushData' 'p2p.js'
+
 export function sendGameData(id){
     if (id == 'host'){
         connections.forEach(connection => {
@@ -147,7 +130,6 @@ export function sendGameData(id){
 }
 
 
-// 'findPlayerById' 'playerHandler.js'
 export function swapPlayerCards(){
     const bank = playerHandler.findPlayerById('bank').player;
     const player = playerHandler.findPlayerById(gameData.activePlayerId).player;

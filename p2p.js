@@ -1,10 +1,5 @@
-// 'dataHandler.js'
 import {gameData} from './dataHandler.js';
 import * as dataHandler from './dataHandler.js';
-// const gameData = dataHandler.gameData;
-// import {gameData} from './dataHandler.js'
-// 'dom.js'
-// import {dom} from 'dom.js';
 import * as dom from './dom.js'
 
 function testHost(playerName){
@@ -33,10 +28,7 @@ function testHost(playerName){
     })
 }
 
-// 'gameData' 'dataHandler.js'
-// 'connections' 'dataHandler.js'
-// 'renderApp' 'dom.js'
-// 'createWaitingRoom' 'dom.js'
+
 export function setupConnection(playerName){
     const p2pObject = testHost(playerName)
 
@@ -67,10 +59,6 @@ export function setupConnection(playerName){
 }
 
 
-// 'gameData' 'dataHandler.js'
-// 'connections' 'dataHandler.js'
-// 'renderApp' 'dom.js'
-// 'createWaitingRoom' 'dom.js'
 function setAsHost(playerName){
     const peer = new Peer(gameData.hostName, {
         debug: 2
@@ -101,8 +89,6 @@ function setAsHost(playerName){
 }
 
 
-// 'gameData' 'dataHandler.js'
-// 'connections' 'dataHandler.js'
 function addNewConnection(c){
     const excistingPlayer = gameData.players.some(player => {
         if (player.connectionId){
@@ -138,14 +124,6 @@ function addNewConnection(c){
 }
 
 
-// 'gameData' 'dataHandler.js'
-// 'updateGameData' 'dataHandler.js'
-// 'updateClient' 'dataHandler.js'
-// 'setCardsDB' 'dataHandler.js'
-// 'updateHost' 'dataHandler.js'
-// 'startGame'  'dom.js'
-// 'renderApp' 'dom.js'
-// 'createWaitingRoom' 'dom.js'
 function setConnectionEvents(c) {
 
     c.on('data', function (received) {

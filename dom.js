@@ -1,9 +1,5 @@
-// 'dataHandler.js'
 import {gameData} from './dataHandler.js';
 import * as dataHandler from './dataHandler.js';
-// const gameData = dataHandler.gameData;
-// 'players.js'
-// import {players} from 'players.js';
 import * as playerHandler from './playerHandler.js';
 import * as p2p from './p2p.js';
 
@@ -56,7 +52,7 @@ function createPlayfield(){
     return playfield
 }
 
-// 'gameData' 'dataHandler.js'
+
 export function updatePlayerLabels(){
     removePlayerLabels();
     gameData.players.forEach(player => {
@@ -97,7 +93,6 @@ function setPlayerLabels(player){
     }
 }
 
-//////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
 
 export function createWaitingRoom(){
     const waitingRoomDiv = document.createElement('div');
@@ -112,7 +107,7 @@ export function createWaitingRoom(){
     return waitingRoomDiv
 }
 
-// 'gameData' 'dataHandler.js'
+
 function canStartGame(){
     if (gameData.players[0].data.connectionId === gameData.hostName){
         return createStartGameBtn;
@@ -122,7 +117,7 @@ function canStartGame(){
     }
 }
 
-// 'initializeGame' 'dataHandler.js'
+
 function createStartGameBtn(){
     const startGameBtn = document.createElement('button');
     startGameBtn.innerText ='Start Game';
@@ -133,7 +128,7 @@ function createStartGameBtn(){
     return startGameBtn
 }
 
-// 'returnPlayerList' 'playerHandler.js'
+
 function createPlayerList() {
     return playerHandler.returnPlayerList().map(player => createPlayerListItem(player))
 }
@@ -171,8 +166,8 @@ function createCardElem(cardID){
     return cardElem;
 }
 
-// 'gameData' 'dataHandler.js'
-// Local Function //
+
+// LOCAL FUNCTION //
 function createDeck(component){;
     const cardIDs = Object.keys(gameData.cards) 
     cardIDs.forEach(cardID => {
@@ -190,7 +185,7 @@ function createDeck(component){;
     })
 }
 
-// 'gameData' 'dataHandler.js'
+
 // Actuall Trigger for the Deck CSS Animation //
 function handOutDeckCards(timing=0){
     let i = 0;
@@ -223,7 +218,7 @@ function handOutDeckCards(timing=0){
     }, timing);
 }
 
-// 'gameData' 'dataHandler.js'
+
 function cardClickEvent(e){
     const classes = e.currentTarget.classList;
     const south = classes.contains('south');
@@ -255,7 +250,6 @@ function cardClickEvent(e){
 }
 
 
-// 'netPlayer' 'playerHandler.js'
 function createPlayCardsBtn(){
     const btn = `<button id="play-cards">Play Cards</button>`
     document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
@@ -271,7 +265,7 @@ function removePlayCardsBtn(){
     document.getElementById('play-cards').remove();
 }
 
-// 'gameData' 'dataHandler.js'
+
 export function swapDomCards(){
     if (gameData.pickedHand && gameData.pickedBank){
         const cardHand = document.getElementById(gameData.pickedHand);
@@ -290,6 +284,7 @@ export function swapDomCards(){
         console.log('Please Select Two Cards!');
     }
 }
+
 
 export function startGame(){
     renderApp(createPlayfield());

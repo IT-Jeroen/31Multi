@@ -1,13 +1,6 @@
-// import {dataHandler} from 'dataHandler.js';
 import {gameData} from './dataHandler.js' 
 import * as dataHandler from './dataHandler.js';
 import * as game from './gameMechanics.js';
-// const gameData = dataHandler.gameData;
-//updateGame
-//updateHost
-//sendGameData
-
-///////////////////////////////////// PLAYERS //////////////////////////////////////////
 
 
 export function returnPlayerList(){
@@ -41,8 +34,6 @@ export function findPlayerById(connectionId){
 }
 
 
-// CAN MOVE TO APP.JS //
-
 export function nextPlayer(){
     if (gameData.singlePlayer){
         game.updateGame();
@@ -71,8 +62,6 @@ export function isAutoPlayerNext(){
 }
 
 
-
-// ONLY USED INSIDE PLAYERS //
 // HOST FUNCTION //
 function autoPlayer(active){
     setTimeout(()=> {

@@ -1,16 +1,7 @@
-// 'dataHandler.js'
 import {gameData} from './dataHandler.js'
 import * as dataHandler from './dataHandler.js';
-// const gameData = dataHandler.gameData;
-
-// 'dom.js'
-// import {dom} from "dom.js"
 import * as dom from './dom.js'
-// 'p2p.js'
-// import {p2p} from 'p2p.js'
 import * as p2p from './p2p.js'; 
-// 'players.js'
-// import {players} from 'players.js';
 import * as playerHandler from './playerHandler.js'; 
 
 
@@ -51,9 +42,8 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
     return cardsInGame;
 }
 
-// 'gameData'
-// 'addCardsToCardDB' 'gameData.js'
-// Host function //
+
+// HOST FUNCTION //
 export function prepCards(){
     const numPlayerCards = 3
     const maxCards = gameData.players.length * numPlayerCards
@@ -73,8 +63,8 @@ export function prepCards(){
     }
 }
 
-// 'gameData'
-// Host function //
+
+// HOST FUNCTION //
 export function dealCards(cardsInGame){
 
     gameData.players.forEach((player, index) => {
@@ -83,10 +73,6 @@ export function dealCards(cardsInGame){
 }
 
 
-// 'swapDomCards' 'dom.js'
-// 'swapPlayerCards' 'gameData.js'
-// 'setNextPlayerActive' ' playerHandler.js'
-// 'updatePlayerLabels' 'dom.js'
 export function updateGame(isClient=false){
     dom.swapDomCards();
     if (!isClient){
