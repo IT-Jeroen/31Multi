@@ -1,15 +1,21 @@
-import {dataHandler} from 'dataHandler.js';
-const gameData = dataHandler.gameData;
+// import {dataHandler} from 'dataHandler.js';
+import {gameData} from './dataHandler.js' 
+import * as dataHandler from './dataHandler.js';
+import * as game from './gameMechanics.js';
+// const gameData = dataHandler.gameData;
+//updateGame
+//updateHost
+//sendGameData
 
 ///////////////////////////////////// PLAYERS //////////////////////////////////////////
 
 
-function returnPlayerList(){
+export function returnPlayerList(){
     return gameData.players.map(player => player.name)
 }
 
 
-function shuffleHostPlayers(gameDataPlayers){
+export function shuffleHostPlayers(gameDataPlayers){
     const clientAtIndex = gameDataPlayers.findIndex(player =>  player.data.connectionId === gameData.players[0].data.connectionId);
     const clientFirst = gameDataPlayers.slice(clientAtIndex, 4)
     const theRest = gameDataPlayers.slice(0, clientAtIndex)
@@ -23,7 +29,7 @@ function shuffleHostPlayers(gameDataPlayers){
 }
 
 
-function findPlayerById(connectionId){
+export function findPlayerById(connectionId){
     const result = {index: '', player: ''}
     gameData.players.forEach((player, index) => {
         if (player.data.connectionId === connectionId){
@@ -37,9 +43,9 @@ function findPlayerById(connectionId){
 
 // CAN MOVE TO APP.JS //
 
-function nextPlayer(){
+export function nextPlayer(){
     if (gameData.singlePlayer){
-        dataHandler.updateGame();
+        game.updateGame();
 
         gameData.pickedBank = null;
         gameData.pickedHand = null;
@@ -48,7 +54,7 @@ function nextPlayer(){
     }
     else {
         if (gameData.players[0].data.connectionId == gameData.hostName){
-            dataHandler.updateGame()
+            game.updateGame()
             dataHandler.sendGameData('host')
         }
         else {
@@ -58,7 +64,7 @@ function nextPlayer(){
 }
 
 
-function isAutoPlayerNext(){
+export function isAutoPlayerNext(){
     if (gameData.activePlayerId.slice(0,4) == 'auto'){
         autoPlayer(findPlayerById(gameData.activePlayerId));
     }
@@ -79,7 +85,7 @@ function autoPlayer(active){
 
 
 // HOST FUNCTION //
-function setNextPlayerActive(){
+export function setNextPlayerActive(){
     if (gameData.players[0].data.connectionId == gameData.hostName){
         // set current active to prevActivePlayerId //
         gameData.prevActivePlayerId = gameData.activePlayerId

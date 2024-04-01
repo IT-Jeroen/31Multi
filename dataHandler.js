@@ -1,13 +1,18 @@
 // 'players.js'
-import {players} from 'players.js';
+// import {players} from 'players.js';
+import * as playerHandler from './playerHandler.js';
 // 'p2p.js'
-import {p2p} from 'p2p.js';
+// import {p2p} from 'p2p.js';
+import * as p2p from './p2p.js';
 // 'gameMechanics.js'
-import {game} from 'gameMechanics.js'
+// import {game} from 'gameMechanics.js'
+import * as game from './gameMechanics.js';
+
+import * as dom from './dom.js';
 
 // const hostName = '31-multi-host-test-id';
 
-const connections = [
+export const connections = [
     {'name':'Local', 'connectionId': null, 'p': null, 'c': null},
     {'name':'Auto 1', 'connectionId': null, 'p': null, 'c': null},
     {'name':'Auto 2', 'connectionId': null, 'p': null, 'c': null},
@@ -24,7 +29,7 @@ const players = [
 ]
 
 
-const gameData = {
+export const gameData = {
     hostName: '31-multi-host-test-id',
     isHost: null,
     singlePlayer: true,
@@ -40,7 +45,7 @@ const gameData = {
 //////////////////////////////////////////// Cards DB ////////////////////////////////////////////////////////
 
 
-function setCardsDB(data){
+export function setCardsDB(data){
     if (!gameData.cards){
         gameData.cards = data
     } else{
@@ -61,7 +66,7 @@ function returnCardValue(card){
 }
 
 
-function addCardsToCardDB(cards){
+export function addCardsToCardDB(cards){
     gameData.cards = {};
     cards.forEach(card => {
         const cardValue = returnCardValue(card)
@@ -70,12 +75,25 @@ function addCardsToCardDB(cards){
     })
 }
 
+// 'dealCards' 'gameMechanics'
+// 'prepCards' 'gameMechanics'
+export function initializeGame(){
+    gameData.activePlayerId = gameData.players[0].data.connectionId;
+    gameData.players[0].data.active = true;
+    game.dealCards(game.prepCards())
+    
+    connections.forEach(connection => {
+        p2p.pushData(connection.c, gameData, 'start-game');
+    })
+    
+    dom.startGame()
+}
 
 // 'updateGame' 'gameMechanics.js'
 // 'isAutoPlayerNext' ' players.js'
 // HOST FUNCTION //
 // on 'data type == 'host-data //
-function updateHost(clientData){
+export function updateHost(clientData){
 
     gameData.pickedBank = clientData.pickedBank;
     gameData.pickedHand = clientData.pickedHand;
@@ -86,14 +104,14 @@ function updateHost(clientData){
     gameData.pickedBank = null;
     gameData.pickedHand = null;
 
-    players.isAutoPlayerNext();
+    playerHandler.isAutoPlayerNext();
 }
 
 
 // 'updateGame' 'gameMechanics'
 // CLIENT FUNCTION //
 // on 'data' type == client-data //
-function updateClient(receivedGameData){
+export function updateClient(receivedGameData){
     const isClient = true;
     updateGameData(receivedGameData)
     game.updateGame(isClient);
@@ -104,8 +122,8 @@ function updateClient(receivedGameData){
 
 
 // 'shuffleHostPlayers' 'players.js'
-function updateGameData(receivedGameData){
-    const shuffledPlayers = players.shuffleHostPlayers(receivedGameData.players);
+export function updateGameData(receivedGameData){
+    const shuffledPlayers = playerHandler.shuffleHostPlayers(receivedGameData.players);
     const newGameData = {...receivedGameData};
     newGameData.players = shuffledPlayers;
 
@@ -116,7 +134,7 @@ function updateGameData(receivedGameData){
 
 // CAN MOVE TO P2P.JS ??? //
 // 'pushData' 'p2p.js'
-function sendGameData(id){
+export function sendGameData(id){
     if (id == 'host'){
         connections.forEach(connection => {
             p2p.pushData(connection.c, gameData, 'client-data')
@@ -129,10 +147,10 @@ function sendGameData(id){
 }
 
 
-// 'findPlayerById' 'players.js'
-function swapPlayerCards(){
-    const bank = players.findPlayerById('bank').player;
-    const player = players.findPlayerById(gameData.activePlayerId).player;
+// 'findPlayerById' 'playerHandler.js'
+export function swapPlayerCards(){
+    const bank = playerHandler.findPlayerById('bank').player;
+    const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
 
     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)

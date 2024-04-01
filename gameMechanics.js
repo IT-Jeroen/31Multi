@@ -1,36 +1,17 @@
-// 'dom.js'
-import {dom} from "dom.js"
-// 'p2p.js'
-import {p2p} from 'p2p.js'
-// 'players.js'
-import {players} from 'players.js';
 // 'dataHandler.js'
-import {dataHandler} from 'dataHandler.js'
-const gameData = dataHandler.gameData;
+import {gameData} from './dataHandler.js'
+import * as dataHandler from './dataHandler.js';
+// const gameData = dataHandler.gameData;
 
-// 'gameData'
-// 'pushData' 'p2p.js'
-// 'startGame' 'dom.js'
-/// Doesn't Apply to Clients, only Host ///
-function initializeGame(){
-    gameData.activePlayerId = gameData.players[0].data.connectionId;
-    gameData.players[0].data.active = true;
-    dealCards(prepCards())
-    
-    connections.forEach(connection => {
-        p2p.pushData(connection.c, gameData, 'start-game');
-    })
-    
-    dom.startGame()
-}
-
-
-// // MOVED TO DOM.JS //
-// function startGame(){
-//     renderApp(createPlayfield());
-//     handOutDeckCards(300);
-//     updatePlayerLabels();
-// }
+// 'dom.js'
+// import {dom} from "dom.js"
+import * as dom from './dom.js'
+// 'p2p.js'
+// import {p2p} from 'p2p.js'
+import * as p2p from './p2p.js'; 
+// 'players.js'
+// import {players} from 'players.js';
+import * as playerHandler from './playerHandler.js'; 
 
 
 function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
@@ -73,7 +54,7 @@ function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
 // 'gameData'
 // 'addCardsToCardDB' 'gameData.js'
 // Host function //
-function prepCards(){
+export function prepCards(){
     const numPlayerCards = 3
     const maxCards = gameData.players.length * numPlayerCards
     const cardsInGame = createRandomDeckValues(maxCards, '7');
@@ -81,7 +62,7 @@ function prepCards(){
     if (cardsInGame.length / gameData.players.length == numPlayerCards){
         dataHandler.addCardsToCardDB(cardsInGame);
 
-        connections.forEach(connection => {
+        dataHandler.connections.forEach(connection => {
             p2p.pushData(connection.c, gameData.cards, 'card-data');
         })
         return cardsInGame
@@ -94,7 +75,7 @@ function prepCards(){
 
 // 'gameData'
 // Host function //
-function dealCards(cardsInGame){
+export function dealCards(cardsInGame){
 
     gameData.players.forEach((player, index) => {
         player.data.cards = [cardsInGame[index], cardsInGame[index + gameData.players.length], cardsInGame[index + 2 * gameData.players.length]]
@@ -104,13 +85,13 @@ function dealCards(cardsInGame){
 
 // 'swapDomCards' 'dom.js'
 // 'swapPlayerCards' 'gameData.js'
-// 'setNextPlayerActive' ' players.js'
+// 'setNextPlayerActive' ' playerHandler.js'
 // 'updatePlayerLabels' 'dom.js'
-function updateGame(isClient=false){
+export function updateGame(isClient=false){
     dom.swapDomCards();
     if (!isClient){
         dataHandler.swapPlayerCards();
-        players.setNextPlayerActive();
+        playerHandler.setNextPlayerActive();
     }
     dom.updatePlayerLabels();
 }

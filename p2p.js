@@ -1,8 +1,11 @@
 // 'dataHandler.js'
-import {dataHandler} from 'dataHandler.js';
-const gameData = dataHandler.gameData;
+import {gameData} from './dataHandler.js';
+import * as dataHandler from './dataHandler.js';
+// const gameData = dataHandler.gameData;
+// import {gameData} from './dataHandler.js'
 // 'dom.js'
-import {dom} from 'dom.js';
+// import {dom} from 'dom.js';
+import * as dom from './dom.js'
 
 function testHost(playerName){
     return new Promise((resolve, reject) => {
@@ -34,7 +37,7 @@ function testHost(playerName){
 // 'connections' 'dataHandler.js'
 // 'renderApp' 'dom.js'
 // 'createWaitingRoom' 'dom.js'
-function setupConnection(playerName){
+export function setupConnection(playerName){
     const p2pObject = testHost(playerName)
 
     p2pObject
@@ -187,7 +190,7 @@ function setConnectionEvents(c) {
 
 
 // Delayed Response in case connection is closed when still setting up in the background //
-function pushData(c, data, type){
+export function pushData(c, data, type){
     if (c){
         if (!c._open){
             let counter = 0;

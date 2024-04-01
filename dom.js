@@ -1,14 +1,14 @@
 // 'dataHandler.js'
-import {dataHandler} from 'dataHandler.js';
-const gameData = dataHandler.gameData;
+import {gameData} from './dataHandler.js';
+import * as dataHandler from './dataHandler.js';
+// const gameData = dataHandler.gameData;
 // 'players.js'
-import {players} from 'players.js';
-// 'p2p.js'
-import {p2p} from 'p2p.js';
-// 'gameMechanics.js'
-import {game} from 'gameMechanics.js';
+// import {players} from 'players.js';
+import * as playerHandler from './playerHandler.js';
+import * as p2p from './p2p.js';
 
-function createNameInput(cb) {
+
+export function createNameInput(cb) {
     const wrapper = document.createElement('div')
     
     const label = document.createElement('label')
@@ -34,18 +34,16 @@ function createNameInput(cb) {
     return wrapper;
 }
 
-// 'setupConnection' 'p2p.js'
-function handleNameSubmitted(playerName) {
+
+export function handleNameSubmitted(playerName) {
     p2p.setupConnection(playerName);
 }
 
 
-function renderApp(component) {
+export function renderApp(component) {
     document.getElementById('table').replaceChildren(component);
 }
 
-// Start Page //
-renderApp(createNameInput(handleNameSubmitted));
 
 
 function createPlayfield(){
@@ -59,7 +57,7 @@ function createPlayfield(){
 }
 
 // 'gameData' 'dataHandler.js'
-function updatePlayerLabels(){
+export function updatePlayerLabels(){
     removePlayerLabels();
     gameData.players.forEach(player => {
         setPlayerLabels(player);
@@ -101,7 +99,7 @@ function setPlayerLabels(player){
 
 //////////////////////////////////// WAITNG ROOM /////////////////////////////////////////////////
 
-function createWaitingRoom(){
+export function createWaitingRoom(){
     const waitingRoomDiv = document.createElement('div');
     waitingRoomDiv.id = 'waiting-room';
     waitingRoomDiv.append(...createPlayerList())
@@ -124,20 +122,20 @@ function canStartGame(){
     }
 }
 
-// 'initializeGame' 'gameMechanics.js'
+// 'initializeGame' 'dataHandler.js'
 function createStartGameBtn(){
     const startGameBtn = document.createElement('button');
     startGameBtn.innerText ='Start Game';
     
     startGameBtn.addEventListener('click', () => {
-        game.initializeGame();
+        dataHandler.initializeGame();
     })
     return startGameBtn
 }
 
-// 'returnPlayerList' 'players.js'
+// 'returnPlayerList' 'playerHandler.js'
 function createPlayerList() {
-    return players.returnPlayerList().map(player => createPlayerListItem(player))
+    return playerHandler.returnPlayerList().map(player => createPlayerListItem(player))
 }
 
 
@@ -257,14 +255,14 @@ function cardClickEvent(e){
 }
 
 
-// 'netPlayer' 'players.js'
+// 'netPlayer' 'playerHandler.js'
 function createPlayCardsBtn(){
     const btn = `<button id="play-cards">Play Cards</button>`
     document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
 
     document.getElementById('play-cards').addEventListener('click', () => {
         removePlayCardsBtn();
-        players.nextPlayer();
+        playerHandler.nextPlayer();
     })
 }
 
@@ -274,7 +272,7 @@ function removePlayCardsBtn(){
 }
 
 // 'gameData' 'dataHandler.js'
-function swapDomCards(){
+export function swapDomCards(){
     if (gameData.pickedHand && gameData.pickedBank){
         const cardHand = document.getElementById(gameData.pickedHand);
         cardHand.classList.remove('clicked');
@@ -293,7 +291,7 @@ function swapDomCards(){
     }
 }
 
-function startGame(){
+export function startGame(){
     renderApp(createPlayfield());
     handOutDeckCards(300);
     updatePlayerLabels();
