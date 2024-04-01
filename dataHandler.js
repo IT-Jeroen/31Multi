@@ -1,14 +1,11 @@
-// import {gameData} from 'gameData.js'; //
-// import {players} from 'players.js';
-// import {gameMechanics} from 'gameMechanics.js'; //
-// import {p2p} from 'p2p.js';
-// import {dom} from 'dom.js';
+// 'players.js'
+import {players} from 'players.js';
+// 'p2p.js'
+import {p2p} from 'p2p.js';
+// 'gameMechanics.js'
+import {game} from 'gameMechanics.js'
 
-'dom.js'
-'players.js'
-'p2p.js'
-
-
+// const hostName = '31-multi-host-test-id';
 
 const connections = [
     {'name':'Local', 'connectionId': null, 'p': null, 'c': null},
@@ -28,14 +25,15 @@ const players = [
 
 
 const gameData = {
+    hostName: '31-multi-host-test-id',
+    isHost: null,
+    singlePlayer: true,
     players: players,
     cards: null,
     pickedHand: null,
     pickedBank: null,
-    isHost: null,
     activePlayerId: null,
     prevActivePlayerId: null,
-    singlePlayer: true,
 }
 
 
@@ -73,7 +71,8 @@ function addCardsToCardDB(cards){
 }
 
 
-'isAutoPlayerNext' ' players.js'
+// 'updateGame' 'gameMechanics.js'
+// 'isAutoPlayerNext' ' players.js'
 // HOST FUNCTION //
 // on 'data type == 'host-data //
 function updateHost(clientData){
@@ -81,31 +80,32 @@ function updateHost(clientData){
     gameData.pickedBank = clientData.pickedBank;
     gameData.pickedHand = clientData.pickedHand;
     
-    updateGame();
+    game.updateGame();
 
     sendGameData('host');
     gameData.pickedBank = null;
     gameData.pickedHand = null;
 
-    isAutoPlayerNext();
+    players.isAutoPlayerNext();
 }
 
 
+// 'updateGame' 'gameMechanics'
 // CLIENT FUNCTION //
 // on 'data' type == client-data //
 function updateClient(receivedGameData){
     const isClient = true;
     updateGameData(receivedGameData)
-    updateGame(isClient);
+    game.updateGame(isClient);
 
     gameData.pickedHand = null;
     gameData.pickedBank = null;
 }
 
 
-'shuffleHostPlayers' 'players.js'
+// 'shuffleHostPlayers' 'players.js'
 function updateGameData(receivedGameData){
-    const shuffledPlayers = shuffleHostPlayers(receivedGameData.players);
+    const shuffledPlayers = players.shuffleHostPlayers(receivedGameData.players);
     const newGameData = {...receivedGameData};
     newGameData.players = shuffledPlayers;
 
@@ -114,23 +114,25 @@ function updateGameData(receivedGameData){
     })
 }
 
-'pushData' 'p2p.js'
+// CAN MOVE TO P2P.JS ??? //
+// 'pushData' 'p2p.js'
 function sendGameData(id){
     if (id == 'host'){
         connections.forEach(connection => {
-            pushData(connection.c, gameData, 'client-data')
+            p2p.pushData(connection.c, gameData, 'client-data')
         })
     }
     if (id == 'client') {
         const clientData = {pickedBank: gameData.pickedBank, pickedHand: gameData.pickedHand}
-        pushData(connections[0].c, clientData, 'host-data')
+        p2p.pushData(connections[0].c, clientData, 'host-data')
     }
 }
 
-'findPlayerById' 'players.js'
+
+// 'findPlayerById' 'players.js'
 function swapPlayerCards(){
-    const bank = findPlayerById('bank').player;
-    const player = findPlayerById(gameData.activePlayerId).player;
+    const bank = players.findPlayerById('bank').player;
+    const player = players.findPlayerById(gameData.activePlayerId).player;
 
     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
@@ -147,116 +149,4 @@ function swapPlayerCards(){
         console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
     }
     
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-'dom.js'
-'p2p.js'
-'players.js'
-
-
-'pushData' 'p2p.js'
-/// Doesn't Apply to Clients, only Host ///
-function initializeGame(){
-    gameData.activePlayerId = gameData.players[0].data.connectionId;
-    gameData.players[0].data.active = true;
-    dealCards(prepCards())
-    
-    connections.forEach(connection => {
-        pushData(connection.c, gameData, 'start-game');
-    })
-    
-    startGame()
-}
-
-'ALL dom.js'
-function startGame(){
-    renderApp(createPlayfield());
-    handOutDeckCards(300);
-    updatePlayerLabels();
-}
-
-
-function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
-    const cardLabels = ['2','3','4','5','6','7','8','9','10','jack', 'queen', 'king', 'ace'];
-    const cardSuits = ['club', 'diamond', 'heart', 'spade'];
-
-    const min = cardLabels.indexOf(minValue);
-    const max = cardLabels.indexOf(maxValue)+1;
-    const cardLabelRange = cardLabels.slice(min, max);
-
-    let randomIndex = 0;
-
-    // Can be miss-aligned ??? //
-    if (cardLabelRange.length > numCards){
-        console.log('Card Value Range not inline with Number of Playing Cards per Player')
-    }
-
-    const cardsInDeck = [];
-
-    cardLabelRange.forEach(label => {
-        cardSuits.forEach(suit => {
-            cardsInDeck.push(`${suit}_${label}`)
-        })
-    })
-
-    // Randomize cards //
-    for (let index = cardsInDeck.length - 1; index > 0; index--){
-        
-        randomIndex = Math.floor(Math.random() * (index + 1));
-        [cardsInDeck[index], cardsInDeck[randomIndex]] = [cardsInDeck[randomIndex], cardsInDeck[index]]
-        
-      }
-
-    const pickIndex = Math.floor(Math.random() * (cardsInDeck.length - numCards));
-    const  cardsInGame = cardsInDeck.slice(pickIndex, pickIndex + numCards);
-
-    return cardsInGame;
-}
-
-
-// Host function //
-function prepCards(){
-    const numPlayerCards = 3
-    const maxCards = gameData.players.length * numPlayerCards
-    const cardsInGame = createRandomDeckValues(maxCards, '7');
-
-    if (cardsInGame.length / gameData.players.length == numPlayerCards){
-        addCardsToCardDB(cardsInGame);
-
-        connections.forEach(connection => {
-            pushData(connection.c, gameData.cards, 'card-data');
-        })
-        return cardsInGame
-    }
-    else {
-        console.log('CARDS ON TABLE DOES NOT MATCH PLAYERS', cardsInGame.length, gameData.players.length, numPlayerCards);
-        return []
-    }
-}
-
-
-// Host function //
-function dealCards(cardsInGame){
-
-    gameData.players.forEach((player, index) => {
-        player.data.cards = [cardsInGame[index], cardsInGame[index + gameData.players.length], cardsInGame[index + 2 * gameData.players.length]]
-    })
-}
-
-
-'swapDomCards' 'dom.js'
-'swapPlayerCards' 'players.js'
-'setNextPlayerActive' ' players.js'
-'updatePlayerLabels' 'dom.js'
-function updateGame(isClient=false){
-    swapDomCards();
-    if (!isClient){
-        swapPlayerCards();
-        setNextPlayerActive();
-    }
-    updatePlayerLabels();
 }
