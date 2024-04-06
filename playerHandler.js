@@ -1,4 +1,5 @@
-import {gameData} from './dataHandler.js' 
+import { autoPlayerPick } from './autoPlayer.js';
+import { gameData } from './dataHandler.js' 
 import * as dataHandler from './dataHandler.js';
 import * as game from './gameMechanics.js';
 
@@ -65,13 +66,33 @@ export function isAutoPlayerNext(){
 // HOST FUNCTION //
 function autoPlayer(active){
     setTimeout(()=> {
-        gameData.pickedBank = gameData.players[4].data.cards[0];
-        gameData.pickedHand = active.player.data.cards[0];
-        dataHandler.updateHost(gameData);
+        // gameData.pickedBank = gameData.players[4].data.cards[0];
+        // gameData.pickedHand = active.player.data.cards[0];
+        const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
+        const mappedBank = gameData.players[4].data.cards.map(card => gameData.cards[card]);
+        const pickedCards = autoPlayerPick(mappedHand, mappedBank);
+        console.log('PICKED CARDS',pickedCards)
+        if(pickedCards == 'player_pass'){
+            // playerPass(active);
+            active.player.data.pass = true;
+            gameData.pickedHand = null;
+            gameData.pickedBank = null
+        }
+        else{
+            gameData.pickedHand = pickedCards.hand;
+            gameData.pickedBank = pickedCards.bank;
+            // dataHandler.updateHost(gameData);   
+        }
+        dataHandler.updateHost(gameData);  
+        
     }, 2000);
     
 }
 
+// function playerPass(active){
+//     active.player.data.pass = true;
+//     setNextPlayerActive()
+// }
 
 // HOST FUNCTION //
 export function setNextPlayerActive(){

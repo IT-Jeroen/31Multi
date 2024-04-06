@@ -281,7 +281,8 @@ export function swapDomCards(){
         
     }
     else {
-        console.log('Please Select Two Cards!');
+        // console.log('Please Select Two Cards!');
+        console.log('PLAYER PASS');
     }
 }
 

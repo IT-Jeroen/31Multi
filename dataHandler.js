@@ -42,12 +42,12 @@ export function setCardsDB(data){
 }
 
 
-function returnCardValue(card){
+function returnCardValue(icon){
     const charValues = {'ace':11, 'king':10, 'queen':10, 'jack': 10};
-    let cardValue = Number(card.label);
+    let cardValue = Number(icon);
     
     if (!cardValue){
-        cardValue = charValues[card.label];
+        cardValue = charValues[icon];
     }
 
     return cardValue
@@ -57,8 +57,8 @@ function returnCardValue(card){
 export function addCardsToCardDB(cards){
     gameData.cards = {};
     cards.forEach(card => {
-        const cardValue = returnCardValue(card)
         const splitID = card.split('_')
+        const cardValue = returnCardValue(splitID[1]);
         gameData.cards[card] = {value: cardValue, suit: splitID[0], icon: splitID[1]};
     })
 }
