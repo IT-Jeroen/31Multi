@@ -259,6 +259,7 @@ function cardClickEvent(e){
     const center = classes.contains('center');
 
     if (gameData.players[0].data.active){
+        createPassBtn();
         if (south){
             if (gameData.pickedHand){
                 document.getElementById(gameData.pickedHand).classList.remove('clicked');
@@ -285,29 +286,63 @@ function cardClickEvent(e){
 
 
 function createPlayCardsBtn(){
-    const btn = `<button id="play-cards">Play Cards</button>`
-    document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+    if (!document.getElementById('play-cards')){
+        const btn = `<button id="play-cards">Play Cards</button>`
+        document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
 
-    document.getElementById('play-cards').addEventListener('click', () => {
-        removePlayCardsBtn();
+        document.getElementById('play-cards').addEventListener('click', () => {
+        removeBtn();
+        removeClicked();
         playerHandler.nextPlayer();
+    })
+    }
+    
+}
+
+
+function createPassBtn(){
+    if(!document.getElementById('player-pass')){
+        const btn = `<button id="player-pass">PASS</button>`
+        document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+    
+        document.getElementById('player-pass').addEventListener('click', () => {
+            removeBtn();
+            removeClicked();
+            playerHandler.playerPass();
+        })
+    }
+
+}
+
+// function removePlayCardsBtn(){
+//     document.getElementById('play-cards').remove();
+// }
+
+function removeBtn(){
+    document.querySelectorAll(['#player-pass', '#play-cards']).forEach(elem => {
+        elem.remove()
+    })
+    // document.getElementById('player-pass').remove();
+    // document.getElementById('play-cards').remove();
+}
+
+
+function removeClicked(){
+    document.querySelectorAll('.clicked').forEach(elem => {
+        elem.classList.remove('clicked');
     })
 }
 
-
-function removePlayCardsBtn(){
-    document.getElementById('play-cards').remove();
-}
-
-
 export function swapDomCards(){
+    
     if (gameData.pickedHand && gameData.pickedBank){
         const cardHand = document.getElementById(gameData.pickedHand);
-        cardHand.classList.remove('clicked');
-        const handCss = cardHand.className;
-
         const cardBank = document.getElementById(gameData.pickedBank);
+
+        cardHand.classList.remove('clicked');
         cardBank.classList.remove('clicked');
+
+        const handCss = cardHand.className;
         const bankCss = cardBank.className
 
         cardHand.className = bankCss;

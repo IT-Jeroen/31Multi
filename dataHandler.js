@@ -147,6 +147,7 @@ export function swapPlayerCards(){
         player.data.cards = playerArray;
     }
     else {
+        // Should only happen when a player pass, pickedHand and pickBank are null //
         console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
         console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
     }

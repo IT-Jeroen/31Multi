@@ -73,10 +73,9 @@ function autoPlayer(active){
         const pickedCards = autoPlayerPick(mappedHand, mappedBank);
         console.log('PICKED CARDS',pickedCards)
         if(pickedCards == 'player_pass'){
-            // playerPass(active);
             active.player.data.pass = true;
             gameData.pickedHand = null;
-            gameData.pickedBank = null
+            gameData.pickedBank = null;
         }
         else{
             gameData.pickedHand = pickedCards.hand;
@@ -89,10 +88,12 @@ function autoPlayer(active){
     
 }
 
-// function playerPass(active){
-//     active.player.data.pass = true;
-//     setNextPlayerActive()
-// }
+export function playerPass(){
+    gameData.players[0].data.pass = true;
+    gameData.pickedHand = null;
+    gameData.pickedBank = null;
+    nextPlayer()
+}
 
 
 // HOST FUNCTION //

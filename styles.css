@@ -420,5 +420,15 @@ body {
     z-index: 200;
     bottom: 1em;
     left: calc(50% + var(--card-width));
+}
+
+#player-pass{
+    position: absolute;
+    background-color: blue;
+    color: white;
+    padding: 1em;
+    z-index: 200;
+    bottom: 1em;
+    left: calc(50% - var(--card-width));
 
 }
