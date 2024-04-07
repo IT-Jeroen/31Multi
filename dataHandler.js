@@ -90,6 +90,8 @@ export function updateHost(clientData){
     gameData.pickedBank = null;
     gameData.pickedHand = null;
 
+    // if next player == auto, this will trigger the autoPlayer //
+    // else client or host will trigger nextplayer responds //
     playerHandler.isAutoPlayerNext();
 }
 

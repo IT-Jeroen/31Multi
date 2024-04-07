@@ -71,17 +71,7 @@ function setPlayerLabels(player){
     const playFieldElem = document.getElementById('playfield');
 
     if(player.name != 'Bank'){
-
-        if(!player.data.active){
-            const inActiveLabel = `
-            <div class="player-label player-${player.location}">
-                ${player.name}
-            </div>`
-            playFieldElem.insertAdjacentHTML('afterbegin',inActiveLabel);
-            
-        }
-
-        else {
+        if(player.data.active){
             if(player.location != 'south'){
                 const activeLabel = `
                 <div class="player-label player-${player.location} player-active">
@@ -90,8 +80,52 @@ function setPlayerLabels(player){
                 playFieldElem.insertAdjacentHTML('afterbegin',activeLabel);
             }
         }
+
+        if(player.data.pass){
+            const passLabel = `
+            <div class="player-label player-${player.location} player-pass">
+                ${player.name}
+            </div>`
+            playFieldElem.insertAdjacentHTML('afterbegin',passLabel);
+        }
+
+        if (!player.data.active && !player.data.pass){
+            const inActiveLabel = `
+            <div class="player-label player-${player.location}">
+                ${player.name}
+            </div>`
+            playFieldElem.insertAdjacentHTML('afterbegin',inActiveLabel);
+        }
+
     }
 }
+
+
+// function setPlayerLabels(player){
+//     const playFieldElem = document.getElementById('playfield');
+
+//     if(player.name != 'Bank'){
+
+//         if(!player.data.active){
+//             const inActiveLabel = `
+//             <div class="player-label player-${player.location}">
+//                 ${player.name}
+//             </div>`
+//             playFieldElem.insertAdjacentHTML('afterbegin',inActiveLabel);
+            
+//         }
+
+//         else {
+//             if(player.location != 'south'){
+//                 const activeLabel = `
+//                 <div class="player-label player-${player.location} player-active">
+//                     ${player.name}
+//                 </div>`
+//                 playFieldElem.insertAdjacentHTML('afterbegin',activeLabel);
+//             }
+//         }
+//     }
+// }
 
 
 export function createWaitingRoom(){

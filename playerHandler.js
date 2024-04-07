@@ -94,6 +94,7 @@ function autoPlayer(active){
 //     setNextPlayerActive()
 // }
 
+
 // HOST FUNCTION //
 export function setNextPlayerActive(){
     if (gameData.players[0].data.connectionId == gameData.hostName){
@@ -109,9 +110,32 @@ export function setNextPlayerActive(){
         if (index >3){
             index = 0;
         }
-
+        
         gameData.activePlayerId = gameData.players[index].data.connectionId;
         gameData.players[index].data.active = true;
 
+        if (!playerPassCheck(gameData.players[index])){
+            setNextPlayerActive()
+        }
+
+    }
+}
+
+
+// On endGame setNextPlayerActive is waiting on playerPassCheck to continue //
+// playerPassCheck endOfGame does not return anything //
+function playerPassCheck(active){
+    const allPlayerPass = gameData.players.every(player => player.data.pass);
+    if (allPlayerPass){
+        console.log('END OF GAME');
+        // endGame()
+    }
+    else{
+        if (active.data.pass){
+            return false
+        }
+        else {
+            return true
+        }
     }
 }
