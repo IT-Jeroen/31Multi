@@ -26,8 +26,8 @@ export const gameData = {
     singlePlayer: true,
     players: players,
     cards: null,
-    pickedHand: null,
-    pickedBank: null,
+    pickedHand: [],
+    pickedBank: [],
     activePlayerId: null,
     prevActivePlayerId: null,
 }
@@ -87,8 +87,10 @@ export function updateHost(clientData){
     game.updateGame();
 
     sendGameData('host');
-    gameData.pickedBank = null;
-    gameData.pickedHand = null;
+    // gameData.pickedBank = null;
+    // gameData.pickedHand = null;
+    gameData.pickedBank = [];
+    gameData.pickedHand = [];
 
     // if next player == auto, this will trigger the autoPlayer //
     // else client or host will trigger nextplayer responds //
@@ -103,8 +105,10 @@ export function updateClient(receivedGameData){
     updateGameData(receivedGameData)
     game.updateGame(isClient);
 
-    gameData.pickedHand = null;
-    gameData.pickedBank = null;
+    // gameData.pickedHand = null;
+    // gameData.pickedBank = null;
+    gameData.pickedHand = [];
+    gameData.pickedBank = [];
 }
 
 
@@ -132,24 +136,72 @@ export function sendGameData(id){
 }
 
 
+// export function swapPlayerCards(){
+//     const bank = playerHandler.findPlayerById('bank').player;
+//     const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
+
+//     // const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
+//     // const playerArray = player.data.cards.filter(card => card != gameData.pickedHand);
+//     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank[0]);
+//     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand[0]);
+    
+//     if (bankArray.length == 2 && playerArray.length == 2){
+//         // bankArray.push(gameData.pickedHand);
+//         // playerArray.push(gameData.pickedBank);
+//         bankArray.push(gameData.pickedHand[0]);
+//         playerArray.push(gameData.pickedBank[0]);
+        
+//         bank.data.cards = bankArray;
+//         player.data.cards = playerArray;
+//     }
+//     else {
+//         // Should only happen when a player pass, pickedHand and pickBank are null //
+//         console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
+//         console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
+//     }
+    
+// }
+
+
 export function swapPlayerCards(){
     const bank = playerHandler.findPlayerById('bank').player;
     const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
 
-    const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
-    const playerArray = player.data.cards.filter(card => card != gameData.pickedHand)
-    
-    if (bankArray.length == 2 && playerArray.length == 2){
-        bankArray.push(gameData.pickedHand);
-        playerArray.push(gameData.pickedBank);
-        
-        bank.data.cards = bankArray;
-        player.data.cards = playerArray;
+    if (gameData.pickedBank.length == gameData.pickedHand.length){
+        gameData.pickedBank.forEach((pickedCard,index) => {
+            const bankArray = bank.data.cards.filter(card => card != pickedCard);
+            const playerArray = player.data.cards.filter(card => card != gameData.pickedHand[index]);
+
+            if (bankArray.length == 2 && playerArray.length == 2){
+                bankArray.push(gameData.pickedHand[index]);
+                playerArray.push(pickedCard);
+                
+                bank.data.cards = bankArray;
+                player.data.cards = playerArray;
+            }
+            else {
+                console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
+                console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
+            }
+        })
     }
-    else {
-        // Should only happen when a player pass, pickedHand and pickBank are null //
-        console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
-        console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
-    }
-    
 }
+
+
+// // isn't called anywhere //
+// export function swapBankCards(){
+//     const bank = playerHandler.findPlayerById('bank').player;
+//     const bankCards = [...bank.data.cards];
+//     const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
+//     const playerCards = [...player.data.cards];
+
+//     if(bankCards.length == 3 && playerCards.length == 3){
+//         bank.data.cards = playerCards;
+//         player.data.cards = bankCards;
+//         // set player pass to true
+//     }
+//     else {
+//         console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
+//     }
+
+// }

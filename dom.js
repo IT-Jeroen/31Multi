@@ -259,26 +259,26 @@ function cardClickEvent(e){
     const center = classes.contains('center');
 
     if (gameData.players[0].data.active){
-        createPassBtn();
+        // createPassBtn();
         if (south){
-            if (gameData.pickedHand){
-                document.getElementById(gameData.pickedHand).classList.remove('clicked');
+            if (gameData.pickedHand[0]){
+                document.getElementById(gameData.pickedHand[0]).classList.remove('clicked');
             }
-            gameData.pickedHand = e.currentTarget.id;
+            gameData.pickedHand = [e.currentTarget.id];
     
             e.currentTarget.classList.add('clicked');
         }
     
         if (center){
-            if (gameData.pickedBank){
-                document.getElementById(gameData.pickedBank).classList.remove('clicked');
+            if (gameData.pickedBank[0]){
+                document.getElementById(gameData.pickedBank[0]).classList.remove('clicked');
             }
     
-            gameData.pickedBank = e.currentTarget.id;
+            gameData.pickedBank = [e.currentTarget.id];
             e.currentTarget.classList.add('clicked');
         }
 
-        if (gameData.pickedBank && gameData.pickedHand){
+        if (gameData.pickedBank[0] && gameData.pickedHand[0]){
             createPlayCardsBtn()
         }
     }
@@ -300,7 +300,7 @@ function createPlayCardsBtn(){
 }
 
 
-function createPassBtn(){
+export function createPassBtn(){
     if(!document.getElementById('player-pass')){
         const btn = `<button id="player-pass">PASS</button>`
         document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
@@ -314,12 +314,30 @@ function createPassBtn(){
 
 }
 
+export function createSwapBankBtn(){
+    if(!document.getElementById('swap-bank')){
+        const btn = `<button id="swap-bank">SWAP BANK</button>`
+        document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+    
+        document.getElementById('swap-bank').addEventListener('click', () => {
+            removeBtn();
+            removeClicked();
+            const player = gameData.players[0]
+            const bank = gameData.players[4];
+            gameData.pickedHand = player.data.cards;
+            gameData.pickedBank = bank.data.cards;
+            playerHandler.nextPlayer();
+        })
+    }
+
+}
+
 // function removePlayCardsBtn(){
 //     document.getElementById('play-cards').remove();
 // }
 
 function removeBtn(){
-    document.querySelectorAll(['#player-pass', '#play-cards']).forEach(elem => {
+    document.querySelectorAll(['#player-pass', '#play-cards', '#swap-bank']).forEach(elem => {
         elem.remove()
     })
     // document.getElementById('player-pass').remove();
@@ -333,31 +351,74 @@ function removeClicked(){
     })
 }
 
-export function swapDomCards(){
-    
-    if (gameData.pickedHand && gameData.pickedBank){
-        const cardHand = document.getElementById(gameData.pickedHand);
-        const cardBank = document.getElementById(gameData.pickedBank);
+// export function swapDomCards(){
+//     // if (gameData.pickedHand.length == 1 && gameData.pickedBank.length == 1){
+//     if (gameData.pickedHand && gameData.pickedBank){
+//         // const cardHand = document.getElementById(gameData.pickedHand[0]);
+//         // const cardBank = document.getElementById(gameData.pickedBank[0]);
+//         const cardHand = document.getElementById(gameData.pickedHand);
+//         const cardBank = document.getElementById(gameData.pickedBank);
 
-        cardHand.classList.remove('clicked');
-        cardBank.classList.remove('clicked');
+//         cardHand.classList.remove('clicked');
+//         cardBank.classList.remove('clicked');
 
-        const handCss = cardHand.className;
-        const bankCss = cardBank.className
+//         const handCss = cardHand.className;
+//         const bankCss = cardBank.className
 
-        cardHand.className = bankCss;
-        cardBank.className = handCss;
+//         cardHand.className = bankCss;
+//         cardBank.className = handCss;
         
+//     }
+//     else {
+//         // console.log('Please Select Two Cards!');
+//         console.log('PLAYER PASS');
+//     }
+// }
+
+
+export function swapDomCards(){
+    if (gameData.pickedBank.length == gameData.pickedHand.length){
+        gameData.pickedBank.forEach((card,index) => {
+            const cardHand = document.getElementById(gameData.pickedHand[index]);
+            const cardBank = document.getElementById(card);
+            
+            const handCss = cardHand.className;
+            const bankCss = cardBank.className;
+    
+            cardHand.className = bankCss;
+            cardBank.className = handCss;
+        })
     }
     else {
-        // console.log('Please Select Two Cards!');
-        console.log('PLAYER PASS');
+
     }
+
 }
+
+
+
+// export function swapDomBankCards(){
+//     const active = playerHandler.findPlayerById(gameData.activePlayerId);
+//     const bank = gameData.players[4];
+//     for (let i = 0; i<3;i++){
+//         const cardHand = document.getElementById(active.player.data.cards[i]);
+//         const cardBank = document.getElementById(bank.data.cards[i]);
+        
+//         const handCss = cardHand.className;
+//         const bankCss = cardBank.className;
+
+//         cardHand.className = bankCss;
+//         cardBank.className = handCss;
+//     }
+// }
 
 
 export function startGame(){
     renderApp(createPlayfield());
     handOutDeckCards(300);
     updatePlayerLabels();
+    if (gameData.players[0].data.active){
+        createPassBtn();
+        createSwapBankBtn();
+    }
 }

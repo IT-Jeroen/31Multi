@@ -73,11 +73,44 @@ export function dealCards(cardsInGame){
 }
 
 
+// null has no length //
 export function updateGame(isClient=false){
+
     dom.swapDomCards();
     if (!isClient){
         dataHandler.swapPlayerCards();
         playerHandler.setNextPlayerActive();
     }
     dom.updatePlayerLabels();
+
+    if (gameData.players[0].data.active){
+        dom.createPassBtn();
+        dom.createSwapBankBtn();
+    }
 }
+
+// // null has no length //
+// export function updateGame(isClient=false){
+//     if (gameData.pickedHand.length == 3 & gameData.pickedBank.length == 3){
+//         dom.swapDomBankCards();
+//         if (!isClient){
+//             dataHandler.swapBankCards();
+//             playerHandler.setNextPlayerActive();
+//         }
+//         dom.updatePlayerLabels();
+//     }
+//     else{
+//         dom.swapDomCards();
+//         if (!isClient){
+//             dataHandler.swapPlayerCards();
+//             playerHandler.setNextPlayerActive();
+//         }
+//         dom.updatePlayerLabels();
+//     }
+    
+
+//     if (gameData.players[0].data.active){
+//         dom.createPassBtn();
+//         dom.createSwapBankBtn();
+//     }
+// }

@@ -35,12 +35,16 @@ export function findPlayerById(connectionId){
 }
 
 
+
 export function nextPlayer(){
     if (gameData.singlePlayer){
+        // sets pass button only after first round //
         game.updateGame();
 
-        gameData.pickedBank = null;
-        gameData.pickedHand = null;
+        // gameData.pickedBank = null;
+        // gameData.pickedHand = null;
+        gameData.pickedBank = [];
+        gameData.pickedHand = [];
 
         isAutoPlayerNext()
     }
@@ -66,21 +70,20 @@ export function isAutoPlayerNext(){
 // HOST FUNCTION //
 function autoPlayer(active){
     setTimeout(()=> {
-        // gameData.pickedBank = gameData.players[4].data.cards[0];
-        // gameData.pickedHand = active.player.data.cards[0];
         const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
         const mappedBank = gameData.players[4].data.cards.map(card => gameData.cards[card]);
         const pickedCards = autoPlayerPick(mappedHand, mappedBank);
         console.log('PICKED CARDS',pickedCards)
         if(pickedCards == 'player_pass'){
             active.player.data.pass = true;
-            gameData.pickedHand = null;
-            gameData.pickedBank = null;
+            // gameData.pickedHand = null;
+            // gameData.pickedBank = null;
+            gameData.pickedHand = [];
+            gameData.pickedBank = [];
         }
         else{
-            gameData.pickedHand = pickedCards.hand;
-            gameData.pickedBank = pickedCards.bank;
-            // dataHandler.updateHost(gameData);   
+            gameData.pickedHand = [pickedCards.hand];
+            gameData.pickedBank = [pickedCards.bank]; 
         }
         dataHandler.updateHost(gameData);  
         
@@ -90,8 +93,10 @@ function autoPlayer(active){
 
 export function playerPass(){
     gameData.players[0].data.pass = true;
-    gameData.pickedHand = null;
-    gameData.pickedBank = null;
+    // gameData.pickedHand = null;
+    // gameData.pickedBank = null;
+    gameData.pickedHand = [];
+    gameData.pickedBank = [];
     nextPlayer()
 }
 
