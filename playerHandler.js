@@ -134,6 +134,8 @@ function playerPassCheck(active){
     const allPlayerPass = gameData.players.every(player => player.data.pass);
     if (allPlayerPass){
         console.log('END OF GAME');
+        // a bit counter intuative, but this is to stop inifinite recursion of nextPlayer() //
+        return true
         // endGame()
     }
     else{
