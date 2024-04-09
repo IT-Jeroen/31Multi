@@ -78,9 +78,9 @@ function returnHandCombos(mappedCards){
 function pickBestCombo(mappedHand, mappedBank){
     let bestCombo = null;
     const bestSuitCombo = testCardCombos(mappedHand, mappedBank, 'suit');
-    console.log('SUIT',bestSuitCombo);
+    // console.log('SUIT',bestSuitCombo);
     const bestIconCombo = testCardCombos(mappedHand, mappedBank, 'icon');
-    console.log('ICON', bestIconCombo);
+    // console.log('ICON', bestIconCombo);
     
     if (bestSuitCombo.length == bestIconCombo.length){
         if(bestSuitCombo.length != 0 && bestIconCombo.length != 0){
@@ -103,7 +103,7 @@ function pickBestCombo(mappedHand, mappedBank){
         bestCombo = bestIconCombo
     }
 
-    console.log('BEST COMBO', bestCombo)
+    // console.log('BEST COMBO', bestCombo)
 
     return bestCombo
 }
@@ -161,7 +161,7 @@ function returnHighestValueCard(mappedCards){
 
 function pickHandCard(mappedHand, keepCards){
     let pickedHand = null;
-    console.log('KEEP CARDS in hand', keepCards);
+    // console.log('KEEP CARDS in hand', keepCards);
     let pickHandCards = mappedHand.filter(card => !keepCards.includes(card));
     if (pickHandCards.length == 0){
         pickHandCards = [...keepCards];
@@ -191,9 +191,27 @@ function autoPlayerPass(mappedCards){
 }
 
 
+function takeBank(mappedHand, pickedHand, mappedBank, pickedBank, ){
+    const testHand = mappedHand.filter(card => card != pickedHand);
+    testHand.push(pickedBank);
+    const handScore = calculateHand(testHand);
+    const bankScore = calculateHand(mappedBank);
+
+    if (bankScore > handScore){
+        if (autoPlayerPass(mappedBank)){
+            console.log('AUTO PLAYER BANK SWAP')
+            return true
+        }
+    }
+    return false
+}
+
+
 export function autoPlayerPick(mappedHand, mappedBank){
-    let pickedBank = null;
-    let pickedHand = null;
+    // let pickedBank = null;
+    // let pickedHand = null;
+    let pickedBank = [];
+    let pickedHand = [];
     const bestCombo = pickBestCombo(mappedHand, mappedBank);
     
     if (!bestCombo){
@@ -208,6 +226,7 @@ export function autoPlayerPick(mappedHand, mappedBank){
         if (pickedBank != 'player_pass' && mappedBank.includes(pickedBank)){
             const keepCards = bestCombo.slice(1);
             pickedHand = pickHandCard(mappedHand, keepCards);
+
         }
         
         else {
@@ -216,19 +235,40 @@ export function autoPlayerPick(mappedHand, mappedBank){
             if (!autoPlayerPass(mappedHand)){
                 const keepCards = [...bestCombo];
                 pickedHand = pickHandCard(mappedHand, keepCards);
-
                 pickedBank = returnHighestValueCard(mappedBank);
+
+
             }
             else {
-                // pickedHand = {suit:'player', icon:'pass'};
-                // pickedBank = {suit:'player', icon:'pass'};
-                console.log('PLAYER PASS');
-                return 'player_pass'
+
+                // console.log('AUTO PLAYER PASS');
+                return {hand: [], bank: []}
             }
         }
     }
-    console.log('PICKED BANK', pickedBank);
-    console.log('PICKED HAND', pickedHand);
-    // 
-    return {hand: `${pickedHand.suit}_${pickedHand.icon}`, bank: `${pickedBank.suit}_${pickedBank.icon}`}
+
+    // console.log('PICKED BANK', pickedBank);
+    // console.log('PICKED HAND', pickedHand);
+
+    if (takeBank(mappedHand, pickedHand, mappedBank, pickedBank)){
+        // pickedHand = Object.keys(mappedHand);
+        // pickedBank = Object.keys(mappedBank);
+        const hand = [];
+        const bank = [];
+        for (let i = 0; i < 3; i++){
+            hand.push(`${mappedHand[i].suit}_${mappedHand[i].icon}`);
+            bank.push(`${mappedBank[i].suit}_${mappedBank[i].icon}`);
+        }
+        return {hand: hand, bank: bank}
+    }
+    else {
+        return {hand: [`${pickedHand.suit}_${pickedHand.icon}`], bank: [`${pickedBank.suit}_${pickedBank.icon}`]}
+    }
+
+    // console.log('PICKED BANK', pickedBank);
+    // console.log('PICKED HAND', pickedHand);
+    // // 
+    // return {hand: `${pickedHand.suit}_${pickedHand.icon}`, bank: `${pickedBank.suit}_${pickedBank.icon}`}
 }
+
+

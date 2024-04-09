@@ -30,6 +30,7 @@ export const gameData = {
     pickedBank: [],
     activePlayerId: null,
     prevActivePlayerId: null,
+    endOfGame: false,
 }
 
 
@@ -83,6 +84,12 @@ export function updateHost(clientData){
 
     gameData.pickedBank = clientData.pickedBank;
     gameData.pickedHand = clientData.pickedHand;
+
+    if (gameData.pickedBank.length == 0 || gameData.pickedBank.length == 3){
+        // Player Pass //
+        const active = playerHandler.findPlayerById(gameData.activePlayerId);
+        active.player.data.pass = true; 
+    }
     
     game.updateGame();
 

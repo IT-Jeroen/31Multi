@@ -258,7 +258,7 @@ function cardClickEvent(e){
     const south = classes.contains('south');
     const center = classes.contains('center');
 
-    if (gameData.players[0].data.active){
+    if (gameData.players[0].data.active && !gameData.endOfGame){
         // createPassBtn();
         if (south){
             if (gameData.pickedHand[0]){
@@ -322,7 +322,8 @@ export function createSwapBankBtn(){
         document.getElementById('swap-bank').addEventListener('click', () => {
             removeBtn();
             removeClicked();
-            const player = gameData.players[0]
+            const player = gameData.players[0];
+            player.data.pass = true;
             const bank = gameData.players[4];
             gameData.pickedHand = player.data.cards;
             gameData.pickedBank = bank.data.cards;

@@ -37,34 +37,70 @@ export function findPlayerById(connectionId){
 
 
 export function nextPlayer(){
-    if (gameData.singlePlayer){
-        // sets pass button only after first round //
-        game.updateGame();
+    console.log('GAME DATA', gameData)
+    if (!gameData.endOfGame){
+        if (gameData.singlePlayer){
 
-        // gameData.pickedBank = null;
-        // gameData.pickedHand = null;
-        gameData.pickedBank = [];
-        gameData.pickedHand = [];
-
-        isAutoPlayerNext()
-    }
-    else {
-        if (gameData.players[0].data.connectionId == gameData.hostName){
-            game.updateGame()
-            dataHandler.sendGameData('host')
+            game.updateGame();
+    
+            // gameData.pickedBank = null;
+            // gameData.pickedHand = null;
+            gameData.pickedBank = [];
+            gameData.pickedHand = [];
+    
+            isAutoPlayerNext()
         }
         else {
-            dataHandler.sendGameData('client');
+            if (gameData.players[0].data.connectionId == gameData.hostName){
+                game.updateGame()
+                dataHandler.sendGameData('host')
+            }
+            else {
+                dataHandler.sendGameData('client');
+            }
         }
     }
+    else{
+        console.log('END OF GAME');
+    }
+
 }
 
 
 export function isAutoPlayerNext(){
     if (gameData.activePlayerId.slice(0,4) == 'auto'){
-        autoPlayer(findPlayerById(gameData.activePlayerId));
+        if (!gameData.endOfGame){
+            autoPlayer(findPlayerById(gameData.activePlayerId));
+            // console.log('GAME DATA', gameData)
+        }
     }
 }
+
+
+// // HOST FUNCTION //
+// function autoPlayer(active){
+//     setTimeout(()=> {
+//         const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
+//         const mappedBank = gameData.players[4].data.cards.map(card => gameData.cards[card]);
+//         const pickedCards = autoPlayerPick(mappedHand, mappedBank);
+//         console.log('AUTO PICKED CARDS',pickedCards)
+//         if(pickedCards == 'player_pass'){
+//             active.player.data.pass = true;
+//             // gameData.pickedHand = null;
+//             // gameData.pickedBank = null;
+//             gameData.pickedHand = [];
+//             gameData.pickedBank = [];
+//         }
+//         else{
+//             gameData.pickedHand = [pickedCards.hand];
+//             gameData.pickedBank = [pickedCards.bank]; 
+//         }
+//         dataHandler.updateHost(gameData);  
+        
+//     }, 2000);
+    
+// }
+
 
 
 // HOST FUNCTION //
@@ -73,8 +109,9 @@ function autoPlayer(active){
         const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
         const mappedBank = gameData.players[4].data.cards.map(card => gameData.cards[card]);
         const pickedCards = autoPlayerPick(mappedHand, mappedBank);
-        console.log('PICKED CARDS',pickedCards)
-        if(pickedCards == 'player_pass'){
+        // console.log('AUTO PICKED CARDS',pickedCards)
+        if(pickedCards.hand.length == 0 && pickedCards.bank.length == 0){
+            console.log('AUTO PLAYER PASS')
             active.player.data.pass = true;
             // gameData.pickedHand = null;
             // gameData.pickedBank = null;
@@ -82,14 +119,18 @@ function autoPlayer(active){
             gameData.pickedBank = [];
         }
         else{
-            gameData.pickedHand = [pickedCards.hand];
-            gameData.pickedBank = [pickedCards.bank]; 
+            gameData.pickedHand = pickedCards.hand;
+            gameData.pickedBank = pickedCards.bank; 
+            if (pickedCards.bank.length == 3){
+                active.player.data.pass = true;
+            }
         }
         dataHandler.updateHost(gameData);  
         
     }, 2000);
     
 }
+
 
 export function playerPass(){
     gameData.players[0].data.pass = true;
@@ -129,11 +170,12 @@ export function setNextPlayerActive(){
 
 
 // On endGame setNextPlayerActive is waiting on playerPassCheck to continue //
-// playerPassCheck endOfGame does not return anything //
+
 function playerPassCheck(active){
     const allPlayerPass = gameData.players.every(player => player.data.pass);
     if (allPlayerPass){
-        console.log('END OF GAME');
+        // console.log('END OF GAME');
+        gameData.endOfGame = true;
         // a bit counter intuative, but this is to stop inifinite recursion of nextPlayer() //
         return true
         // endGame()
