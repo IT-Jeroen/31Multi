@@ -107,7 +107,8 @@ export function updateHost(clientData){
         playerHandler.isAutoPlayerNext();
     }
     else {
-        console.log('updateHost END OF GAME')
+        console.log('updateHost END OF GAME');
+        dom.flipAllCards();
     }
     
 }

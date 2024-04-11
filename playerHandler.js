@@ -2,6 +2,7 @@ import { autoPlayerPick } from './autoPlayer.js';
 import { gameData } from './dataHandler.js' 
 import * as dataHandler from './dataHandler.js';
 import * as game from './gameMechanics.js';
+import * as dom from './dom.js';
 
 
 export function returnPlayerList(){
@@ -71,6 +72,7 @@ export function nextPlayer(){
     }
     else{
         console.log('nextPlayer END OF GAME');
+        // dom.flipAllCards()
     }
 
 }
@@ -86,6 +88,7 @@ export function isAutoPlayerNext(){
         }
         else {
             console.log('isAutoPlayerNext END OF GAME');
+            // dom.flipAllCards()
         }
     }
     else {

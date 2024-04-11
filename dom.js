@@ -294,7 +294,7 @@ function createPlayCardsBtn(){
         removeBtn();
         removeClicked();
         playerHandler.nextPlayer();
-    })
+        })
     }
     
 }
@@ -398,6 +398,13 @@ export function swapDomCards(){
 }
 
 
+export function flipAllCards(){
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const classStr = card.className;
+        card.className = `${classStr}-open`;
+    })
+}
 
 // export function swapDomBankCards(){
 //     const active = playerHandler.findPlayerById(gameData.activePlayerId);
@@ -415,6 +422,9 @@ export function swapDomCards(){
 // }
 
 
+
+
+
 export function startGame(){
     renderApp(createPlayfield());
     handOutDeckCards(300);
@@ -423,8 +433,4 @@ export function startGame(){
         createPassBtn();
         createSwapBankBtn();
     }
-}
-
-export function setEndOfGame(){
-    gameData.endOfGame = true;
 }

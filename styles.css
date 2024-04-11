@@ -189,6 +189,7 @@ body {
     background-color: blue;
 }
 
+/* ------------------------------------------------------------------------------------------ */
 
 .north {
     position: absolute;
@@ -307,9 +308,132 @@ body {
     z-index: 3;
 }
 
+
+/* ---------------------------------------- OPEN ------------------------------------------------------ */
+
+.north-open {
+    position: absolute;
+    top: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) - var(--overlap));
+    transform: rotateZ(180deg);
+    z-index: 1;
+}
+
+.north-open ~ .north-open{
+    position: absolute;
+    top: 0rem;
+    left: calc(50% - 0.5 * var(--card-width));
+    transform: rotateZ(180deg);
+    z-index: 2;
+}
+
+.north-open ~ .north-open ~ .north-open {
+    position: absolute;
+    top: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) + var(--overlap));
+    transform: rotateZ(180deg);
+    z-index: 3;
+}
+
+.south-open {
+    position: absolute;
+    bottom: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) - var(--overlap));
+    transform: rotateZ(0deg);
+    z-index: 1;
+}
+
+.south-open ~ .south-open{
+    position: absolute;
+    bottom: 0rem;
+    left: calc(50% - 0.5 * var(--card-width));
+    transform: rotateZ(0deg);
+    z-index: 2;
+}
+
+.south-open ~ .south-open ~ .south-open {
+    position: absolute;
+    bottom: 0rem;
+    left: calc(50% - 0.5 * var(--card-width) + var(--overlap));
+    transform: rotateZ(0deg);
+    z-index: 3;
+}
+
+.west-open {
+    position: absolute;
+    left: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) - var(--overlap));
+    transform: rotateZ(90deg);
+    z-index: 1;
+}
+
+.west-open ~ .west-open{
+    position: absolute;
+    left: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height));
+    transform: rotateZ(90deg);
+    z-index: 2;
+}
+
+.west-open ~ .west-open ~ .west-open{
+    position: absolute;
+    left: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) + var(--overlap));
+    transform: rotateZ(90deg);
+    z-index: 3;
+}
+
+.east-open {
+    position: absolute;
+    right: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) - var(--overlap));
+    transform: rotateZ(270deg);
+    z-index: 1;
+}
+
+.east-open ~ .east-open{
+    position: absolute;
+    right: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height));
+    transform: rotateZ(270deg);
+    z-index: 2;
+}
+
+.east-open ~ .east-open ~ .east-open{
+    position: absolute;
+    right: var(--width-height-offset);
+    top: calc(50% - 0.5 * var(--card-height) + var(--overlap));
+    transform: rotateZ(270deg);
+    z-index: 3;
+}
+
+.center-open {
+    position: absolute;
+    left: calc(50% - 1.5 * var(--card-width) - 0.5em);
+    top: calc(50% - 0.5 * var(--card-height));
+    z-index: 1;
+}
+
+.center-open ~ .center-open{
+    position: absolute;
+    left: calc(50% - 0.5 * var(--card-width));
+    top: calc(50% - 0.5 * var(--card-height));
+    z-index: 2;
+}
+
+.center-open ~ .center-open ~ .center-open{
+    position: absolute;
+    left: calc(50% + 0.5 * var(--card-width) + 0.5em);
+    top: calc(50% - 0.5 * var(--card-height));
+    z-index: 3;
+}
+
+/* ------------------------------------------------------------------------------------------------------- */
+
 .flipped {
     transform: rotateY(180deg);
 }
+
 
 .deck{
     position: absolute;
