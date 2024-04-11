@@ -72,7 +72,7 @@ function setPlayerLabels(player){
 
     if(player.name != 'Bank'){
         if(player.data.active){
-            if(player.location != 'south'){
+            if(player.location != 'south' && !player.data.pass){
                 const activeLabel = `
                 <div class="player-label player-${player.location} player-active">
                     ${player.name}
@@ -308,7 +308,8 @@ export function createPassBtn(){
         document.getElementById('player-pass').addEventListener('click', () => {
             removeBtn();
             removeClicked();
-            playerHandler.playerPass();
+            playerHandler.setPlayerPass();
+            playerHandler.nextPlayer();
         })
     }
 
@@ -422,4 +423,8 @@ export function startGame(){
         createPassBtn();
         createSwapBankBtn();
     }
+}
+
+export function setEndOfGame(){
+    gameData.endOfGame = true;
 }

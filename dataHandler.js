@@ -12,11 +12,11 @@ export const connections = [
 ]
 
 const players = [
-    {'name':'Local', 'location': 'south', 'data':{ 'connectionId': 'local', 'cards':[], 'last-dropped-cards': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
-    {'name':'Auto 1', 'location': 'west', 'data':{ 'connectionId': 'auto-1', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 2', 'location': 'north', 'data':{ 'connectionId': 'auto-2', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 3', 'location': 'east', 'data':{ 'connectionId': 'auto-3', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': 'bank', 'cards':[], 'last-dropped-cards': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+    {'name':'Local', 'location': 'south', 'data':{ 'connectionId': 'local', 'cards':[], 'history': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
+    {'name':'Auto 1', 'location': 'west', 'data':{ 'connectionId': 'auto-1', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 2', 'location': 'north', 'data':{ 'connectionId': 'auto-2', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 3', 'location': 'east', 'data':{ 'connectionId': 'auto-3', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': 'bank', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
 
 
@@ -78,7 +78,7 @@ export function initializeGame(){
 }
 
 
-// HOST FUNCTION //
+// HOST FUNCTION (Auto Player)//
 // on 'data type == 'host-data //
 export function updateHost(clientData){
 
@@ -89,11 +89,13 @@ export function updateHost(clientData){
         // Player Pass //
         const active = playerHandler.findPlayerById(gameData.activePlayerId);
         active.player.data.pass = true; 
+        console.log('PLAYER PASS', active.player.name)
     }
     
     game.updateGame();
 
-    sendGameData('host');
+    const sender = 'host';
+    sendGameData(sender);
     // gameData.pickedBank = null;
     // gameData.pickedHand = null;
     gameData.pickedBank = [];
@@ -101,7 +103,13 @@ export function updateHost(clientData){
 
     // if next player == auto, this will trigger the autoPlayer //
     // else client or host will trigger nextplayer responds //
-    playerHandler.isAutoPlayerNext();
+    if (!gameData.endOfGame){
+        playerHandler.isAutoPlayerNext();
+    }
+    else {
+        console.log('updateHost END OF GAME')
+    }
+    
 }
 
 

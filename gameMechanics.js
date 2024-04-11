@@ -73,7 +73,6 @@ export function dealCards(cardsInGame){
 }
 
 
-// null has no length //
 export function updateGame(isClient=false){
 
     dom.swapDomCards();
@@ -83,7 +82,7 @@ export function updateGame(isClient=false){
     }
     dom.updatePlayerLabels();
 
-    if (gameData.players[0].data.active){
+    if (gameData.players[0].data.active && !gameData.players[0].data.pass){
         dom.createPassBtn();
         dom.createSwapBankBtn();
     }

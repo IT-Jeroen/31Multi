@@ -120,7 +120,6 @@ function pickBankCard(bestCombo){
             pickedBank = bankCard
         }
         else {
-            // playerPass()
             pickedBank = 'player_pass'
         }
     }
