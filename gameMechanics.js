@@ -88,8 +88,9 @@ export function dealCards(cardsInGame){
 // }
 
 export function updateGame(isClient=false){
-    console.log('UPDATE GAME')
+    
     if (!gameData.endOfGame){
+        console.log('UPDATE GAME CONTINUE')
         dom.swapDomCards();
         if (!isClient){
             dataHandler.swapPlayerCards();
@@ -104,14 +105,13 @@ export function updateGame(isClient=false){
         }
     }
     else{
+        console.log('UPDATE GAME END OF GAME')
         dom.swapDomCards();
-        if (!isClient){
-            dataHandler.swapPlayerCards();
-            playerHandler.setNextPlayerActive();
-        }
+        // if (!isClient){
+        //     dataHandler.swapPlayerCards();
+        //     playerHandler.setNextPlayerActive();
+        // }
         dom.updatePlayerLabels();
-        
-        console.log('updateGame END OF GAME')
         dom.flipAllCards();
     }
     

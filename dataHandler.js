@@ -92,6 +92,8 @@ export function updateHost(clientData){
         // console.log('PLAYER PASS', active.player.name)
     }
     
+    const allPlayerPass = gameData.players.every(player => player.data.pass);
+    gameData.endOfGame = allPlayerPass
     game.updateGame();
 
     const sender = 'host';
@@ -103,7 +105,7 @@ export function updateHost(clientData){
 
     // if next player == auto, this will trigger the autoPlayer //
     // else client or host will trigger nextplayer responds //
-    const allPlayerPass = gameData.players.every(player => player.data.pass);
+    // const allPlayerPass = gameData.players.every(player => player.data.pass);
     // console.log('Update Host')
     // console.log('PLAYER:',gameData.prevActivePlayerId);
     // console.log('End of Game',gameData.endOfGame, 'All Pass', allPlayerPass);
@@ -115,9 +117,13 @@ export function updateHost(clientData){
     //     // console.log('updateHost END OF GAME');
     //     dom.flipAllCards();
     // }
-    if (gameData.endOfGame || allPlayerPass){
-        dom.flipAllCards()
-    }
+
+
+    // // NEEDED IN SINGLE PLAYER //
+    // if (gameData.endOfGame || allPlayerPass){
+    //     console.log('updateHost flipAllCards')
+    //     dom.flipAllCards()
+    // }
     
 }
 
@@ -133,10 +139,10 @@ export function updateClient(receivedGameData){
         gameData.pickedHand = [];
         gameData.pickedBank = [];
     }
-    else {
-        updateGameData(receivedGameData);
-        dom.flipAllCards();
-    }
+    // else {
+    //     updateGameData(receivedGameData);
+    //     dom.flipAllCards();
+    // }
     
 }
 
