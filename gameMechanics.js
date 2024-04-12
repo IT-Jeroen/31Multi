@@ -73,43 +73,45 @@ export function dealCards(cardsInGame){
 }
 
 
-export function updateGame(isClient=false){
-
-    dom.swapDomCards();
-    if (!isClient){
-        dataHandler.swapPlayerCards();
-        playerHandler.setNextPlayerActive();
-    }
-    dom.updatePlayerLabels();
-
-    if (gameData.players[0].data.active && !gameData.players[0].data.pass){
-        dom.createPassBtn();
-        dom.createSwapBankBtn();
-    }
-}
-
-// // null has no length //
 // export function updateGame(isClient=false){
-//     if (gameData.pickedHand.length == 3 & gameData.pickedBank.length == 3){
-//         dom.swapDomBankCards();
-//         if (!isClient){
-//             dataHandler.swapBankCards();
-//             playerHandler.setNextPlayerActive();
-//         }
-//         dom.updatePlayerLabels();
+//     dom.swapDomCards();
+//     if (!isClient){
+//         dataHandler.swapPlayerCards();
+//         playerHandler.setNextPlayerActive();
 //     }
-//     else{
-//         dom.swapDomCards();
-//         if (!isClient){
-//             dataHandler.swapPlayerCards();
-//             playerHandler.setNextPlayerActive();
-//         }
-//         dom.updatePlayerLabels();
-//     }
-    
+//     dom.updatePlayerLabels();
 
-//     if (gameData.players[0].data.active){
+//     if (gameData.players[0].data.active && !gameData.players[0].data.pass){
 //         dom.createPassBtn();
 //         dom.createSwapBankBtn();
 //     }
 // }
+
+export function updateGame(isClient=false){
+    if (!gameData.endOfGame){
+        dom.swapDomCards();
+        if (!isClient){
+            dataHandler.swapPlayerCards();
+            playerHandler.setNextPlayerActive();
+        }
+        dom.updatePlayerLabels();
+
+        if (gameData.players[0].data.active && !gameData.players[0].data.pass){
+            dom.createPassBtn();
+            dom.createSwapBankBtn();
+        }
+    }
+    else{
+        dom.swapDomCards();
+        if (!isClient){
+            dataHandler.swapPlayerCards();
+            playerHandler.setNextPlayerActive();
+        }
+        dom.updatePlayerLabels();
+        
+        console.log('updateGame END OF GAME')
+        dom.flipAllCards();
+    }
+    
+}
+

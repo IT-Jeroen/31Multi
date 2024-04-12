@@ -36,65 +36,113 @@ export function findPlayerById(connectionId){
 }
 
 
+// export function nextPlayer(){
+//     const allPlayersPass = gameData.players.every(player => player.data.pass);
+//     // console.log('NEXT PLAYER PASS:', allPlayersPass)
+//     if (!gameData.endOfGame && !allPlayersPass){
+//         if (gameData.singlePlayer){
+
+//             // dom.swapDomCards();
+//             // if (!isClient){
+//             //     dataHandler.swapPlayerCards();
+//             //     playerHandler.setNextPlayerActive();
+//             // }
+//             // dom.updatePlayerLabels();
+        
+//             // if (gameData.players[0].data.active){
+//             //     dom.createPassBtn();
+//             //     dom.createSwapBankBtn();
+//             // }
+
+//             game.updateGame();
+//             gameData.pickedBank = [];
+//             gameData.pickedHand = [];
+    
+//             isAutoPlayerNext()
+//         }
+//         else {
+//             if (gameData.players[0].data.connectionId == gameData.hostName){
+//                 game.updateGame();
+//                 const sender = 'host';
+//                 dataHandler.sendGameData(sender);
+//                 if (gameData.endOfGame || allPlayersPass){
+//                     dom.flipAllCards();
+//                 }
+//             }
+//             else {
+//                 const sender = 'client';
+//                 dataHandler.sendGameData(sender);
+//             }
+//         }
+//     }
+//     else{
+//         // console.log('nextPlayer END OF GAME');
+//         dom.flipAllCards()
+//     }
+
+// }
+
 
 export function nextPlayer(){
     const allPlayersPass = gameData.players.every(player => player.data.pass);
-    if (!gameData.endOfGame || !allPlayersPass){
+    // console.log('NEXT PLAYER PASS:', allPlayersPass)
+    // if (!gameData.endOfGame && !allPlayersPass){
         if (gameData.singlePlayer){
-
-            // dom.swapDomCards();
-            // if (!isClient){
-            //     dataHandler.swapPlayerCards();
-            //     playerHandler.setNextPlayerActive();
-            // }
-            // dom.updatePlayerLabels();
+            if (!gameData.endOfGame && !allPlayersPass){
+                game.updateGame();
+                gameData.pickedBank = [];
+                gameData.pickedHand = [];
         
-            // if (gameData.players[0].data.active){
-            //     dom.createPassBtn();
-            //     dom.createSwapBankBtn();
-            // }
-
-            game.updateGame();
-            gameData.pickedBank = [];
-            gameData.pickedHand = [];
-    
-            isAutoPlayerNext()
+                isAutoPlayerNext()
+            }
+            else {
+                dom.flipAllCards()
+            }
         }
         else {
             if (gameData.players[0].data.connectionId == gameData.hostName){
-                game.updateGame()
-                dataHandler.sendGameData('host')
+                game.updateGame();
+                const sender = 'host';
+                dataHandler.sendGameData(sender);
             }
             else {
-                dataHandler.sendGameData('client');
+                const sender = 'client';
+                dataHandler.sendGameData(sender);
             }
         }
-    }
-    else{
-        console.log('nextPlayer END OF GAME');
-        // dom.flipAllCards()
-    }
+    // }
+    // else{
+    //     // console.log('nextPlayer END OF GAME');
+    //     dom.flipAllCards()
+    // }
 
 }
 
 
 export function isAutoPlayerNext(){
     if (gameData.activePlayerId.slice(0,4) == 'auto'){
-        const allPlayersPass = gameData.players.every(player => player.data.pass);
-        if (!gameData.endOfGame || !allPlayersPass){
-            autoPlayer(findPlayerById(gameData.activePlayerId));
-            // console.log('isAutoPlayerNext GAME DATA', gameData);
-
-        }
-        else {
-            console.log('isAutoPlayerNext END OF GAME');
-            // dom.flipAllCards()
-        }
-    }
-    else {
-        console.log('AUTO PLAYER IS NOT NEXT')
+        autoPlayer(findPlayerById(gameData.activePlayerId));
     }
 }
+
+
+// export function isAutoPlayerNext(){
+//     if (gameData.activePlayerId.slice(0,4) == 'auto'){
+//         const allPlayersPass = gameData.players.every(player => player.data.pass);
+//         if (!gameData.endOfGame && !allPlayersPass){
+//             autoPlayer(findPlayerById(gameData.activePlayerId));
+//             // console.log('isAutoPlayerNext GAME DATA', gameData);
+
+//         }
+//         else {
+//             console.log('isAutoPlayerNext END OF GAME');
+//             // dom.flipAllCards()
+//         }
+//     }
+//     else {
+//         console.log('AUTO PLAYER IS NOT NEXT')
+//     }
+// }
 
 
 // // HOST FUNCTION //
@@ -151,7 +199,7 @@ function infiniteLoop(active, pickedBankCard){
     pickedBankCard.forEach(card => {
         active.player.data.history.push(card);
         const recursions = active.player.data.history.filter(item => item == card);
-        console.log('RECURSUIION', recursions);
+        // console.log('RECURSUIION', recursions);
         if (recursions.length >= 3){
             console.log('INIFINITE LOOP');
             // return true
@@ -165,6 +213,7 @@ function infiniteLoop(active, pickedBankCard){
 
 export function setPlayerPass(){
     gameData.players[0].data.pass = true;
+    // console.log('PLAYER PASS', gameData.players[0].name, gameData.players[0].data.pass)
     // gameData.pickedHand = null;
     // gameData.pickedBank = null;
     gameData.pickedHand = [];
@@ -172,9 +221,9 @@ export function setPlayerPass(){
     // nextPlayer()
 }
 
-
+// let round = 1;
 // HOST FUNCTION //
-let round = 1;
+
 export function setNextPlayerActive(){
     if (gameData.players[0].data.connectionId == gameData.hostName && !gameData.endOfGame){
         // set current active to prevActivePlayerId //
@@ -193,12 +242,12 @@ export function setNextPlayerActive(){
         gameData.activePlayerId = gameData.players[index].data.connectionId;
         gameData.players[index].data.active = true;
 
-        console.log('ROUND:', round);
-        if (gameData.activePlayerId == 'auto-3'){
-            round +=1;
-        }
+        // console.log('ROUND:', round);
+        // if (gameData.activePlayerId == 'auto-3'){
+        //     round +=1;
+        // }
         // console.log('GAME DATA', gameData)
-        printGameData()
+        // printGameData()
 
         if (playerPass(gameData.players[index])){
             // gameData.activePlayerId = gameData.players[index].data.connectionId;
@@ -209,19 +258,21 @@ export function setNextPlayerActive(){
     }
 }
 
-function printGameData(){
-    console.log(`pickedHand: ${gameData.pickedHand}`);
-    console.log(`pickedBank: ${gameData.pickedBank}`);
-    console.log(`endOfGame: ${gameData.endOfGame}`);
-    console.log(`Active Player: ${gameData.prevActivePlayerId}`);
-    // gameData.players.forEach(player => {
-    //     console.log(`NAME: ${player.name}`);
-    //     console.log(`ACTIVE: ${player.data.active}`);
-    //     console.log(`PASS: ${player.data.pass}`);
-    //     console.log('-----------------------------------------------------')
-    // })
-    console.log('#########################################################')
-}
+// function printGameData(){
+//     console.log(`pickedHand: ${gameData.pickedHand}`);
+//     console.log(`pickedBank: ${gameData.pickedBank}`);
+//     console.log(`endOfGame: ${gameData.endOfGame}`);
+//     console.log(`Active Player: ${gameData.prevActivePlayerId}`);
+//     // gameData.players.forEach(player => {
+//     //     console.log(`NAME: ${player.name}`);
+//     //     console.log(`ACTIVE: ${player.data.active}`);
+//     //     console.log(`PASS: ${player.data.pass}`);
+//     //     console.log('-----------------------------------------------------')
+//     // })
+//     console.log('#########################################################')
+// }
+
+
 // On endGame setNextPlayerActive is waiting on playerPassCheck to continue //
 
 function playerPass(active){
