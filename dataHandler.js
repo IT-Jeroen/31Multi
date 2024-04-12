@@ -92,34 +92,18 @@ export function updateHost(clientData){
         // console.log('PLAYER PASS', active.player.name)
     }
     
-    const allPlayerPass = gameData.players.every(player => player.data.pass);
-    gameData.endOfGame = allPlayerPass
+    const allPlayersPass = gameData.players.every(player => player.data.pass);
+    if(allPlayersPass){
+        gameData.endOfGame = true;
+    }
+    
     game.updateGame();
 
     const sender = 'host';
     sendGameData(sender);
-    // gameData.pickedBank = null;
-    // gameData.pickedHand = null;
     gameData.pickedBank = [];
     gameData.pickedHand = [];
 
-    // if next player == auto, this will trigger the autoPlayer //
-    // else client or host will trigger nextplayer responds //
-    // const allPlayerPass = gameData.players.every(player => player.data.pass);
-    // console.log('Update Host')
-    // console.log('PLAYER:',gameData.prevActivePlayerId);
-    // console.log('End of Game',gameData.endOfGame, 'All Pass', allPlayerPass);
-
-    // if (!gameData.endOfGame && !allPlayerPass){
-    //     playerHandler.isAutoPlayerNext();
-    // }
-    // else {
-    //     // console.log('updateHost END OF GAME');
-    //     dom.flipAllCards();
-    // }
-
-
-    // // NEEDED IN SINGLE PLAYER //
     // if (gameData.endOfGame || allPlayerPass){
     //     console.log('updateHost flipAllCards')
     //     dom.flipAllCards()
@@ -131,19 +115,14 @@ export function updateHost(clientData){
 // CLIENT FUNCTION //
 // on 'data' type == client-data //
 export function updateClient(receivedGameData){
-    if (!receivedGameData.endOfGame){
+    // if (!receivedGameData.endOfGame){
         const isClient = true;
         updateGameData(receivedGameData);
         game.updateGame(isClient);
 
         gameData.pickedHand = [];
         gameData.pickedBank = [];
-    }
-    // else {
-    //     updateGameData(receivedGameData);
-    //     dom.flipAllCards();
     // }
-    
 }
 
 
@@ -171,33 +150,6 @@ export function sendGameData(id){
 }
 
 
-// export function swapPlayerCards(){
-//     const bank = playerHandler.findPlayerById('bank').player;
-//     const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
-
-//     // const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank);
-//     // const playerArray = player.data.cards.filter(card => card != gameData.pickedHand);
-//     const bankArray = bank.data.cards.filter(card => card != gameData.pickedBank[0]);
-//     const playerArray = player.data.cards.filter(card => card != gameData.pickedHand[0]);
-    
-//     if (bankArray.length == 2 && playerArray.length == 2){
-//         // bankArray.push(gameData.pickedHand);
-//         // playerArray.push(gameData.pickedBank);
-//         bankArray.push(gameData.pickedHand[0]);
-//         playerArray.push(gameData.pickedBank[0]);
-        
-//         bank.data.cards = bankArray;
-//         player.data.cards = playerArray;
-//     }
-//     else {
-//         // Should only happen when a player pass, pickedHand and pickBank are null //
-//         console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
-//         console.log(`Picked Cards; Bank: ${gameData.pickedBank}, Player: ${gameData.pickedHand}`);
-//     }
-    
-// }
-
-
 export function swapPlayerCards(){
     const bank = playerHandler.findPlayerById('bank').player;
     const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
@@ -221,22 +173,3 @@ export function swapPlayerCards(){
         })
     }
 }
-
-
-// // isn't called anywhere //
-// export function swapBankCards(){
-//     const bank = playerHandler.findPlayerById('bank').player;
-//     const bankCards = [...bank.data.cards];
-//     const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
-//     const playerCards = [...player.data.cards];
-
-//     if(bankCards.length == 3 && playerCards.length == 3){
-//         bank.data.cards = playerCards;
-//         player.data.cards = bankCards;
-//         // set player pass to true
-//     }
-//     else {
-//         console.log(`Unexpected Length Card Arrays; Bank: ${bankArray.length}, Player: ${playerArray.length}`);
-//     }
-
-// }

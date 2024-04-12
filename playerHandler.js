@@ -36,64 +36,17 @@ export function findPlayerById(connectionId){
 }
 
 
-// export function nextPlayer(){
-//     const allPlayersPass = gameData.players.every(player => player.data.pass);
-//     // console.log('NEXT PLAYER PASS:', allPlayersPass)
-//     if (!gameData.endOfGame && !allPlayersPass){
-//         if (gameData.singlePlayer){
-
-//             // dom.swapDomCards();
-//             // if (!isClient){
-//             //     dataHandler.swapPlayerCards();
-//             //     playerHandler.setNextPlayerActive();
-//             // }
-//             // dom.updatePlayerLabels();
-        
-//             // if (gameData.players[0].data.active){
-//             //     dom.createPassBtn();
-//             //     dom.createSwapBankBtn();
-//             // }
-
-//             game.updateGame();
-//             gameData.pickedBank = [];
-//             gameData.pickedHand = [];
-    
-//             isAutoPlayerNext()
-//         }
-//         else {
-//             if (gameData.players[0].data.connectionId == gameData.hostName){
-//                 game.updateGame();
-//                 const sender = 'host';
-//                 dataHandler.sendGameData(sender);
-//                 if (gameData.endOfGame || allPlayersPass){
-//                     dom.flipAllCards();
-//                 }
-//             }
-//             else {
-//                 const sender = 'client';
-//                 dataHandler.sendGameData(sender);
-//             }
-//         }
-//     }
-//     else{
-//         // console.log('nextPlayer END OF GAME');
-//         dom.flipAllCards()
-//     }
-
-// }
-
-
 export function nextPlayer(){
     const allPlayersPass = gameData.players.every(player => player.data.pass);
+    if (allPlayersPass){
+        gameData.endOfGame = true;
+    }
     console.log('NEXT PLAYER')
-    // if (!gameData.endOfGame && !allPlayersPass){
         if (gameData.singlePlayer){
-            if (!gameData.endOfGame && !allPlayersPass){
+            if (!gameData.endOfGame){
                 game.updateGame();
                 gameData.pickedBank = [];
                 gameData.pickedHand = [];
-        
-                // isAutoPlayerNext()
             }
             else {
                 dom.flipAllCards()
@@ -127,51 +80,6 @@ export function isAutoPlayerNext(){
 }
 
 
-// export function isAutoPlayerNext(){
-//     if (gameData.activePlayerId.slice(0,4) == 'auto'){
-//         const allPlayersPass = gameData.players.every(player => player.data.pass);
-//         if (!gameData.endOfGame && !allPlayersPass){
-//             autoPlayer(findPlayerById(gameData.activePlayerId));
-//             // console.log('isAutoPlayerNext GAME DATA', gameData);
-
-//         }
-//         else {
-//             console.log('isAutoPlayerNext END OF GAME');
-//             // dom.flipAllCards()
-//         }
-//     }
-//     else {
-//         console.log('AUTO PLAYER IS NOT NEXT')
-//     }
-// }
-
-
-// // HOST FUNCTION //
-// function autoPlayer(active){
-//     setTimeout(()=> {
-//         const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
-//         const mappedBank = gameData.players[4].data.cards.map(card => gameData.cards[card]);
-//         const pickedCards = autoPlayerPick(mappedHand, mappedBank);
-//         console.log('AUTO PICKED CARDS',pickedCards)
-//         if(pickedCards == 'player_pass'){
-//             active.player.data.pass = true;
-//             // gameData.pickedHand = null;
-//             // gameData.pickedBank = null;
-//             gameData.pickedHand = [];
-//             gameData.pickedBank = [];
-//         }
-//         else{
-//             gameData.pickedHand = [pickedCards.hand];
-//             gameData.pickedBank = [pickedCards.bank]; 
-//         }
-//         dataHandler.updateHost(gameData);  
-        
-//     }, 2000);
-    
-// }
-
-
-
 // HOST FUNCTION //
 function autoPlayer(active){
     setTimeout(()=> {
@@ -203,7 +111,6 @@ function infiniteLoop(active, pickedBankCard){
         // console.log('RECURSUIION', recursions);
         if (recursions.length >= 3){
             console.log('INIFINITE LOOP');
-            // return true
             fail = true
         }
     })
@@ -215,16 +122,12 @@ function infiniteLoop(active, pickedBankCard){
 export function setPlayerPass(){
     gameData.players[0].data.pass = true;
     console.log('PLAYER PASS', gameData.players[0].name, gameData.players[0].data.pass)
-    // gameData.pickedHand = null;
-    // gameData.pickedBank = null;
     gameData.pickedHand = [];
     gameData.pickedBank = [];
-    // nextPlayer()
 }
 
-// let round = 1;
-// HOST FUNCTION //
 
+// HOST FUNCTION //
 export function setNextPlayerActive(){
     if (gameData.players[0].data.connectionId == gameData.hostName && !gameData.endOfGame){
         // set current active to prevActivePlayerId //
@@ -245,38 +148,11 @@ export function setNextPlayerActive(){
         gameData.players[index].data.active = true;
         console.log('setNextPlayerActive AFTER;', gameData.activePlayerId)
 
-        // console.log('ROUND:', round);
-        // if (gameData.activePlayerId == 'auto-3'){
-        //     round +=1;
-        // }
-        // console.log('GAME DATA', gameData)
-        // printGameData()
-
         if (playerPass(gameData.players[index])){
-            // gameData.activePlayerId = gameData.players[index].data.connectionId;
-            // gameData.players[index].data.active = true;
             setNextPlayerActive();
         }
-        // else {
-        //     isAutoPlayerNext(); // creates a loop
-        // }
-
     }
 }
-
-// function printGameData(){
-//     console.log(`pickedHand: ${gameData.pickedHand}`);
-//     console.log(`pickedBank: ${gameData.pickedBank}`);
-//     console.log(`endOfGame: ${gameData.endOfGame}`);
-//     console.log(`Active Player: ${gameData.prevActivePlayerId}`);
-//     // gameData.players.forEach(player => {
-//     //     console.log(`NAME: ${player.name}`);
-//     //     console.log(`ACTIVE: ${player.data.active}`);
-//     //     console.log(`PASS: ${player.data.pass}`);
-//     //     console.log('-----------------------------------------------------')
-//     // })
-//     console.log('#########################################################')
-// }
 
 
 // On endGame setNextPlayerActive is waiting on playerPassCheck to continue //
@@ -288,7 +164,6 @@ function playerPass(active){
         gameData.endOfGame = true;
         // a bit counter intuative, but this is to stop inifinite recursion of nextPlayer() //
         return false
-        // endGame()
     }
     else{
         if (active.data.pass){
@@ -299,13 +174,3 @@ function playerPass(active){
         }
     }
 }
-
-
-// function playerPassCheck(active){
-//     if (active.data.pass){
-//         return false
-//     }
-//     else {
-//         return true
-//     }
-// }

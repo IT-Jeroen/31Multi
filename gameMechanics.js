@@ -73,20 +73,6 @@ export function dealCards(cardsInGame){
 }
 
 
-// export function updateGame(isClient=false){
-//     dom.swapDomCards();
-//     if (!isClient){
-//         dataHandler.swapPlayerCards();
-//         playerHandler.setNextPlayerActive();
-//     }
-//     dom.updatePlayerLabels();
-
-//     if (gameData.players[0].data.active && !gameData.players[0].data.pass){
-//         dom.createPassBtn();
-//         dom.createSwapBankBtn();
-//     }
-// }
-
 export function updateGame(isClient=false){
     
     if (!gameData.endOfGame){

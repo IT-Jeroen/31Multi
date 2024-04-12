@@ -101,33 +101,6 @@ function setPlayerLabels(player){
 }
 
 
-// function setPlayerLabels(player){
-//     const playFieldElem = document.getElementById('playfield');
-
-//     if(player.name != 'Bank'){
-
-//         if(!player.data.active){
-//             const inActiveLabel = `
-//             <div class="player-label player-${player.location}">
-//                 ${player.name}
-//             </div>`
-//             playFieldElem.insertAdjacentHTML('afterbegin',inActiveLabel);
-            
-//         }
-
-//         else {
-//             if(player.location != 'south'){
-//                 const activeLabel = `
-//                 <div class="player-label player-${player.location} player-active">
-//                     ${player.name}
-//                 </div>`
-//                 playFieldElem.insertAdjacentHTML('afterbegin',activeLabel);
-//             }
-//         }
-//     }
-// }
-
-
 export function createWaitingRoom(){
     const waitingRoomDiv = document.createElement('div');
     waitingRoomDiv.id = 'waiting-room';
@@ -259,7 +232,6 @@ function cardClickEvent(e){
     const center = classes.contains('center');
 
     if (gameData.players[0].data.active && !gameData.endOfGame){
-        // createPassBtn();
         if (south){
             if (gameData.pickedHand[0]){
                 document.getElementById(gameData.pickedHand[0]).classList.remove('clicked');
@@ -334,16 +306,11 @@ export function createSwapBankBtn(){
 
 }
 
-// function removePlayCardsBtn(){
-//     document.getElementById('play-cards').remove();
-// }
 
 function removeBtn(){
     document.querySelectorAll(['#player-pass', '#play-cards', '#swap-bank']).forEach(elem => {
         elem.remove()
     })
-    // document.getElementById('player-pass').remove();
-    // document.getElementById('play-cards').remove();
 }
 
 
@@ -352,30 +319,6 @@ function removeClicked(){
         elem.classList.remove('clicked');
     })
 }
-
-// export function swapDomCards(){
-//     // if (gameData.pickedHand.length == 1 && gameData.pickedBank.length == 1){
-//     if (gameData.pickedHand && gameData.pickedBank){
-//         // const cardHand = document.getElementById(gameData.pickedHand[0]);
-//         // const cardBank = document.getElementById(gameData.pickedBank[0]);
-//         const cardHand = document.getElementById(gameData.pickedHand);
-//         const cardBank = document.getElementById(gameData.pickedBank);
-
-//         cardHand.classList.remove('clicked');
-//         cardBank.classList.remove('clicked');
-
-//         const handCss = cardHand.className;
-//         const bankCss = cardBank.className
-
-//         cardHand.className = bankCss;
-//         cardBank.className = handCss;
-        
-//     }
-//     else {
-//         // console.log('Please Select Two Cards!');
-//         console.log('PLAYER PASS');
-//     }
-// }
 
 
 export function swapDomCards(){
@@ -406,24 +349,6 @@ export function flipAllCards(){
         card.className = `${classStr}-open`;
     })
 }
-
-// export function swapDomBankCards(){
-//     const active = playerHandler.findPlayerById(gameData.activePlayerId);
-//     const bank = gameData.players[4];
-//     for (let i = 0; i<3;i++){
-//         const cardHand = document.getElementById(active.player.data.cards[i]);
-//         const cardBank = document.getElementById(bank.data.cards[i]);
-        
-//         const handCss = cardHand.className;
-//         const bankCss = cardBank.className;
-
-//         cardHand.className = bankCss;
-//         cardBank.className = handCss;
-//     }
-// }
-
-
-
 
 
 export function startGame(){
