@@ -86,11 +86,11 @@ function pickBestCombo(mappedHand, mappedBank){
         if(bestSuitCombo.length != 0 && bestIconCombo.length != 0){
             if (Math.random() > 0.5){
                 bestCombo = bestSuitCombo
-                console.log('RANDOM SUIT')
+                // console.log('RANDOM SUIT')
             }
             else {
                 bestCombo = bestIconCombo
-                console.log('RANDOM ICON')
+                // console.log('RANDOM ICON')
             }
         }
     }
@@ -183,7 +183,7 @@ function autoPlayerPass(mappedCards){
             playerPass = true
         }
         else {
-            console.log('TAKING A GAMBLE ???')
+            // console.log('TAKING A GAMBLE ???')
         }
     }
     return playerPass
@@ -198,7 +198,7 @@ function takeBank(mappedHand, pickedHand, mappedBank, pickedBank, ){
 
     if (bankScore > handScore){
         if (autoPlayerPass(mappedBank)){
-            console.log('AUTO PLAYER BANK SWAP')
+            // console.log('AUTO PLAYER BANK SWAP')
             return true
         }
     }
@@ -207,8 +207,6 @@ function takeBank(mappedHand, pickedHand, mappedBank, pickedBank, ){
 
 
 export function autoPlayerPick(mappedHand, mappedBank){
-    // let pickedBank = null;
-    // let pickedHand = null;
     let pickedBank = [];
     let pickedHand = [];
     const bestCombo = pickBestCombo(mappedHand, mappedBank);
@@ -246,12 +244,7 @@ export function autoPlayerPick(mappedHand, mappedBank){
         }
     }
 
-    // console.log('PICKED BANK', pickedBank);
-    // console.log('PICKED HAND', pickedHand);
-
     if (takeBank(mappedHand, pickedHand, mappedBank, pickedBank)){
-        // pickedHand = Object.keys(mappedHand);
-        // pickedBank = Object.keys(mappedBank);
         const hand = [];
         const bank = [];
         for (let i = 0; i < 3; i++){
@@ -263,11 +256,6 @@ export function autoPlayerPick(mappedHand, mappedBank){
     else {
         return {hand: [`${pickedHand.suit}_${pickedHand.icon}`], bank: [`${pickedBank.suit}_${pickedBank.icon}`]}
     }
-
-    // console.log('PICKED BANK', pickedBank);
-    // console.log('PICKED HAND', pickedHand);
-    // // 
-    // return {hand: `${pickedHand.suit}_${pickedHand.icon}`, bank: `${pickedBank.suit}_${pickedBank.icon}`}
 }
 
 

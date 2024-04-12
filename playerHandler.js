@@ -41,39 +41,32 @@ export function nextPlayer(){
     if (allPlayersPass){
         gameData.endOfGame = true;
     }
-    console.log('NEXT PLAYER')
-        if (gameData.singlePlayer){
-            if (!gameData.endOfGame){
-                game.updateGame();
-                gameData.pickedBank = [];
-                gameData.pickedHand = [];
-            }
-            else {
-                dom.flipAllCards()
-            }
+    
+    if (gameData.singlePlayer){
+        if (!gameData.endOfGame){
+            game.updateGame();
+            gameData.pickedBank = [];
+            gameData.pickedHand = [];
         }
         else {
-            if (gameData.players[0].data.connectionId == gameData.hostName){
-                game.updateGame();
-                const sender = 'host';
-                dataHandler.sendGameData(sender);
-            }
-            else {
-                const sender = 'client';
-                dataHandler.sendGameData(sender);
-            }
+            dom.flipAllCards()
         }
-    // }
-    // else{
-    //     // console.log('nextPlayer END OF GAME');
-    //     dom.flipAllCards()
-    // }
-
+    }
+    else {
+        if (gameData.players[0].data.connectionId == gameData.hostName){
+            game.updateGame();
+            const sender = 'host';
+            dataHandler.sendGameData(sender);
+        }
+        else {
+            const sender = 'client';
+            dataHandler.sendGameData(sender);
+        }
+    }
 }
 
 
 export function isAutoPlayerNext(){
-    console.log('isAutoPlayerNext')
     if (gameData.activePlayerId.slice(0,4) == 'auto'){
         autoPlayer(findPlayerById(gameData.activePlayerId));
     }
@@ -89,10 +82,8 @@ function autoPlayer(active){
 
         gameData.pickedHand = pickedCards.hand;
         gameData.pickedBank = pickedCards.bank;
-        console.log('AUTO PLAYER', active.player.name);
 
         if (infiniteLoop(active, pickedCards.bank)){
-            console.log('INFINITE LOOP RESET PICKED CARDS')
             gameData.pickedHand = [];
             gameData.pickedBank = [];
         }
@@ -108,9 +99,7 @@ function infiniteLoop(active, pickedBankCard){
     pickedBankCard.forEach(card => {
         active.player.data.history.push(card);
         const recursions = active.player.data.history.filter(item => item == card);
-        // console.log('RECURSUIION', recursions);
         if (recursions.length >= 3){
-            console.log('INIFINITE LOOP');
             fail = true
         }
     })
@@ -121,7 +110,7 @@ function infiniteLoop(active, pickedBankCard){
 
 export function setPlayerPass(){
     gameData.players[0].data.pass = true;
-    console.log('PLAYER PASS', gameData.players[0].name, gameData.players[0].data.pass)
+    // console.log('PLAYER PASS', gameData.players[0].name, gameData.players[0].data.pass)
     gameData.pickedHand = [];
     gameData.pickedBank = [];
 }
@@ -143,10 +132,8 @@ export function setNextPlayerActive(){
             index = 0;
         }
         
-        console.log('setNextPlayerActive BEFORE;', gameData.activePlayerId)
         gameData.activePlayerId = gameData.players[index].data.connectionId;
         gameData.players[index].data.active = true;
-        console.log('setNextPlayerActive AFTER;', gameData.activePlayerId)
 
         if (playerPass(gameData.players[index])){
             setNextPlayerActive();
@@ -155,12 +142,10 @@ export function setNextPlayerActive(){
 }
 
 
-// On endGame setNextPlayerActive is waiting on playerPassCheck to continue //
 
 function playerPass(active){
     const allPlayerPass = gameData.players.every(player => player.data.pass);
     if (allPlayerPass){
-        // console.log('playerPass END OF GAME');
         gameData.endOfGame = true;
         // a bit counter intuative, but this is to stop inifinite recursion of nextPlayer() //
         return false

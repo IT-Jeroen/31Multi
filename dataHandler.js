@@ -86,7 +86,6 @@ export function updateHost(clientData){
     gameData.pickedHand = clientData.pickedHand;
 
     if (gameData.pickedBank.length == 0 || gameData.pickedBank.length == 3){
-        // Player Pass //
         const active = playerHandler.findPlayerById(gameData.activePlayerId);
         active.player.data.pass = true; 
         // console.log('PLAYER PASS', active.player.name)
@@ -103,11 +102,6 @@ export function updateHost(clientData){
     sendGameData(sender);
     gameData.pickedBank = [];
     gameData.pickedHand = [];
-
-    // if (gameData.endOfGame || allPlayerPass){
-    //     console.log('updateHost flipAllCards')
-    //     dom.flipAllCards()
-    // }
     
 }
 
@@ -115,14 +109,12 @@ export function updateHost(clientData){
 // CLIENT FUNCTION //
 // on 'data' type == client-data //
 export function updateClient(receivedGameData){
-    // if (!receivedGameData.endOfGame){
         const isClient = true;
         updateGameData(receivedGameData);
         game.updateGame(isClient);
 
         gameData.pickedHand = [];
         gameData.pickedBank = [];
-    // }
 }
 
 

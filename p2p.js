@@ -143,13 +143,11 @@ function setConnectionEvents(c) {
         }
 
         if (received.type == 'client-data'){
-            console.log('RECIEVED CLIENT', received.data);
             dataHandler.updateClient(received.data);
             
         }
 
         if (received.type == 'host-data'){
-            console.log('RECIEVED Host', received.data)
             if (gameData.players[0].data.connectionId == gameData.hostName){
                 dataHandler.updateHost(received.data);
 
