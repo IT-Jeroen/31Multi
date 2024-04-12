@@ -88,11 +88,13 @@ export function dealCards(cardsInGame){
 // }
 
 export function updateGame(isClient=false){
+    console.log('UPDATE GAME')
     if (!gameData.endOfGame){
         dom.swapDomCards();
         if (!isClient){
             dataHandler.swapPlayerCards();
             playerHandler.setNextPlayerActive();
+            playerHandler.isAutoPlayerNext(); // creates a flipAllCards loop x3
         }
         dom.updatePlayerLabels();
 

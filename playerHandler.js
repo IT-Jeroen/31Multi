@@ -85,7 +85,7 @@ export function findPlayerById(connectionId){
 
 export function nextPlayer(){
     const allPlayersPass = gameData.players.every(player => player.data.pass);
-    // console.log('NEXT PLAYER PASS:', allPlayersPass)
+    console.log('NEXT PLAYER')
     // if (!gameData.endOfGame && !allPlayersPass){
         if (gameData.singlePlayer){
             if (!gameData.endOfGame && !allPlayersPass){
@@ -93,7 +93,7 @@ export function nextPlayer(){
                 gameData.pickedBank = [];
                 gameData.pickedHand = [];
         
-                isAutoPlayerNext()
+                // isAutoPlayerNext()
             }
             else {
                 dom.flipAllCards()
@@ -120,6 +120,7 @@ export function nextPlayer(){
 
 
 export function isAutoPlayerNext(){
+    console.log('isAutoPlayerNext')
     if (gameData.activePlayerId.slice(0,4) == 'auto'){
         autoPlayer(findPlayerById(gameData.activePlayerId));
     }
@@ -180,7 +181,7 @@ function autoPlayer(active){
 
         gameData.pickedHand = pickedCards.hand;
         gameData.pickedBank = pickedCards.bank;
-        // console.log('AUTO', active.player.name, gameData)
+        console.log('AUTO PLAYER', active.player.name);
 
         if (infiniteLoop(active, pickedCards.bank)){
             console.log('INFINITE LOOP RESET PICKED CARDS')
@@ -213,7 +214,7 @@ function infiniteLoop(active, pickedBankCard){
 
 export function setPlayerPass(){
     gameData.players[0].data.pass = true;
-    // console.log('PLAYER PASS', gameData.players[0].name, gameData.players[0].data.pass)
+    console.log('PLAYER PASS', gameData.players[0].name, gameData.players[0].data.pass)
     // gameData.pickedHand = null;
     // gameData.pickedBank = null;
     gameData.pickedHand = [];
@@ -239,8 +240,10 @@ export function setNextPlayerActive(){
             index = 0;
         }
         
+        console.log('setNextPlayerActive BEFORE;', gameData.activePlayerId)
         gameData.activePlayerId = gameData.players[index].data.connectionId;
         gameData.players[index].data.active = true;
+        console.log('setNextPlayerActive AFTER;', gameData.activePlayerId)
 
         // console.log('ROUND:', round);
         // if (gameData.activePlayerId == 'auto-3'){
@@ -254,6 +257,9 @@ export function setNextPlayerActive(){
             // gameData.players[index].data.active = true;
             setNextPlayerActive();
         }
+        // else {
+        //     isAutoPlayerNext(); // creates a loop
+        // }
 
     }
 }

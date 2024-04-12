@@ -399,6 +399,7 @@ export function swapDomCards(){
 
 
 export function flipAllCards(){
+    console.log('flipAllCards', gameData.activePlayerId);
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
         const classStr = card.className;

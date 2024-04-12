@@ -104,15 +104,19 @@ export function updateHost(clientData){
     // if next player == auto, this will trigger the autoPlayer //
     // else client or host will trigger nextplayer responds //
     const allPlayerPass = gameData.players.every(player => player.data.pass);
-    console.log('Update Host')
-    console.log('PLAYER:',gameData.prevActivePlayerId);
-    console.log('End of Game',gameData.endOfGame, 'All Pass', allPlayerPass);
-    if (!gameData.endOfGame && !allPlayerPass){
-        playerHandler.isAutoPlayerNext();
-    }
-    else {
-        // console.log('updateHost END OF GAME');
-        dom.flipAllCards();
+    // console.log('Update Host')
+    // console.log('PLAYER:',gameData.prevActivePlayerId);
+    // console.log('End of Game',gameData.endOfGame, 'All Pass', allPlayerPass);
+
+    // if (!gameData.endOfGame && !allPlayerPass){
+    //     playerHandler.isAutoPlayerNext();
+    // }
+    // else {
+    //     // console.log('updateHost END OF GAME');
+    //     dom.flipAllCards();
+    // }
+    if (gameData.endOfGame || allPlayerPass){
+        dom.flipAllCards()
     }
     
 }
