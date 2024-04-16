@@ -195,35 +195,72 @@ function createDeck(component){;
 
 // Actuall Trigger for the Deck CSS Animation //
 function handOutDeckCards(timing=0){
-    let i = 0;
-    let playerIndex = 0;
-    let cardIndex = 0;
-    let numCardsToDeal = 0;
+    return new Promise((resolve, reject) => {
+        let i = 0;
+        let playerIndex = 0;
+        let cardIndex = 0;
+        let numCardsToDeal = 0;
+        
+        gameData.players.forEach(player => {
+            numCardsToDeal += player.data.cards.length;
+        })
     
-    gameData.players.forEach(player => {
-        numCardsToDeal += player.data.cards.length;
+    
+        const intervalID = setInterval(()=>{
+            if (i == numCardsToDeal -1){
+                clearInterval(intervalID);
+                resolve(true)
+            }
+            
+            let player = gameData.players[playerIndex];
+            const cardID = player.data.cards[cardIndex];
+            const card = document.getElementById(cardID)
+            card.className = `card ${player.location}`
+            playerIndex += 1;
+    
+            if (playerIndex == gameData.players.length){
+                cardIndex += 1;
+                playerIndex = 0;
+            }
+    
+            i += 1;
+        }, timing);
+
     })
 
-
-    const intervalID = setInterval(()=>{
-        if (i == numCardsToDeal -1){
-            clearInterval(intervalID);
-        }
-        
-        let player = gameData.players[playerIndex];
-        const cardID = player.data.cards[cardIndex];
-        const card = document.getElementById(cardID)
-        card.className = `card ${player.location}`
-        playerIndex += 1;
-
-        if (playerIndex == gameData.players.length){
-            cardIndex += 1;
-            playerIndex = 0;
-        }
-
-        i += 1;
-    }, timing);
 }
+
+
+// function handOutDeckCards(timing=0){
+//     let i = 0;
+//     let playerIndex = 0;
+//     let cardIndex = 0;
+//     let numCardsToDeal = 0;
+    
+//     gameData.players.forEach(player => {
+//         numCardsToDeal += player.data.cards.length;
+//     })
+
+
+//     const intervalID = setInterval(()=>{
+//         if (i == numCardsToDeal -1){
+//             clearInterval(intervalID);
+//         }
+        
+//         let player = gameData.players[playerIndex];
+//         const cardID = player.data.cards[cardIndex];
+//         const card = document.getElementById(cardID)
+//         card.className = `card ${player.location}`
+//         playerIndex += 1;
+
+//         if (playerIndex == gameData.players.length){
+//             cardIndex += 1;
+//             playerIndex = 0;
+//         }
+
+//         i += 1;
+//     }, timing);
+// }
 
 
 function cardClickEvent(e){
@@ -383,10 +420,36 @@ export function flipAllCards(){
 
 export function startGame(){
     renderApp(createPlayfield());
-    handOutDeckCards(300);
-    updatePlayerLabels();
-    if (gameData.players[0].data.active){
-        createPassBtn();
-        createSwapBankBtn();
-    }
+    handOutDeckCards(300).then(() => {
+        updatePlayerLabels();
+        if (gameData.players[0].data.active){
+            createPassBtn();
+            createSwapBankBtn();
+        }
+        else {
+            if (gameData.players[0].data.connectionId == gameData.hostName){
+                playerHandler.isAutoPlayerNext();
+            }
+            
+        } 
+    })
+    
 }
+
+
+
+// export function startGame(){
+//     renderApp(createPlayfield());
+//     handOutDeckCards(300);
+//     updatePlayerLabels();
+//     if (gameData.players[0].data.active){
+//         createPassBtn();
+//         createSwapBankBtn();
+//     }
+//     else {
+//         if (gameData.players[0].data.connectionId == gameData.hostName){
+//             playerHandler.isAutoPlayerNext();
+//         }
+        
+//     } 
+// }

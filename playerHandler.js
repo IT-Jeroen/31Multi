@@ -1,7 +1,7 @@
 import { autoPlayerPick } from './autoPlayer.js';
 import { gameData } from './dataHandler.js' 
 import * as dataHandler from './dataHandler.js';
-import * as game from './gameMechanics.js';
+// import * as game from './gameMechanics.js';
 import * as dom from './dom.js';
 
 

@@ -68,8 +68,9 @@ export function addCardsToCardDB(cards){
 
 
 export function initializeGame(){
-    gameData.activePlayerId = gameData.players[0].data.connectionId;
-    gameData.players[0].data.active = true;
+    const randomInt = Math.floor(Math.random() * 4)
+    gameData.activePlayerId = gameData.players[randomInt].data.connectionId;
+    gameData.players[randomInt].data.active = true;
     game.dealCards(game.prepCards())
     
     connections.forEach(connection => {
@@ -173,6 +174,8 @@ export function swapPlayerCards(){
     }
 }
 
+
+// HOST FUNCTION //
 export function updateGame(){
     
     if (!gameData.endOfGame){
