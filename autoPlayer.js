@@ -1,4 +1,4 @@
-function calculateHand(mappedCards){
+export function calculateHand(mappedCards){
     const handCombos = returnHandCombos(mappedCards);
     let score = 0
 

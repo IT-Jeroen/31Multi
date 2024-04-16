@@ -37,10 +37,12 @@ export function findPlayerById(connectionId){
 
 
 export function nextPlayer(){
-    const allPlayersPass = gameData.players.every(player => player.data.pass);
-    if (allPlayersPass){
-        gameData.endOfGame = true;
-    }
+    // const allPlayersPass = gameData.players.every(player => player.data.pass);
+    // if (allPlayersPass){
+    //     gameData.endOfGame = true;
+    // }
+    console.log('----HOST----')
+    // dataHandler.endOfGameCheck()
     
     if (gameData.singlePlayer){
         if (!gameData.endOfGame){
@@ -67,7 +69,7 @@ export function nextPlayer(){
 
 
 export function isAutoPlayerNext(){
-    if (gameData.activePlayerId.slice(0,4) == 'auto'){
+    if (gameData.activePlayerId.slice(0,4) == 'auto' && ! gameData.endOfGame){
         autoPlayer(findPlayerById(gameData.activePlayerId));
     }
 }
@@ -75,6 +77,7 @@ export function isAutoPlayerNext(){
 
 // HOST FUNCTION //
 function autoPlayer(active){
+    console.log(`------${active.player.name}------`)
     setTimeout(()=> {
         const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
         const mappedBank = gameData.players[4].data.cards.map(card => gameData.cards[card]);
@@ -139,18 +142,15 @@ export function setNextPlayerActive(){
             setNextPlayerActive();
         }
     }
+    else {
+        gameData.players.forEach(player => player.data.pass = true);
+    }
 }
 
 
-
 function playerPass(active){
-    const allPlayerPass = gameData.players.every(player => player.data.pass);
-    if (allPlayerPass){
-        gameData.endOfGame = true;
-        // a bit counter intuative, but this is to stop inifinite recursion of nextPlayer() //
-        return false
-    }
-    else{
+    // dataHandler.endOfGameCheck()
+    if (!gameData.endOfGame){
         if (active.data.pass){
             return true
         }
@@ -159,3 +159,21 @@ function playerPass(active){
         }
     }
 }
+
+
+// function playerPass(active){
+//     const allPlayerPass = gameData.players.every(player => player.data.pass);
+//     if (allPlayerPass){
+//         gameData.endOfGame = true;
+//         // a bit counter intuative, but this is to stop inifinite recursion of nextPlayer() //
+//         return false
+//     }
+//     else{
+//         if (active.data.pass){
+//             return true
+//         }
+//         else {
+//             return false
+//         }
+//     }
+// }

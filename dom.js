@@ -307,7 +307,7 @@ export function createSwapBankBtn(){
 }
 
 
-function removeBtn(){
+export function removeBtn(){
     document.querySelectorAll(['#player-pass', '#play-cards', '#swap-bank']).forEach(elem => {
         elem.remove()
     })

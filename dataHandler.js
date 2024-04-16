@@ -2,6 +2,7 @@ import * as playerHandler from './playerHandler.js';
 import * as p2p from './p2p.js';
 import * as game from './gameMechanics.js';
 import * as dom from './dom.js';
+import {calculateHand} from './autoPlayer.js';
 
 export const connections = [
     {'name':'Local', 'connectionId': null, 'p': null, 'c': null},
@@ -91,15 +92,18 @@ export function updateHost(clientData){
         // console.log('PLAYER PASS', active.player.name)
     }
     
-    const allPlayersPass = gameData.players.every(player => player.data.pass);
-    if(allPlayersPass){
-        gameData.endOfGame = true;
-    }
+    // const allPlayersPass = gameData.players.every(player => player.data.pass);
+    // if(allPlayersPass){
+    //     gameData.endOfGame = true;
+    // }
     
+    // endOfGameCheck()
+
     game.updateGame();
 
     const sender = 'host';
     sendGameData(sender);
+
     gameData.pickedBank = [];
     gameData.pickedHand = [];
     
@@ -164,4 +168,25 @@ export function swapPlayerCards(){
             }
         })
     }
+}
+
+
+export function endOfGameCheck(){
+    const active = playerHandler.findPlayerById(gameData.activePlayerId);
+    console.log(`Player ${active.player.name} endOfGameCheck`)
+    const allPlayersPass = gameData.players.every(player => player.data.pass);
+    if(allPlayersPass){
+        gameData.endOfGame = true;
+    }
+
+    
+    const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
+    const score = calculateHand(mappedHand);
+    
+    
+    if (score == 31){
+        console.log(`Player ${active.player.name} Scores 31`)
+        active.player.data.pass = true;
+        gameData.endOfGame = true
+    }   
 }
