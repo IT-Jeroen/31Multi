@@ -105,14 +105,14 @@ export function dealCards(cardsInGame){
 // }
 
 
-export function updateGame(){
+// export function updateGame(){
     
-    if (!gameData.endOfGame){
-        dataHandler.swapPlayerCards();
-        dataHandler.lastTurnCheck();
-        dataHandler.endOfGameCheck();
-        playerHandler.setNextPlayerActive();
-        playerHandler.isAutoPlayerNext();
-    }
-}
+//     if (!gameData.endOfGame){
+//         dataHandler.swapPlayerCards();
+//         dataHandler.lastTurnCheck();
+//         dataHandler.endOfGameCheck();
+//         playerHandler.setNextPlayerActive();
+//         playerHandler.isAutoPlayerNext();
+//     }
+// }
 

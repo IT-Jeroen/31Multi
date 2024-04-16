@@ -308,7 +308,7 @@ export function createSwapBankBtn(){
 
 
 export function removeBtn(){
-    document.querySelectorAll(['#player-pass', '#play-cards', '#swap-bank']).forEach(elem => {
+    document.querySelectorAll(['#player-pass', '#play-cards', '#swap-bank', '#last-turn']).forEach(elem => {
         elem.remove()
     })
 }
@@ -341,9 +341,24 @@ export function swapDomCards(){
 }
 
 
+function lastTurnEvent(playerName){
+    console.log(`LAST TURN ${playerName}`);
+    const playFieldElem = document.getElementById('playfield');
+    const lastTurnLabel = `
+        <div id=last-turn class="player-label last-turn player-active">
+            LAST TURN ${playerName}!
+        </div>`
+        playFieldElem.insertAdjacentHTML('afterbegin',lastTurnLabel);
+}
+
+
 export function updateDomGame(){
     swapDomCards()
     updatePlayerLabels();
+
+    if (gameData.lastTurn){
+        lastTurnEvent(gameData.lastTurn);
+    }
 
     if (gameData.players[0].data.active && !gameData.players[0].data.pass){
         createPassBtn();

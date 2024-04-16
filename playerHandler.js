@@ -46,7 +46,7 @@ export function nextPlayer(){
     
     if (gameData.singlePlayer){
         if (!gameData.endOfGame){
-            game.updateGame();
+            dataHandler.updateGame();
             dom.updateDomGame();
             gameData.pickedBank = [];
             gameData.pickedHand = [];
@@ -57,7 +57,7 @@ export function nextPlayer(){
     }
     else {
         if (gameData.players[0].data.connectionId == gameData.hostName){
-            game.updateGame();
+            dataHandler.updateGame();
             dom.updateDomGame();
             const sender = 'host';
             dataHandler.sendGameData(sender);
@@ -143,8 +143,14 @@ export function setNextPlayerActive(){
         if (playerPass(gameData.players[index])){
             setNextPlayerActive();
         }
+        else {
+            if(dataHandler.isLastTurn()){
+                gameData.lastTurn = gameData.players[index].name
+            }
+        }
     }
-    else {
+    
+    if (gameData.endOfGame) {
         gameData.players.forEach(player => player.data.pass = true);
     }
 }

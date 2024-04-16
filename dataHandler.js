@@ -32,6 +32,7 @@ export const gameData = {
     activePlayerId: null,
     prevActivePlayerId: null,
     endOfGame: false,
+    lastTurn: null,
 }
 
 
@@ -99,7 +100,7 @@ export function updateHost(clientData){
     
     // endOfGameCheck()
 
-    game.updateGame();
+    updateGame();
     dom.updateDomGame();
 
     const sender = 'host';
@@ -172,6 +173,22 @@ export function swapPlayerCards(){
     }
 }
 
+export function updateGame(){
+    
+    if (!gameData.endOfGame){
+        swapPlayerCards();
+        // lastTurnCheck();
+        const active = playerHandler.findPlayerById(gameData.activePlayerId);
+        if (isLastTurn()){
+            active.player.data.pass = true;
+        }
+
+        endOfGameCheck();
+        playerHandler.setNextPlayerActive();
+        playerHandler.isAutoPlayerNext();
+    }
+}
+
 
 export function endOfGameCheck(){
     const active = playerHandler.findPlayerById(gameData.activePlayerId);
@@ -201,6 +218,17 @@ export function lastTurnCheck(){
     if (nonPassPlayers.length == 1){
         if (nonPassPlayers[0].data.connectionId == gameData.activePlayerId){
             nonPassPlayers[0].data.pass = true;
+        }
+    }
+}
+
+
+export function isLastTurn(){
+    const nonPassPlayers = gameData.players.filter(player => !player.data.pass);
+
+    if (nonPassPlayers.length == 1){
+        if (nonPassPlayers[0].data.connectionId == gameData.activePlayerId){
+            return true
         }
     }
 }
