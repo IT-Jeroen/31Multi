@@ -231,38 +231,6 @@ function handOutDeckCards(timing=0){
 }
 
 
-// function handOutDeckCards(timing=0){
-//     let i = 0;
-//     let playerIndex = 0;
-//     let cardIndex = 0;
-//     let numCardsToDeal = 0;
-    
-//     gameData.players.forEach(player => {
-//         numCardsToDeal += player.data.cards.length;
-//     })
-
-
-//     const intervalID = setInterval(()=>{
-//         if (i == numCardsToDeal -1){
-//             clearInterval(intervalID);
-//         }
-        
-//         let player = gameData.players[playerIndex];
-//         const cardID = player.data.cards[cardIndex];
-//         const card = document.getElementById(cardID)
-//         card.className = `card ${player.location}`
-//         playerIndex += 1;
-
-//         if (playerIndex == gameData.players.length){
-//             cardIndex += 1;
-//             playerIndex = 0;
-//         }
-
-//         i += 1;
-//     }, timing);
-// }
-
-
 function cardClickEvent(e){
     const classes = e.currentTarget.classList;
     const south = classes.contains('south');
@@ -435,21 +403,3 @@ export function startGame(){
     })
     
 }
-
-
-
-// export function startGame(){
-//     renderApp(createPlayfield());
-//     handOutDeckCards(300);
-//     updatePlayerLabels();
-//     if (gameData.players[0].data.active){
-//         createPassBtn();
-//         createSwapBankBtn();
-//     }
-//     else {
-//         if (gameData.players[0].data.connectionId == gameData.hostName){
-//             playerHandler.isAutoPlayerNext();
-//         }
-        
-//     } 
-// }

@@ -78,19 +78,15 @@ function returnHandCombos(mappedCards){
 function pickBestCombo(mappedHand, mappedBank){
     let bestCombo = null;
     const bestSuitCombo = testCardCombos(mappedHand, mappedBank, 'suit');
-    // console.log('SUIT',bestSuitCombo);
     const bestIconCombo = testCardCombos(mappedHand, mappedBank, 'icon');
-    // console.log('ICON', bestIconCombo);
     
     if (bestSuitCombo.length == bestIconCombo.length){
         if(bestSuitCombo.length != 0 && bestIconCombo.length != 0){
             if (Math.random() > 0.5){
                 bestCombo = bestSuitCombo
-                // console.log('RANDOM SUIT')
             }
             else {
                 bestCombo = bestIconCombo
-                // console.log('RANDOM ICON')
             }
         }
     }
@@ -102,8 +98,6 @@ function pickBestCombo(mappedHand, mappedBank){
     if(bestSuitCombo.length < bestIconCombo.length){
         bestCombo = bestIconCombo
     }
-
-    // console.log('BEST COMBO', bestCombo)
 
     return bestCombo
 }
@@ -160,7 +154,6 @@ function returnHighestValueCard(mappedCards){
 
 function pickHandCard(mappedHand, keepCards){
     let pickedHand = null;
-    // console.log('KEEP CARDS in hand', keepCards);
     let pickHandCards = mappedHand.filter(card => !keepCards.includes(card));
     if (pickHandCards.length == 0){
         pickHandCards = [...keepCards];
@@ -182,9 +175,6 @@ function autoPlayerPass(mappedCards){
         if (Math.random() < 0.74){
             playerPass = true
         }
-        else {
-            // console.log('TAKING A GAMBLE ???')
-        }
     }
     return playerPass
 }
@@ -198,7 +188,6 @@ function takeBank(mappedHand, pickedHand, mappedBank, pickedBank, ){
 
     if (bankScore > handScore){
         if (autoPlayerPass(mappedBank)){
-            // console.log('AUTO PLAYER BANK SWAP')
             return true
         }
     }
@@ -237,8 +226,6 @@ export function autoPlayerPick(mappedHand, mappedBank){
 
             }
             else {
-
-                // console.log('AUTO PLAYER PASS');
                 return {hand: [], bank: []}
             }
         }

@@ -1,7 +1,6 @@
 import { autoPlayerPick } from './autoPlayer.js';
 import { gameData } from './dataHandler.js' 
 import * as dataHandler from './dataHandler.js';
-// import * as game from './gameMechanics.js';
 import * as dom from './dom.js';
 
 
@@ -37,13 +36,6 @@ export function findPlayerById(connectionId){
 
 
 export function nextPlayer(){
-    // const allPlayersPass = gameData.players.every(player => player.data.pass);
-    // if (allPlayersPass){
-    //     gameData.endOfGame = true;
-    // }
-    console.log('----HOST----')
-    // dataHandler.endOfGameCheck()
-    
     if (gameData.singlePlayer){
         if (!gameData.endOfGame){
             dataHandler.updateGame();
@@ -79,7 +71,6 @@ export function isAutoPlayerNext(){
 
 // HOST FUNCTION //
 function autoPlayer(active){
-    console.log(`------${active.player.name}------`)
     setTimeout(()=> {
         const mappedHand = active.player.data.cards.map(card => gameData.cards[card]);
         const mappedBank = gameData.players[4].data.cards.map(card => gameData.cards[card]);
@@ -115,7 +106,6 @@ function infiniteLoop(active, pickedBankCard){
 
 export function setPlayerPass(){
     gameData.players[0].data.pass = true;
-    // console.log('PLAYER PASS', gameData.players[0].name, gameData.players[0].data.pass)
     gameData.pickedHand = [];
     gameData.pickedBank = [];
 }
@@ -157,7 +147,6 @@ export function setNextPlayerActive(){
 
 
 function playerPass(active){
-    // dataHandler.endOfGameCheck()
     if (!gameData.endOfGame){
         if (active.data.pass){
             return true
@@ -167,21 +156,3 @@ function playerPass(active){
         }
     }
 }
-
-
-// function playerPass(active){
-//     const allPlayerPass = gameData.players.every(player => player.data.pass);
-//     if (allPlayerPass){
-//         gameData.endOfGame = true;
-//         // a bit counter intuative, but this is to stop inifinite recursion of nextPlayer() //
-//         return false
-//     }
-//     else{
-//         if (active.data.pass){
-//             return true
-//         }
-//         else {
-//             return false
-//         }
-//     }
-// }

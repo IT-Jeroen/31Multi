@@ -1,8 +1,6 @@
 import {gameData} from './dataHandler.js'
 import * as dataHandler from './dataHandler.js';
-import * as dom from './dom.js'
 import * as p2p from './p2p.js'; 
-import * as playerHandler from './playerHandler.js'; 
 
 
 function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
@@ -71,48 +69,4 @@ export function dealCards(cardsInGame){
         player.data.cards = [cardsInGame[index], cardsInGame[index + gameData.players.length], cardsInGame[index + 2 * gameData.players.length]]
     })
 }
-
-
-// export function updateGame(isClient=false){
-    
-//     if (!gameData.endOfGame){
-//         // console.log('UPDATE GAME CONTINUE')
-//         dom.swapDomCards();
-//         if (!isClient){
-//             dataHandler.swapPlayerCards();
-//             dataHandler.endOfGameCheck(); // wrong spot, client is not updated //
-//             playerHandler.setNextPlayerActive();
-//             playerHandler.isAutoPlayerNext(); 
-//         }
-//         dom.updatePlayerLabels();
-
-//         if (gameData.players[0].data.active && !gameData.players[0].data.pass){
-//             dom.createPassBtn();
-//             dom.createSwapBankBtn();
-//         }
-
-//         // dataHandler.endOfGameCheck()
-//     }
-//     if (gameData.endOfGame){
-//         // console.log('UPDATE GAME END OF GAME')
-//         dom.swapDomCards(); // either client not correct or host not correct //
-//         dom.removeBtn();
-//         dom.updatePlayerLabels();
-//         dom.flipAllCards();
-        
-//     }
-    
-// }
-
-
-// export function updateGame(){
-    
-//     if (!gameData.endOfGame){
-//         dataHandler.swapPlayerCards();
-//         dataHandler.lastTurnCheck();
-//         dataHandler.endOfGameCheck();
-//         playerHandler.setNextPlayerActive();
-//         playerHandler.isAutoPlayerNext();
-//     }
-// }
 

@@ -91,15 +91,7 @@ export function updateHost(clientData){
     if (gameData.pickedBank.length == 0 || gameData.pickedBank.length == 3){
         const active = playerHandler.findPlayerById(gameData.activePlayerId);
         active.player.data.pass = true; 
-        // console.log('PLAYER PASS', active.player.name)
     }
-    
-    // const allPlayersPass = gameData.players.every(player => player.data.pass);
-    // if(allPlayersPass){
-    //     gameData.endOfGame = true;
-    // }
-    
-    // endOfGameCheck()
 
     updateGame();
     dom.updateDomGame();
@@ -118,7 +110,6 @@ export function updateHost(clientData){
 export function updateClient(receivedGameData){
         const isClient = true;
         updateGameData(receivedGameData);
-        // game.updateGame(isClient);
         dom.updateDomGame();
 
         gameData.pickedHand = [];
@@ -180,7 +171,6 @@ export function updateGame(){
     
     if (!gameData.endOfGame){
         swapPlayerCards();
-        // lastTurnCheck();
         const active = playerHandler.findPlayerById(gameData.activePlayerId);
         if (isLastTurn()){
             active.player.data.pass = true;
@@ -195,7 +185,6 @@ export function updateGame(){
 
 export function endOfGameCheck(){
     const active = playerHandler.findPlayerById(gameData.activePlayerId);
-    console.log(`Player ${active.player.name} endOfGameCheck`)
     const allPlayersPass = gameData.players.every(player => player.data.pass);
     if(allPlayersPass){
         gameData.endOfGame = true;
@@ -211,18 +200,6 @@ export function endOfGameCheck(){
         active.player.data.pass = true;
         gameData.endOfGame = true
     }   
-}
-
-
-export function lastTurnCheck(){
-    // const active = playerHandler.findPlayerById(gameData.activePlayerId);
-    const nonPassPlayers = gameData.players.filter(player => !player.data.pass);
-
-    if (nonPassPlayers.length == 1){
-        if (nonPassPlayers[0].data.connectionId == gameData.activePlayerId){
-            nonPassPlayers[0].data.pass = true;
-        }
-    }
 }
 
 
