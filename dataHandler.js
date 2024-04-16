@@ -100,6 +100,7 @@ export function updateHost(clientData){
     // endOfGameCheck()
 
     game.updateGame();
+    dom.updateDomGame();
 
     const sender = 'host';
     sendGameData(sender);
@@ -115,7 +116,8 @@ export function updateHost(clientData){
 export function updateClient(receivedGameData){
         const isClient = true;
         updateGameData(receivedGameData);
-        game.updateGame(isClient);
+        // game.updateGame(isClient);
+        dom.updateDomGame();
 
         gameData.pickedHand = [];
         gameData.pickedBank = [];
@@ -189,4 +191,16 @@ export function endOfGameCheck(){
         active.player.data.pass = true;
         gameData.endOfGame = true
     }   
+}
+
+
+export function lastTurnCheck(){
+    // const active = playerHandler.findPlayerById(gameData.activePlayerId);
+    const nonPassPlayers = gameData.players.filter(player => !player.data.pass);
+
+    if (nonPassPlayers.length == 1){
+        if (nonPassPlayers[0].data.connectionId == gameData.activePlayerId){
+            nonPassPlayers[0].data.pass = true;
+        }
+    }
 }

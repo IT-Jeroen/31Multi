@@ -73,38 +73,6 @@ export function dealCards(cardsInGame){
 }
 
 
-export function updateGame(isClient=false){
-    
-    if (!gameData.endOfGame){
-        // console.log('UPDATE GAME CONTINUE')
-        dom.swapDomCards();
-        if (!isClient){
-            dataHandler.swapPlayerCards();
-            dataHandler.endOfGameCheck()
-            playerHandler.setNextPlayerActive();
-            playerHandler.isAutoPlayerNext(); 
-        }
-        dom.updatePlayerLabels();
-
-        if (gameData.players[0].data.active && !gameData.players[0].data.pass){
-            dom.createPassBtn();
-            dom.createSwapBankBtn();
-        }
-
-        // dataHandler.endOfGameCheck()
-    }
-    if (gameData.endOfGame){
-        // console.log('UPDATE GAME END OF GAME')
-        // dom.swapDomCards();
-        dom.removeBtn();
-        dom.updatePlayerLabels();
-        dom.flipAllCards();
-        
-    }
-    
-}
-
-
 // export function updateGame(isClient=false){
     
 //     if (!gameData.endOfGame){
@@ -112,6 +80,7 @@ export function updateGame(isClient=false){
 //         dom.swapDomCards();
 //         if (!isClient){
 //             dataHandler.swapPlayerCards();
+//             dataHandler.endOfGameCheck(); // wrong spot, client is not updated //
 //             playerHandler.setNextPlayerActive();
 //             playerHandler.isAutoPlayerNext(); 
 //         }
@@ -121,13 +90,29 @@ export function updateGame(isClient=false){
 //             dom.createPassBtn();
 //             dom.createSwapBankBtn();
 //         }
+
+//         // dataHandler.endOfGameCheck()
 //     }
-//     else{
+//     if (gameData.endOfGame){
 //         // console.log('UPDATE GAME END OF GAME')
-//         dom.swapDomCards();
+//         dom.swapDomCards(); // either client not correct or host not correct //
+//         dom.removeBtn();
 //         dom.updatePlayerLabels();
 //         dom.flipAllCards();
+        
 //     }
     
 // }
+
+
+export function updateGame(){
+    
+    if (!gameData.endOfGame){
+        dataHandler.swapPlayerCards();
+        dataHandler.lastTurnCheck();
+        dataHandler.endOfGameCheck();
+        playerHandler.setNextPlayerActive();
+        playerHandler.isAutoPlayerNext();
+    }
+}
 

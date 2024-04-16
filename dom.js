@@ -341,6 +341,22 @@ export function swapDomCards(){
 }
 
 
+export function updateDomGame(){
+    swapDomCards()
+    updatePlayerLabels();
+
+    if (gameData.players[0].data.active && !gameData.players[0].data.pass){
+        createPassBtn();
+        createSwapBankBtn();
+    }
+
+    if (gameData.endOfGame){
+        removeBtn();
+        flipAllCards(); 
+    }
+}
+
+
 export function flipAllCards(){
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {

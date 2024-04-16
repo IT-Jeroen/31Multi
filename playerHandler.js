@@ -47,6 +47,7 @@ export function nextPlayer(){
     if (gameData.singlePlayer){
         if (!gameData.endOfGame){
             game.updateGame();
+            dom.updateDomGame();
             gameData.pickedBank = [];
             gameData.pickedHand = [];
         }
@@ -57,6 +58,7 @@ export function nextPlayer(){
     else {
         if (gameData.players[0].data.connectionId == gameData.hostName){
             game.updateGame();
+            dom.updateDomGame();
             const sender = 'host';
             dataHandler.sendGameData(sender);
         }
