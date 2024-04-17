@@ -373,6 +373,7 @@ export function updateDomGame(){
     if (gameData.endOfGame){
         removeBtn();
         flipAllCards(); 
+        createScoreboard();
     }
 }
 
@@ -383,6 +384,33 @@ export function flipAllCards(){
         const classStr = card.className;
         card.className = `${classStr}-open`;
     })
+}
+
+
+export function createScoreboard(){
+    const result = dataHandler.scoring();
+    console.log(result)
+    let firstPart = `
+        <div class="score-board">
+        <div class="score-title">Round Winner(s)</div>
+        <div class="score">Winning Score: ${result.score}</div>`
+        result.roundWinners.forEach(player => {
+            firstPart = `${firstPart}<div class="winner">${player.name}</div>`
+            const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
+            playerLabel.className = `player-label player-${player.location} player-wins`
+        })
+    
+    
+    let secondPart = `
+        <div class="score-title">Game Winner(s)</div>
+        <div class="wins">Number of Wins: ${result.wins}</div>`
+        result.gameWinners.forEach(player => {secondPart = `${secondPart}<div class="winner">${player.name}</div>`})
+    
+    const htmlString = `${firstPart}${secondPart}</div>`;
+    const playFieldElem = document.getElementById('playfield');
+
+    playFieldElem.insertAdjacentHTML('afterbegin',htmlString);
+
 }
 
 

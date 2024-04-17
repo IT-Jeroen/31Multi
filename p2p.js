@@ -127,6 +127,7 @@ function addNewConnection(c){
 function setConnectionEvents(c) {
 
     c.on('data', function (received) {
+        // CLIENT SIDE //
         if (received.type === 'waiting-room'){
             dataHandler.updateGameData(received.data);
             dom.renderApp(dom.createWaitingRoom())

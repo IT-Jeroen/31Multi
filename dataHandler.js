@@ -13,11 +13,11 @@ export const connections = [
 ]
 
 const players = [
-    {'name':'Local', 'location': 'south', 'data':{ 'connectionId': 'local', 'cards':[], 'history': [],'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':false}},
-    {'name':'Auto 1', 'location': 'west', 'data':{ 'connectionId': 'auto-1', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 2', 'location': 'north', 'data':{ 'connectionId': 'auto-2', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Auto 3', 'location': 'east', 'data':{ 'connectionId': 'auto-3', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': false, 'active':false, 'auto':true}},
-    {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': 'bank', 'cards':[], 'history': [], 'wins': 0, 'loses': 0, 'pass': true, 'active':false, 'auto':false}}
+    {'name':'Local', 'location': 'south', 'data':{ 'connectionId': 'local', 'cards':[], 'history': [],'wins': 0, 'pass': false, 'active':false, 'auto':false}},
+    {'name':'Auto 1', 'location': 'west', 'data':{ 'connectionId': 'auto-1', 'cards':[], 'history': [], 'wins': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 2', 'location': 'north', 'data':{ 'connectionId': 'auto-2', 'cards':[], 'history': [], 'wins': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Auto 3', 'location': 'east', 'data':{ 'connectionId': 'auto-3', 'cards':[], 'history': [], 'wins': 0, 'pass': false, 'active':false, 'auto':true}},
+    {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': 'bank', 'cards':[], 'history': [], 'wins': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
 
 
@@ -197,8 +197,10 @@ export function endOfGameCheck(){
     
     if (score == 31){
         console.log(`Player ${active.player.name} Scores 31`)
-        active.player.data.pass = true;
+        // active.player.data.pass = true;
+        active.player.data.wins += 1;
         gameData.endOfGame = true
+        gameData.players.forEach(player => player.data.pass = true);
     }   
 }
 
@@ -211,4 +213,39 @@ export function isLastTurn(){
             return true
         }
     }
+}
+
+export function scoring(){
+    let roundWinners = [];
+    let topScore = 0;
+    let gameWinners = [];
+    let wins = 0;
+
+    gameData.players.forEach(player => {
+        const mappedHand = player.data.cards.map(card => gameData.cards[card]);
+        const score = calculateHand(mappedHand);
+        
+        if (score == topScore){
+            // roundWinners.push(player.name);
+            roundWinners.push(player);
+        }
+        if (score > topScore){
+            topScore = score;
+            // roundWinners = [player.name];
+            roundWinners = [player];
+        }
+
+        if (player.data.wins == wins){
+            // gameWinners.push(player.name);
+            gameWinners.push(player);
+        }
+        if (player.data.wins > wins){
+            // gameWinners = [player.name];
+            wins = player.data.wins;
+            gameWinners = [player];
+        }
+
+    })
+
+    return {score: topScore, roundWinners: roundWinners, wins: wins, gameWinners: gameWinners}
 }
