@@ -273,14 +273,26 @@ export function scoring(){
 
 // LOCAL FUNCTION //
 export function leaveGame(player){
+    // Client //
     if (player.data.connectionId != gameData.hostName){
         p2p.pushData(connections[0].c, player, 'leave-game');
+        connections[0].p.destroy()
+        
     }
+    // Host //
     else {
+        console.log('HOST LEAVING')
         connections.forEach(connection => {
             p2p.pushData(connection.c, null, 'host-leaving');
+            
         })
+        
     }
+    // reset //
+    setTimeout(()=> {
+        connections[0].p.destroy();
+        window.location.reload();
+    }, 1000);
     
 }
 
@@ -341,10 +353,12 @@ export function updateWaitingRoom(){
 export function removeConnection(connectionId){
     connections.forEach((connection, index) => {
     if (connection.connectionId == connectionId){
+        connection.c.close();
         connections[index] = {'name':`Auto ${index}`, 'connectionId': null, 'p': null, 'c': null}
         }
    });
 }
+
 
 export function removePlayer(connectionId){
     gameData.players.forEach((player, index) => {

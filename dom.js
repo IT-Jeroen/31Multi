@@ -460,8 +460,8 @@ function createLeaveGameBtn(){
    
     button.addEventListener('click', () => {
         dataHandler.leaveGame(gameData.players[0]);
-        // reset browser //
-        setTimeout(()=> window.location.reload(), 1000);
+        // // reset browser //
+        // setTimeout(()=> window.location.reload(), 1000);
 
     })
     return button;

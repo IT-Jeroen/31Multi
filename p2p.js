@@ -77,7 +77,11 @@ function setAsHost(playerName){
         dom.renderApp(dom.createWaitingRoom())
     })
 
-    peer.on('error', err => {console.log('PEER ERROR:', err)});
+    peer.on('error', err => {
+        console.log('PEER ERROR:', err);
+        peer.destroy();
+        setupConnection(playerName);
+    });
 
     // Create Waiting Room //
     gameData.players[0].name = playerName;
@@ -213,7 +217,11 @@ function setConnectionEvents(c) {
         //     })
         // }
 
+        // CLIENT SIDE //
+        // Connection closes before this will be executed //
         if (received.type == 'host-leaves'){
+            console.log('RECIEVED HOST LEAVING')
+            dataHandler.connections[0].p.destroy()
             // go back to starting screen //
             window.location.reload();
             
@@ -223,6 +231,11 @@ function setConnectionEvents(c) {
 
     c.on('close', function () {
         console.log('Connection reset, Awaiting connection...');
+        if (gameData.players[0].data.connectionId != gameData.hostName){
+            window.location.reload();
+        }
+        
+
         // set player connection to null
         // set player data.id to null
         // set player to auto ???
