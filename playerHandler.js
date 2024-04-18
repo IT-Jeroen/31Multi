@@ -5,7 +5,7 @@ import * as dom from './dom.js';
 
 
 export function returnPlayerList(){
-    return gameData.players.map(player => player.name)
+    return gameData.waitingRoom.map(player => player.name);
 }
 
 

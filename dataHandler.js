@@ -20,12 +20,19 @@ const players = [
     {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': 'bank', 'cards':[], 'history': [], 'wins': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
 
+// // only (host and) client players ??? //
+// export let waitingRoom = [];
+
+// export function returnWaitingRoomList(){
+//     return waitingRoom
+// }
+
 
 export const gameData = {
     hostName: '31-multi-host-test-id',
     isHost: null,
     singlePlayer: true,
-    players: players,
+    players: JSON.parse(JSON.stringify(players)),
     cards: null,
     pickedHand: [],
     pickedBank: [],
@@ -33,6 +40,7 @@ export const gameData = {
     prevActivePlayerId: null,
     endOfGame: false,
     lastTurn: null,
+    waitingRoom: [],
 }
 
 
@@ -66,9 +74,18 @@ export function addCardsToCardDB(cards){
     })
 }
 
+function isSinglePlayer(){
+    if (gameData.players[1].data.auto && gameData.players[2].data.auto && gameData.players[2].data.auto){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 
 export function initializeGame(){
-    const randomInt = Math.floor(Math.random() * 4)
+    gameData.singlePlayer = isSinglePlayer();
+    const randomInt = Math.floor(Math.random() * 4);
     gameData.activePlayerId = gameData.players[randomInt].data.connectionId;
     gameData.players[randomInt].data.active = true;
     game.dealCards(game.prepCards())
@@ -78,6 +95,7 @@ export function initializeGame(){
     })
     
     dom.startGame()
+    gameData.waitingRoom = [];
 }
 
 
@@ -196,9 +214,9 @@ export function endOfGameCheck(){
     
     
     if (score == 31){
-        console.log(`Player ${active.player.name} Scores 31`)
+        // console.log(`Player ${active.player.name} Scores 31`)
         // active.player.data.pass = true;
-        active.player.data.wins += 1;
+        // active.player.data.wins += 1;
         gameData.endOfGame = true
         gameData.players.forEach(player => player.data.pass = true);
     }   
@@ -214,6 +232,7 @@ export function isLastTurn(){
         }
     }
 }
+
 
 export function scoring(){
     let roundWinners = [];
@@ -247,5 +266,90 @@ export function scoring(){
 
     })
 
+    roundWinners.forEach(player => player.data.wins += 1);
+
     return {score: topScore, roundWinners: roundWinners, wins: wins, gameWinners: gameWinners}
 }
+
+// LOCAL FUNCTION //
+export function leaveGame(player){
+    if (player.data.connectionId != gameData.hostName){
+        p2p.pushData(connections[0].c, player, 'leave-game');
+    }
+    else {
+        connections.forEach(connection => {
+            p2p.pushData(connection.c, null, 'host-leaving');
+        })
+    }
+    
+}
+
+// LOCAL FUNCTION //
+export function nextGame(){
+    
+    if (gameData.players[0].data.connectionId == gameData.hostName){
+        // gameData.hostName = '';
+        // gameData.isHost = null;
+        // gameData.singlePlayer = true; moved to initializeGame();
+        gameData.cards = null;
+        gameData.pickedBank = [];
+        gameData.pickedHand = [];
+        gameData.activePlayerId = null;
+        gameData.prevActivePlayerId = null;
+        gameData.endOfGame = false;
+        gameData.lastTurn = null;
+
+        gameData.players.forEach(player => {
+            player.data.cards = [];
+            player.data.history = [];
+            player.data.active = false;
+            player.data.pass = false;
+            if (player.data.connectionId == 'bank'){
+                player.data.pass = true;
+            }
+        })
+
+        gameData.waitingRoom.push(gameData.players[0])
+        // dom.renderApp(dom.createWaitingRoom());
+        updateWaitingRoom();
+        
+    }
+    else {
+        // gameData is not reset yet but will be reset once host enters next game //
+        p2p.pushData(connections[0].c, gameData.players[0], 'next-game');
+    }
+    
+}
+
+
+export function updateWaitingRoom(){
+    gameData.waitingRoom.forEach(player => {
+                
+        if (player.data.connectionId == gameData.hostName){
+            dom.renderApp(dom.createWaitingRoom())
+        }
+        else {
+            const connect = connections.filter(connection => connection.connectionId == player.data.connectionId)[0];
+            p2p.pushData(connect.c, gameData, 'waiting-room');
+        }
+        
+
+    })
+}
+
+
+export function removeConnection(connectionId){
+    connections.forEach((connection, index) => {
+    if (connection.connectionId == connectionId){
+        connections[index] = {'name':`Auto ${index}`, 'connectionId': null, 'p': null, 'c': null}
+        }
+   });
+}
+
+export function removePlayer(connectionId){
+    gameData.players.forEach((player, index) => {
+     if (player.data.connectionId == connectionId){
+         gameData.players[index] = players[index];
+         }
+    });
+ }

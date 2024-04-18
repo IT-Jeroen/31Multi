@@ -65,7 +65,7 @@ function setAsHost(playerName){
         })
 
     peer.on('connection', (c)=>{
-        gameData.singlePlayer = false;
+        // gameData.singlePlayer = false; moved to initializeGame()
         addNewConnection(c)
         setConnectionEvents(c)
 
@@ -84,6 +84,7 @@ function setAsHost(playerName){
     dataHandler.connections[0].p = peer;
     gameData.players[0].data.connectionId = peer._id;
     gameData.isHost = playerName;
+    gameData.waitingRoom.push(gameData.players[0]);
     dom.renderApp(dom.createWaitingRoom())
 
 }
@@ -115,6 +116,9 @@ function addNewConnection(c){
             dataHandler.connections[autoPlayerIndex].name = c.metadata;
             dataHandler.connections[autoPlayerIndex].connectionId = c.connectionId;
             dataHandler.connections[autoPlayerIndex].c = c;
+
+            // add to waiting room //
+            gameData.waitingRoom.push(gameData.players[autoPlayerIndex]);
         }
         
     }
@@ -133,26 +137,86 @@ function setConnectionEvents(c) {
             dom.renderApp(dom.createWaitingRoom())
         }
 
-
+        // CLIENT SIDE //
         if (received.type == 'card-data'){
             dataHandler.setCardsDB(received.data)
         }
 
+        // CLIENT SIDE //
         if (received.type == 'start-game'){
             dataHandler.updateGameData(received.data);
             dom.startGame()
         }
 
+        // CLIENT SIDE //
         if (received.type == 'client-data'){
             dataHandler.updateClient(received.data);
             
         }
 
+        // HOST SIDE //
         if (received.type == 'host-data'){
             if (gameData.players[0].data.connectionId == gameData.hostName){
                 dataHandler.updateHost(received.data);
 
             }
+        }
+        // // HOST SIDE //
+        if (received.type == 'next-game'){
+            const player = received.data;
+            gameData.waitingRoom.push(player);
+            // const connect = dataHandler.connections.filter(connection => connection.connectionId == player.data.connectionId)[0];
+            // pushData(connect.c, gameData, 'waiting-room');
+    
+            // Update Waiting Room //
+            // dom.renderApp(dom.createWaitingRoom())
+            // gameData.waitingRoom.forEach(playerName => {
+                
+            //     if (playerName == gameData.players[0].name){
+            //         dom.renderApp(dom.createWaitingRoom())
+            //     }
+            //     else {
+            //         const connect = dataHandler.connections.filter(connection => connection.connectionId == player.data.connectionId)[0];
+            //         pushData(connect.c, gameData, 'waiting-room');
+            //     }
+                
+
+            // })
+            dataHandler.updateWaitingRoom();
+        }
+
+        // HOST SIDE //
+        if (received.type == 'leave-game'){
+            console.log('LEAVE GAME P2P', received)
+            const player = received.data
+            // remove client connection //
+            dataHandler.removeConnection(player.data.connectionId);
+            
+            // remove client from players //
+            dataHandler.removePlayer(player.data.connectionId);
+
+            // MAKE A WAITING ROOM FLAG ??? //
+
+            // forces host into waiting room //
+            // dom.renderApp(dom.createWaitingRoom());
+
+            // will force all clients into waiting room //
+            dataHandler.connections.forEach(connection => {
+                pushData(connection.c, gameData, 'waiting-room');
+            })
+        }
+
+        // if (received.type == 'client-leaves'){
+        //     // remove client connection //
+        //     dataHandler.connections.forEach(connection => {
+        //         pushData(connection.c, gameData, 'waiting-room');
+        //     })
+        // }
+
+        if (received.type == 'host-leaves'){
+            // go back to starting screen //
+            window.location.reload();
+            
         }
         
     });
@@ -192,4 +256,12 @@ export function pushData(c, data, type){
             c.send({type: type, data: data});
         }
     }
+}
+
+function clientLeaves(){
+
+}
+
+function hostLeaves(){
+
 }

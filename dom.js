@@ -110,6 +110,9 @@ export function createWaitingRoom(){
     if (startBtn){
         waitingRoomDiv.append(startBtn())
     }
+
+    // const leaveGameBtn = createLeaveGameBtn();
+    // waitingRoomDiv.append(leaveGameBtn); 
     
     return waitingRoomDiv
 }
@@ -138,6 +141,7 @@ function createStartGameBtn(){
 
 function createPlayerList() {
     return playerHandler.returnPlayerList().map(player => createPlayerListItem(player))
+    // return gameData.waitingRoom.map(player => createPlayerListItem(player));
 }
 
 
@@ -410,6 +414,8 @@ export function createScoreboard(){
     const playFieldElem = document.getElementById('playfield');
 
     playFieldElem.insertAdjacentHTML('afterbegin',htmlString);
+    playFieldElem.append(createNextGameBtn());
+    playFieldElem.append(createLeaveGameBtn());
 
 }
 
@@ -430,4 +436,33 @@ export function startGame(){
         } 
     })
     
+}
+
+function createNextGameBtn(){
+    const button = document.createElement('button')
+    button.type = 'button';
+    button.innerText = 'Next Game';
+   
+    button.addEventListener('click', e => {
+        button.innerText = 'Waiting Room...';
+        button.disabled = true;
+        dataHandler.nextGame();
+        
+
+    })
+    return button;
+}
+
+function createLeaveGameBtn(){
+    const button = document.createElement('button')
+    button.type = 'button';
+    button.innerText = 'Leave Game';
+   
+    button.addEventListener('click', () => {
+        dataHandler.leaveGame(gameData.players[0]);
+        // reset browser //
+        setTimeout(()=> window.location.reload(), 1000);
+
+    })
+    return button;
 }
