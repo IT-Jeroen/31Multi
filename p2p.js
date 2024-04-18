@@ -109,7 +109,8 @@ function addNewConnection(c){
         const autoPlayerIndex = gameData.players.findIndex(player => player.data.auto)
         
         if (autoPlayerIndex == -1){
-            console.log('CANNOT ADD CONNECTION:', c.metadata)
+            console.log('CANNOT ADD CONNECTION:', c.metadata);
+            pushData(c, null, 'game-full');
             // c.send('CANNOT ADD CLIENT')
         }
         else{
@@ -135,6 +136,10 @@ function addNewConnection(c){
 function setConnectionEvents(c) {
 
     c.on('data', function (received) {
+        // CLIENT SIDE //
+        if (received.type === 'game-full'){
+            document.getElementById('player-name-input').value = 'No Place Available';
+        }
         // CLIENT SIDE //
         if (received.type === 'waiting-room'){
             dataHandler.updateGameData(received.data);
@@ -199,15 +204,17 @@ function setConnectionEvents(c) {
             // remove client from players //
             dataHandler.removePlayer(player.data.connectionId);
 
+            dataHandler.updateWaitingRoom();
             // MAKE A WAITING ROOM FLAG ??? //
 
             // forces host into waiting room //
             // dom.renderApp(dom.createWaitingRoom());
 
-            // will force all clients into waiting room //
-            dataHandler.connections.forEach(connection => {
-                pushData(connection.c, gameData, 'waiting-room');
-            })
+            // // will force all clients into waiting room //
+            // dataHandler.connections.forEach(connection => {
+            //     pushData(connection.c, gameData, 'waiting-room');
+            // })
+            
         }
 
         // if (received.type == 'client-leaves'){

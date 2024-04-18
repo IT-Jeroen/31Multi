@@ -12,6 +12,7 @@ export function createNameInput(cb) {
     
     const input = document.createElement('input')
     input.type = 'text';
+    input.id = 'player-name-input'
     
     const button = document.createElement('button')
     button.type = 'button';
