@@ -43,7 +43,6 @@ export function setupConnection(playerName){
             gameData.players[0].data.connectionId = result.c.connectionId;
 
             setConnectionEvents(result.c)
-            dom.renderApp(dom.createWaitingRoom())
         }
         else{
             result.p.destroy();
@@ -65,7 +64,6 @@ function setAsHost(playerName){
         })
 
     peer.on('connection', (c)=>{
-        // gameData.singlePlayer = false; moved to initializeGame()
         addNewConnection(c)
         setConnectionEvents(c)
 
@@ -109,9 +107,8 @@ function addNewConnection(c){
         const autoPlayerIndex = gameData.players.findIndex(player => player.data.auto)
         
         if (autoPlayerIndex == -1){
-            console.log('CANNOT ADD CONNECTION:', c.metadata);
+            console.log('CANNOT ADD CONNECTION GAME FULL:', c.metadata);
             pushData(c, null, 'game-full');
-            // c.send('CANNOT ADD CLIENT')
         }
         else{
             gameData.players[autoPlayerIndex].name = c.metadata;
@@ -138,7 +135,8 @@ function setConnectionEvents(c) {
     c.on('data', function (received) {
         // CLIENT SIDE //
         if (received.type === 'game-full'){
-            document.getElementById('player-name-input').value = 'No Place Available';
+            document.getElementById('player-name-input').value = 'No Place Available at this Time';
+            
         }
         // CLIENT SIDE //
         if (received.type === 'waiting-room'){
@@ -170,66 +168,28 @@ function setConnectionEvents(c) {
 
             }
         }
-        // // HOST SIDE //
+
+        // HOST SIDE //
         if (received.type == 'next-game'){
             const player = received.data;
             gameData.waitingRoom.push(player);
-            // const connect = dataHandler.connections.filter(connection => connection.connectionId == player.data.connectionId)[0];
-            // pushData(connect.c, gameData, 'waiting-room');
-    
-            // Update Waiting Room //
-            // dom.renderApp(dom.createWaitingRoom())
-            // gameData.waitingRoom.forEach(playerName => {
-                
-            //     if (playerName == gameData.players[0].name){
-            //         dom.renderApp(dom.createWaitingRoom())
-            //     }
-            //     else {
-            //         const connect = dataHandler.connections.filter(connection => connection.connectionId == player.data.connectionId)[0];
-            //         pushData(connect.c, gameData, 'waiting-room');
-            //     }
-                
-
-            // })
             dataHandler.updateWaitingRoom();
         }
 
         // HOST SIDE //
         if (received.type == 'leave-game'){
-            console.log('LEAVE GAME P2P', received)
             const player = received.data
-            // remove client connection //
             dataHandler.removeConnection(player.data.connectionId);
-            
-            // remove client from players //
             dataHandler.removePlayer(player.data.connectionId);
-
             dataHandler.updateWaitingRoom();
-            // MAKE A WAITING ROOM FLAG ??? //
-
-            // forces host into waiting room //
-            // dom.renderApp(dom.createWaitingRoom());
-
-            // // will force all clients into waiting room //
-            // dataHandler.connections.forEach(connection => {
-            //     pushData(connection.c, gameData, 'waiting-room');
-            // })
             
         }
-
-        // if (received.type == 'client-leaves'){
-        //     // remove client connection //
-        //     dataHandler.connections.forEach(connection => {
-        //         pushData(connection.c, gameData, 'waiting-room');
-        //     })
-        // }
 
         // CLIENT SIDE //
         // Connection closes before this will be executed //
         if (received.type == 'host-leaves'){
             console.log('RECIEVED HOST LEAVING')
             dataHandler.connections[0].p.destroy()
-            // go back to starting screen //
             window.location.reload();
             
         }
@@ -237,19 +197,11 @@ function setConnectionEvents(c) {
     });
 
     c.on('close', function () {
-        console.log('Connection reset, Awaiting connection...');
         if (gameData.players[0].data.connectionId != gameData.hostName){
             window.location.reload();
         }
-        
-
-        // set player connection to null
-        // set player data.id to null
-        // set player to auto ???
-        // rename player to auto ???
     });
 }
-
 
 
 // Delayed Response in case connection is closed when still setting up in the background //
@@ -276,12 +228,4 @@ export function pushData(c, data, type){
             c.send({type: type, data: data});
         }
     }
-}
-
-function clientLeaves(){
-
-}
-
-function hostLeaves(){
-
 }

@@ -20,13 +20,6 @@ const players = [
     {'name':'Bank', 'location': 'center', 'data':{ 'connectionId': 'bank', 'cards':[], 'history': [], 'wins': 0, 'pass': true, 'active':false, 'auto':false}}
 ]
 
-// // only (host and) client players ??? //
-// export let waitingRoom = [];
-
-// export function returnWaitingRoomList(){
-//     return waitingRoom
-// }
-
 
 export const gameData = {
     hostName: '31-multi-host-test-id',
@@ -214,9 +207,6 @@ export function endOfGameCheck(){
     
     
     if (score == 31){
-        // console.log(`Player ${active.player.name} Scores 31`)
-        // active.player.data.pass = true;
-        // active.player.data.wins += 1;
         gameData.endOfGame = true
         gameData.players.forEach(player => player.data.pass = true);
     }   
@@ -245,28 +235,28 @@ export function scoring(){
         const score = calculateHand(mappedHand);
         
         if (score == topScore){
-            // roundWinners.push(player.name);
             roundWinners.push(player);
         }
         if (score > topScore){
             topScore = score;
-            // roundWinners = [player.name];
             roundWinners = [player];
         }
+    })
 
+    if (gameData.players[0].data.connectionId == gameData.hostName){
+        roundWinners.forEach(player => player.data.wins += 1);
+    }
+    
+
+    gameData.players.forEach(player => {
         if (player.data.wins == wins){
-            // gameWinners.push(player.name);
             gameWinners.push(player);
         }
         if (player.data.wins > wins){
-            // gameWinners = [player.name];
             wins = player.data.wins;
             gameWinners = [player];
         }
-
     })
-
-    roundWinners.forEach(player => player.data.wins += 1);
 
     return {score: topScore, roundWinners: roundWinners, wins: wins, gameWinners: gameWinners}
 }
@@ -276,8 +266,6 @@ export function leaveGame(player){
     // Client //
     if (player.data.connectionId != gameData.hostName){
         p2p.pushData(connections[0].c, player, 'leave-game');
-        connections[0].p.destroy()
-        
     }
     // Host //
     else {
@@ -300,9 +288,6 @@ export function leaveGame(player){
 export function nextGame(){
     
     if (gameData.players[0].data.connectionId == gameData.hostName){
-        // gameData.hostName = '';
-        // gameData.isHost = null;
-        // gameData.singlePlayer = true; moved to initializeGame();
         gameData.cards = null;
         gameData.pickedBank = [];
         gameData.pickedHand = [];
@@ -322,7 +307,6 @@ export function nextGame(){
         })
 
         gameData.waitingRoom.push(gameData.players[0])
-        // dom.renderApp(dom.createWaitingRoom());
         updateWaitingRoom();
         
     }

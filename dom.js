@@ -111,9 +111,6 @@ export function createWaitingRoom(){
     if (startBtn){
         waitingRoomDiv.append(startBtn())
     }
-
-    // const leaveGameBtn = createLeaveGameBtn();
-    // waitingRoomDiv.append(leaveGameBtn); 
     
     return waitingRoomDiv
 }
@@ -142,7 +139,6 @@ function createStartGameBtn(){
 
 function createPlayerList() {
     return playerHandler.returnPlayerList().map(player => createPlayerListItem(player))
-    // return gameData.waitingRoom.map(player => createPlayerListItem(player));
 }
 
 
@@ -394,15 +390,18 @@ export function flipAllCards(){
 
 export function createScoreboard(){
     const result = dataHandler.scoring();
-    console.log(result)
+    console.log('SCORING' ,result);
     let firstPart = `
         <div class="score-board">
         <div class="score-title">Round Winner(s)</div>
         <div class="score">Winning Score: ${result.score}</div>`
         result.roundWinners.forEach(player => {
-            firstPart = `${firstPart}<div class="winner">${player.name}</div>`
-            const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
-            playerLabel.className = `player-label player-${player.location} player-wins`
+            if(player.data.connectionId != 'bank'){
+                firstPart = `${firstPart}<div class="winner">${player.name}</div>`
+                const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
+                playerLabel.className = `player-label player-${player.location} player-wins`
+            }
+            
         })
     
     
@@ -439,6 +438,7 @@ export function startGame(){
     
 }
 
+
 function createNextGameBtn(){
     const button = document.createElement('button')
     button.type = 'button';
@@ -454,6 +454,7 @@ function createNextGameBtn(){
     return button;
 }
 
+
 function createLeaveGameBtn(){
     const button = document.createElement('button')
     button.type = 'button';
@@ -461,9 +462,6 @@ function createLeaveGameBtn(){
    
     button.addEventListener('click', () => {
         dataHandler.leaveGame(gameData.players[0]);
-        // // reset browser //
-        // setTimeout(()=> window.location.reload(), 1000);
-
     })
     return button;
 }

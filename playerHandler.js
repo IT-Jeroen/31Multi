@@ -140,9 +140,6 @@ export function setNextPlayerActive(){
         }
     }
     
-    // if (gameData.endOfGame) {
-    //     gameData.players.forEach(player => player.data.pass = true);
-    // }
 }
 
 
