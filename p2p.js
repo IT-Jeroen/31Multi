@@ -217,7 +217,7 @@ export function pushData(c, data, type){
                 }
                 counter += 1;
 
-                if (counter == 100){
+                if (counter == 300){
                     clearInterval(intervalID);
                     console.log('PUSH DATA TIMEOUT')
                 }
