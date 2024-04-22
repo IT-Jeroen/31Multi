@@ -58,6 +58,10 @@ function createPlayfield(){
     playfield.id = 'playfield'
     playfield.classList.add('playfield')
 
+    const buttonWrapper = document.createElement('div');
+    buttonWrapper.id = 'btn-wrapper';
+    playfield.appendChild(buttonWrapper);
+
     createDeck(playfield)
 
     return playfield
@@ -275,10 +279,12 @@ function cardClickEvent(e){
 
 function createPlayCardsBtn(){
     if (!document.getElementById('play-cards')){
-        const btn = `<button id="play-cards">Play Cards</button>`
-        document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+        const btn = `<button id="play-cards-btn">Play Cards</button>`
+        // document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+        document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
+        
 
-        document.getElementById('play-cards').addEventListener('click', () => {
+        document.getElementById('play-cards-btn').addEventListener('click', () => {
         removeBtn();
         removeClicked();
         nextPlayer();
@@ -290,10 +296,11 @@ function createPlayCardsBtn(){
 
 export function createPassBtn(){
     if(!document.getElementById('player-pass')){
-        const btn = `<button id="player-pass">PASS</button>`
-        document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+        const btn = `<button id="player-pass-btn">Hold Cards</button>`
+        // document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+        document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
     
-        document.getElementById('player-pass').addEventListener('click', () => {
+        document.getElementById('player-pass-btn').addEventListener('click', () => {
             removeBtn();
             removeClicked();
             setPlayerPass();
@@ -305,10 +312,11 @@ export function createPassBtn(){
 
 export function createSwapBankBtn(){
     if(!document.getElementById('swap-bank')){
-        const btn = `<button id="swap-bank">SWAP BANK</button>`
-        document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+        const btn = `<button id="swap-bank-btn">Swap Bank</button>`
+        // document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
+        document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
     
-        document.getElementById('swap-bank').addEventListener('click', () => {
+        document.getElementById('swap-bank-btn').addEventListener('click', () => {
             removeBtn();
             removeClicked();
             const player = gameData.players[0];
@@ -324,7 +332,7 @@ export function createSwapBankBtn(){
 
 
 export function removeBtn(){
-    document.querySelectorAll(['#player-pass', '#play-cards', '#swap-bank', '#last-turn']).forEach(elem => {
+    document.querySelectorAll(['#player-pass-btn', '#play-cards-btn', '#swap-bank-btn', '#last-turn']).forEach(elem => {
         elem.remove()
     })
 }
@@ -400,9 +408,10 @@ export function flipAllCards(){
 
 export function createScoreboard(){
     const result = scoring();
-    console.log('SCORING' ,result);
+    // console.log('SCORING' ,result);
+    const scoreBoard = document.createElement('div');
+    scoreBoard.id = 'score-board';
     let firstPart = `
-        <div class="score-board">
         <div class="score-title">Round Winner(s)</div>
         <div class="score">Winning Score: ${result.score}</div>`
         result.roundWinners.forEach(player => {
@@ -420,13 +429,14 @@ export function createScoreboard(){
         <div class="wins">Number of Wins: ${result.wins}</div>`
         result.gameWinners.forEach(player => {secondPart = `${secondPart}<div class="winner">${player.name}</div>`})
     
-    const htmlString = `${firstPart}${secondPart}</div>`;
+
+    const htmlString = `${firstPart}${secondPart}`;
+    scoreBoard.insertAdjacentHTML('afterbegin',htmlString);
+    scoreBoard.append(createNextGameBtn());
+    scoreBoard.append(createLeaveGameBtn());
+
     const playFieldElem = document.getElementById('playfield');
-
-    playFieldElem.insertAdjacentHTML('afterbegin',htmlString);
-    playFieldElem.append(createNextGameBtn());
-    playFieldElem.append(createLeaveGameBtn());
-
+    playFieldElem.append(scoreBoard);
 }
 
 
@@ -450,9 +460,13 @@ export function startGame(){
 
 
 function createNextGameBtn(){
-    const button = document.createElement('button')
+    const button = document.createElement('button');
     button.type = 'button';
+    button.id = 'next-game-btn'
     button.innerText = 'Next Game';
+
+    const btnWrap = document.createElement('div');
+    btnWrap.append(button);
    
     button.addEventListener('click', e => {
         button.innerText = 'Waiting Room...';
@@ -461,17 +475,23 @@ function createNextGameBtn(){
         
 
     })
-    return button;
+    // return button;
+    return btnWrap;
 }
 
 
 function createLeaveGameBtn(){
     const button = document.createElement('button')
     button.type = 'button';
+    button.id = 'leave-game-btn';
     button.innerText = 'Leave Game';
+
+    const btnWrap = document.createElement('div');
+    btnWrap.append(button);
    
     button.addEventListener('click', () => {
         leaveGame(gameData.players[0]);
     })
-    return button;
+    // return button;
+    return btnWrap;
 }

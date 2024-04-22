@@ -160,7 +160,7 @@ body {
     visibility: visible;
 }
 
-#swap-bank-btn{
+/* #swap-bank-btn{
     position: absolute;
 }
 
@@ -187,7 +187,7 @@ body {
 }
 .play-hold-swap-btn:active{
     background-color: blue;
-}
+} */
 
 /* ------------------------------------------------------------------------------------------ */
 
@@ -541,24 +541,50 @@ body {
     transform: rotateZ(270deg);
 }
 
-#play-cards{
+#btn-wrapper{
     position: absolute;
-    background-color: blue;
-    color: white;
-    padding: 1em;
+    max-height: var(--card-height);
+    /* background-color: blue; */
+    /* color: white; */
+    /* padding: 1em; */
     z-index: 200;
     bottom: 1em;
     left: calc(50% + var(--card-width));
+    display: grid;
+    row-gap: 1em;
+    grid-auto-rows: auto;
+
 }
 
-#player-pass{
-    position: absolute;
+#play-cards-btn{
+    /* position: absolute; */
     background-color: blue;
     color: white;
     padding: 1em;
-    z-index: 200;
-    bottom: 1em;
-    left: calc(50% - var(--card-width));
+    /* z-index: 200; */
+    /* bottom: 1em; */
+    /* left: calc(50% + var(--card-width)); */
+}
+
+#player-pass-btn{
+    /* position: absolute; */
+    background-color: rgb(0, 110, 255);
+    color: white;
+    padding: 1em;
+    /* z-index: 200; */
+    /* bottom: 1em; */
+    /* left: calc(50% - calc(2 * var(--card-width))); */
+
+}
+
+#swap-bank-btn{
+    /* position: absolute; */
+    background-color: rgb(0, 162, 255);
+    color: white;
+    padding: 1em;
+    /* z-index: 200; */
+    /* bottom: 1em; */
+    /* left: calc(50% - calc(2 * var(--card-width))); */
 
 }
 
@@ -568,10 +594,56 @@ body {
     left: calc(50% - 0.5 * (var(--card-width) + 2 * var(--overlap)) - 1em);
 }
 
-.score-board {
+#score-board {
     position: absolute;
     top: 50%;
     left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 200;
     background-color: white;
+    display: grid;
+    row-gap: 0.4em;
+    grid-auto-rows: auto;
+    padding: 1em;
+    border: 5px solid rgb(68, 68, 68);
+    background-color: darkgray;
 }
+
+.score-title {
+    font-size: x-large;
+    background-color: darkgray;
+}
+
+.score {
+    font-size: larger;
+    background-color: green;
+    color: white;
+    text-align: center;
+}
+
+.wins {
+    font-size: larger;
+    background-color: lightgray;
+    text-align: center;
+}
+
+.winner {
+    font-size: large;
+    font-weight: 600;
+    text-align: center;
+    background-color: white;
+    margin-bottom: 1em;
+}
+
+#next-game-btn {
+    font-size: large;
+    font-weight: 500;
+    width: 100%;
+}
+
+#leave-game-btn {
+    font-size: large;
+    /* font-weight: 400; */
+    width: 100%;
+}
+
