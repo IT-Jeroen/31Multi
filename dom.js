@@ -1,7 +1,17 @@
 import {gameData} from './dataHandler.js';
-import * as dataHandler from './dataHandler.js';
-import * as playerHandler from './playerHandler.js';
-import * as p2p from './p2p.js';
+import {initializeGame} from './dataHandler.js';
+import {scoring} from './dataHandler.js';
+import {nextGame} from './dataHandler.js';
+import {leaveGame} from './dataHandler.js';
+// import * as dataHandler from './dataHandler.js';
+import {returnPlayerList} from './playerHandler.js';
+import {nextPlayer} from './playerHandler.js';
+import {setPlayerPass} from './playerHandler.js';
+import {isAutoPlayerNext} from './playerHandler.js';
+// import * as playerHandler from './playerHandler.js';
+import {setupConnection} from './p2p.js';
+// import * as p2p from './p2p.js';
+
 
 
 export function createNameInput(cb) {
@@ -33,7 +43,7 @@ export function createNameInput(cb) {
 
 
 export function handleNameSubmitted(playerName) {
-    p2p.setupConnection(playerName);
+    setupConnection(playerName);
 }
 
 
@@ -131,14 +141,14 @@ function createStartGameBtn(){
     startGameBtn.innerText ='Start Game';
     
     startGameBtn.addEventListener('click', () => {
-        dataHandler.initializeGame();
+        initializeGame();
     })
     return startGameBtn
 }
 
 
 function createPlayerList() {
-    return playerHandler.returnPlayerList().map(player => createPlayerListItem(player))
+    return returnPlayerList().map(player => createPlayerListItem(player))
 }
 
 
@@ -271,7 +281,7 @@ function createPlayCardsBtn(){
         document.getElementById('play-cards').addEventListener('click', () => {
         removeBtn();
         removeClicked();
-        playerHandler.nextPlayer();
+        nextPlayer();
         })
     }
     
@@ -286,8 +296,8 @@ export function createPassBtn(){
         document.getElementById('player-pass').addEventListener('click', () => {
             removeBtn();
             removeClicked();
-            playerHandler.setPlayerPass();
-            playerHandler.nextPlayer();
+            setPlayerPass();
+            nextPlayer();
         })
     }
 
@@ -306,7 +316,7 @@ export function createSwapBankBtn(){
             const bank = gameData.players[4];
             gameData.pickedHand = player.data.cards;
             gameData.pickedBank = bank.data.cards;
-            playerHandler.nextPlayer();
+            nextPlayer();
         })
     }
 
@@ -389,7 +399,7 @@ export function flipAllCards(){
 
 
 export function createScoreboard(){
-    const result = dataHandler.scoring();
+    const result = scoring();
     console.log('SCORING' ,result);
     let firstPart = `
         <div class="score-board">
@@ -430,7 +440,7 @@ export function startGame(){
         }
         else {
             if (gameData.players[0].data.connectionId == gameData.hostName){
-                playerHandler.isAutoPlayerNext();
+                isAutoPlayerNext();
             }
             
         } 
@@ -447,7 +457,7 @@ function createNextGameBtn(){
     button.addEventListener('click', e => {
         button.innerText = 'Waiting Room...';
         button.disabled = true;
-        dataHandler.nextGame();
+        nextGame();
         
 
     })
@@ -461,7 +471,7 @@ function createLeaveGameBtn(){
     button.innerText = 'Leave Game';
    
     button.addEventListener('click', () => {
-        dataHandler.leaveGame(gameData.players[0]);
+        leaveGame(gameData.players[0]);
     })
     return button;
 }

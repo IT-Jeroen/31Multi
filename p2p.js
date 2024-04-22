@@ -1,6 +1,19 @@
 import {gameData} from './dataHandler.js';
-import * as dataHandler from './dataHandler.js';
-import * as dom from './dom.js'
+import {connections} from './dataHandler.js';
+import {updateGameData} from './dataHandler.js';
+import {setCardsDB} from './dataHandler.js';
+import {updateClient} from './dataHandler.js';
+import {updateHost} from './dataHandler.js';
+import {updateWaitingRoom} from './dataHandler.js';
+import {removeConnection} from './dataHandler.js';
+import {removePlayer} from './dataHandler.js';
+// import * as dataHandler from './dataHandler.js';
+import {renderApp} from './dom.js';
+import {createWaitingRoom} from './dom.js';
+import {startGame} from './dom.js';
+// import * as dom from './dom.js'
+
+
 
 function testHost(playerName){
     return new Promise((resolve, reject) => {
@@ -36,18 +49,18 @@ export function setupConnection(playerName){
     .then(result => {
         if (!result.ishost){
             gameData.players[0].name = playerName;
-            dataHandler.connections[0].name = playerName;
-            dataHandler.connections[0].p = result.p;
-            dataHandler.connections[0].c = result.c;
-            dataHandler.connections[0].connectionId = result.c.connectionId;
+            connections[0].name = playerName;
+            connections[0].p = result.p;
+            connections[0].c = result.c;
+            connections[0].connectionId = result.c.connectionId;
             gameData.players[0].data.connectionId = result.c.connectionId;
 
             setConnectionEvents(result.c)
         }
         else{
             result.p.destroy();
-            dataHandler.connections[0].c = null;
-            dataHandler.connections[0].p = null;
+            connections[0].c = null;
+            connections[0].p = null;
             setAsHost(playerName);
         }
         
@@ -67,12 +80,12 @@ function setAsHost(playerName){
         addNewConnection(c)
         setConnectionEvents(c)
 
-        dataHandler.connections.forEach(connection => {
+        connections.forEach(connection => {
             pushData(connection.c, gameData, 'waiting-room');
         })
 
         // Update Waiting Room //
-        dom.renderApp(dom.createWaitingRoom())
+        renderApp(createWaitingRoom())
     })
 
     peer.on('error', err => {
@@ -83,11 +96,11 @@ function setAsHost(playerName){
 
     // Create Waiting Room //
     gameData.players[0].name = playerName;
-    dataHandler.connections[0].p = peer;
+    connections[0].p = peer;
     gameData.players[0].data.connectionId = peer._id;
     gameData.isHost = playerName;
     gameData.waitingRoom.push(gameData.players[0]);
-    dom.renderApp(dom.createWaitingRoom())
+    renderApp(createWaitingRoom())
 
 }
 
@@ -115,9 +128,9 @@ function addNewConnection(c){
             gameData.players[autoPlayerIndex].data.auto = false;
             gameData.players[autoPlayerIndex].data.connectionId = c.connectionId;
 
-            dataHandler.connections[autoPlayerIndex].name = c.metadata;
-            dataHandler.connections[autoPlayerIndex].connectionId = c.connectionId;
-            dataHandler.connections[autoPlayerIndex].c = c;
+            connections[autoPlayerIndex].name = c.metadata;
+            connections[autoPlayerIndex].connectionId = c.connectionId;
+            connections[autoPlayerIndex].c = c;
 
             // add to waiting room //
             gameData.waitingRoom.push(gameData.players[autoPlayerIndex]);
@@ -140,31 +153,31 @@ function setConnectionEvents(c) {
         }
         // CLIENT SIDE //
         if (received.type === 'waiting-room'){
-            dataHandler.updateGameData(received.data);
-            dom.renderApp(dom.createWaitingRoom())
+            updateGameData(received.data);
+            renderApp(createWaitingRoom())
         }
 
         // CLIENT SIDE //
         if (received.type == 'card-data'){
-            dataHandler.setCardsDB(received.data)
+            setCardsDB(received.data)
         }
 
         // CLIENT SIDE //
         if (received.type == 'start-game'){
-            dataHandler.updateGameData(received.data);
-            dom.startGame()
+            updateGameData(received.data);
+            startGame()
         }
 
         // CLIENT SIDE //
         if (received.type == 'client-data'){
-            dataHandler.updateClient(received.data);
+            updateClient(received.data);
             
         }
 
         // HOST SIDE //
         if (received.type == 'host-data'){
             if (gameData.players[0].data.connectionId == gameData.hostName){
-                dataHandler.updateHost(received.data);
+                updateHost(received.data);
 
             }
         }
@@ -173,15 +186,15 @@ function setConnectionEvents(c) {
         if (received.type == 'next-game'){
             const player = received.data;
             gameData.waitingRoom.push(player);
-            dataHandler.updateWaitingRoom();
+            updateWaitingRoom();
         }
 
         // HOST SIDE //
         if (received.type == 'leave-game'){
             const player = received.data
-            dataHandler.removeConnection(player.data.connectionId);
-            dataHandler.removePlayer(player.data.connectionId);
-            dataHandler.updateWaitingRoom();
+            removeConnection(player.data.connectionId);
+            removePlayer(player.data.connectionId);
+            updateWaitingRoom();
             
         }
 
@@ -189,7 +202,7 @@ function setConnectionEvents(c) {
         // Connection closes before this will be executed //
         if (received.type == 'host-leaves'){
             console.log('RECIEVED HOST LEAVING')
-            dataHandler.connections[0].p.destroy()
+            connections[0].p.destroy()
             window.location.reload();
             
         }

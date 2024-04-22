@@ -1,7 +1,18 @@
-import * as playerHandler from './playerHandler.js';
-import * as p2p from './p2p.js';
-import * as game from './gameMechanics.js';
-import * as dom from './dom.js';
+import {findPlayerById} from './playerHandler.js';
+import {shuffleHostPlayers} from './playerHandler.js';
+import {setNextPlayerActive} from './playerHandler.js';
+import {isAutoPlayerNext} from './playerHandler.js';
+// import * as playerHandler from './playerHandler.js';
+import {pushData} from './p2p.js'
+// import * as p2p from './p2p.js';
+import {dealCards} from './gameMechanics.js';
+import {prepCards} from './gameMechanics.js';
+// import * as game from './gameMechanics.js';
+import {startGame} from './dom.js';
+import {updateDomGame} from './dom.js';
+import {renderApp} from './dom.js';
+import {createWaitingRoom} from './dom.js';
+// import * as dom from './dom.js';
 import {calculateHand} from './autoPlayer.js';
 
 export const connections = [
@@ -81,13 +92,13 @@ export function initializeGame(){
     const randomInt = Math.floor(Math.random() * 4);
     gameData.activePlayerId = gameData.players[randomInt].data.connectionId;
     gameData.players[randomInt].data.active = true;
-    game.dealCards(game.prepCards())
+    dealCards(prepCards())
     
     connections.forEach(connection => {
-        p2p.pushData(connection.c, gameData, 'start-game');
+        pushData(connection.c, gameData, 'start-game');
     })
     
-    dom.startGame()
+    startGame()
     gameData.waitingRoom = [];
 }
 
@@ -100,12 +111,12 @@ export function updateHost(clientData){
     gameData.pickedHand = clientData.pickedHand;
 
     if (gameData.pickedBank.length == 0 || gameData.pickedBank.length == 3){
-        const active = playerHandler.findPlayerById(gameData.activePlayerId);
+        const active = findPlayerById(gameData.activePlayerId);
         active.player.data.pass = true; 
     }
 
     updateGame();
-    dom.updateDomGame();
+    updateDomGame();
 
     const sender = 'host';
     sendGameData(sender);
@@ -121,7 +132,7 @@ export function updateHost(clientData){
 export function updateClient(receivedGameData){
         const isClient = true;
         updateGameData(receivedGameData);
-        dom.updateDomGame();
+        updateDomGame();
 
         gameData.pickedHand = [];
         gameData.pickedBank = [];
@@ -129,7 +140,7 @@ export function updateClient(receivedGameData){
 
 
 export function updateGameData(receivedGameData){
-    const shuffledPlayers = playerHandler.shuffleHostPlayers(receivedGameData.players);
+    const shuffledPlayers = shuffleHostPlayers(receivedGameData.players);
     const newGameData = {...receivedGameData};
     newGameData.players = shuffledPlayers;
 
@@ -142,19 +153,19 @@ export function updateGameData(receivedGameData){
 export function sendGameData(id){
     if (id == 'host'){
         connections.forEach(connection => {
-            p2p.pushData(connection.c, gameData, 'client-data')
+            pushData(connection.c, gameData, 'client-data')
         })
     }
     if (id == 'client') {
         const clientData = {pickedBank: gameData.pickedBank, pickedHand: gameData.pickedHand}
-        p2p.pushData(connections[0].c, clientData, 'host-data')
+        pushData(connections[0].c, clientData, 'host-data')
     }
 }
 
 
 export function swapPlayerCards(){
-    const bank = playerHandler.findPlayerById('bank').player;
-    const player = playerHandler.findPlayerById(gameData.activePlayerId).player;
+    const bank = findPlayerById('bank').player;
+    const player = findPlayerById(gameData.activePlayerId).player;
 
     if (gameData.pickedBank.length == gameData.pickedHand.length){
         gameData.pickedBank.forEach((pickedCard,index) => {
@@ -182,20 +193,20 @@ export function updateGame(){
     
     if (!gameData.endOfGame){
         swapPlayerCards();
-        const active = playerHandler.findPlayerById(gameData.activePlayerId);
+        const active = findPlayerById(gameData.activePlayerId);
         if (isLastTurn()){
             active.player.data.pass = true;
         }
 
         endOfGameCheck();
-        playerHandler.setNextPlayerActive();
-        playerHandler.isAutoPlayerNext();
+        setNextPlayerActive();
+        isAutoPlayerNext();
     }
 }
 
 
 export function endOfGameCheck(){
-    const active = playerHandler.findPlayerById(gameData.activePlayerId);
+    const active = findPlayerById(gameData.activePlayerId);
     const allPlayersPass = gameData.players.every(player => player.data.pass);
     if(allPlayersPass){
         gameData.endOfGame = true;
@@ -265,13 +276,13 @@ export function scoring(){
 export function leaveGame(player){
     // Client //
     if (player.data.connectionId != gameData.hostName){
-        p2p.pushData(connections[0].c, player, 'leave-game');
+        pushData(connections[0].c, player, 'leave-game');
     }
     // Host //
     else {
         console.log('HOST LEAVING')
         connections.forEach(connection => {
-            p2p.pushData(connection.c, null, 'host-leaving');
+            pushData(connection.c, null, 'host-leaving');
             
         })
         
@@ -312,7 +323,7 @@ export function nextGame(){
     }
     else {
         // gameData is not reset yet but will be reset once host enters next game //
-        p2p.pushData(connections[0].c, gameData.players[0], 'next-game');
+        pushData(connections[0].c, gameData.players[0], 'next-game');
     }
     
 }
@@ -322,11 +333,11 @@ export function updateWaitingRoom(){
     gameData.waitingRoom.forEach(player => {
                 
         if (player.data.connectionId == gameData.hostName){
-            dom.renderApp(dom.createWaitingRoom())
+            renderApp(createWaitingRoom())
         }
         else {
             const connect = connections.filter(connection => connection.connectionId == player.data.connectionId)[0];
-            p2p.pushData(connect.c, gameData, 'waiting-room');
+            pushData(connect.c, gameData, 'waiting-room');
         }
         
 
