@@ -1,7 +1,14 @@
 import { autoPlayerPick } from './autoPlayer.js';
 import { gameData } from './dataHandler.js' 
-import * as dataHandler from './dataHandler.js';
-import * as dom from './dom.js';
+import {updateGame} from './dataHandler.js';
+import {sendGameData} from './dataHandler.js';
+import {updateHost} from './dataHandler.js';
+import {isLastTurn} from './dataHandler.js';
+// import * as dataHandler from './dataHandler.js';
+
+import {updateDomGame} from './dom.js';
+import {flipAllCards} from './dom.js';
+// import * as dom from './dom.js';
 
 
 export function returnPlayerList(){
@@ -38,25 +45,25 @@ export function findPlayerById(connectionId){
 export function nextPlayer(){
     if (gameData.singlePlayer){
         if (!gameData.endOfGame){
-            dataHandler.updateGame();
-            dom.updateDomGame();
+            updateGame();
+            updateDomGame();
             gameData.pickedBank = [];
             gameData.pickedHand = [];
         }
         else {
-            dom.flipAllCards()
+            flipAllCards()
         }
     }
     else {
         if (gameData.players[0].data.connectionId == gameData.hostName){
-            dataHandler.updateGame();
-            dom.updateDomGame();
+            updateGame();
+            updateDomGame();
             const sender = 'host';
-            dataHandler.sendGameData(sender);
+            sendGameData(sender);
         }
         else {
             const sender = 'client';
-            dataHandler.sendGameData(sender);
+            sendGameData(sender);
         }
     }
 }
@@ -83,7 +90,7 @@ function autoPlayer(active){
             gameData.pickedHand = [];
             gameData.pickedBank = [];
         }
-        dataHandler.updateHost(gameData);  
+        updateHost(gameData);  
         
     }, 2000);
     
@@ -134,7 +141,7 @@ export function setNextPlayerActive(){
             setNextPlayerActive();
         }
         else {
-            if(dataHandler.isLastTurn()){
+            if(isLastTurn()){
                 gameData.lastTurn = gameData.players[index].name
             }
         }
