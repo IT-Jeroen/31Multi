@@ -4,11 +4,8 @@ import {updateGame} from './dataHandler.js';
 import {sendGameData} from './dataHandler.js';
 import {updateHost} from './dataHandler.js';
 import {isLastTurn} from './dataHandler.js';
-// import * as dataHandler from './dataHandler.js';
-
 import {updateDomGame} from './dom.js';
 import {flipAllCards} from './dom.js';
-// import * as dom from './dom.js';
 
 
 export function returnPlayerList(){

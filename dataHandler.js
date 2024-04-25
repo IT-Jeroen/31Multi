@@ -2,17 +2,12 @@ import {findPlayerById} from './playerHandler.js';
 import {shuffleHostPlayers} from './playerHandler.js';
 import {setNextPlayerActive} from './playerHandler.js';
 import {isAutoPlayerNext} from './playerHandler.js';
-// import * as playerHandler from './playerHandler.js';
 import {pushData} from './p2p.js'
-// import * as p2p from './p2p.js';
 import {dealCards} from './gameMechanics.js';
 import {prepCards} from './gameMechanics.js';
-// import * as game from './gameMechanics.js';
 import {startGame} from './dom.js';
 import {updateDomGame} from './dom.js';
-import {renderApp} from './dom.js';
 import {createWaitingRoom} from './dom.js';
-// import * as dom from './dom.js';
 import {calculateHand} from './autoPlayer.js';
 
 export const connections = [
@@ -333,7 +328,6 @@ export function updateWaitingRoom(){
     gameData.waitingRoom.forEach(player => {
                 
         if (player.data.connectionId == gameData.hostName){
-            // renderApp(createWaitingRoom())
             createWaitingRoom()
         }
         else {

@@ -7,11 +7,8 @@ import {updateHost} from './dataHandler.js';
 import {updateWaitingRoom} from './dataHandler.js';
 import {removeConnection} from './dataHandler.js';
 import {removePlayer} from './dataHandler.js';
-// import * as dataHandler from './dataHandler.js';
-import {renderApp} from './dom.js';
 import {createWaitingRoom} from './dom.js';
 import {startGame} from './dom.js';
-// import * as dom from './dom.js'
 
 
 
@@ -85,7 +82,6 @@ function setAsHost(playerName){
         })
 
         // Update Waiting Room //
-        // renderApp(createWaitingRoom())
         createWaitingRoom()
     })
 
@@ -101,7 +97,6 @@ function setAsHost(playerName){
     gameData.players[0].data.connectionId = peer._id;
     gameData.isHost = playerName;
     gameData.waitingRoom.push(gameData.players[0]);
-    // renderApp(createWaitingRoom())
     createWaitingRoom()
 
 }
@@ -156,7 +151,6 @@ function setConnectionEvents(c) {
         // CLIENT SIDE //
         if (received.type === 'waiting-room'){
             updateGameData(received.data);
-            // renderApp(createWaitingRoom())
             createWaitingRoom()
         }
 

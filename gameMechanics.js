@@ -1,10 +1,7 @@
 import {gameData} from './dataHandler.js';
 import {connections} from './dataHandler.js';
 import {addCardsToCardDB} from './dataHandler.js';
-// import * as dataHandler from './dataHandler.js';
 import {pushData} from './p2p.js';
-// import * as p2p from './p2p.js'; 
-
 
 
 function createRandomDeckValues(numCards, minValue='2', maxValue='ace'){
