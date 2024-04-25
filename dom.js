@@ -3,57 +3,11 @@ import {initializeGame} from './dataHandler.js';
 import {scoring} from './dataHandler.js';
 import {nextGame} from './dataHandler.js';
 import {leaveGame} from './dataHandler.js';
-// import * as dataHandler from './dataHandler.js';
 import {returnPlayerList} from './playerHandler.js';
 import {nextPlayer} from './playerHandler.js';
 import {setPlayerPass} from './playerHandler.js';
 import {isAutoPlayerNext} from './playerHandler.js';
-// import * as playerHandler from './playerHandler.js';
 import {setupConnection} from './p2p.js';
-// import * as p2p from './p2p.js';
-
-
-// export function createNameInput(cb) {
-//     const notepad = document.createElement('div');
-//     notepad.id = 'notepad';
-
-//     const img = document.createElement('img');
-//     img.className = 'notepad-img';
-//     img.src = './src/img/notepad.png';
-//     img.alt = 'notepad'
- 
-//     const noteInfo = document.createElement('div');
-//     noteInfo.className = 'notepad';
-
-//     const noteTitle = document.createElement('div');
-//     noteTitle.className = 'notepad-title';
-//     noteTitle.innerText = 'Welcome to 31 The Card Game';
-
-//     const noteBreak = document.createElement('br');
-
-//     const input = document.createElement('input');
-//     input.type = 'text';
-//     input.id = 'player-name-input';
-//     input.placeholder = 'Enter Your Name Here';
-
-//     const button = document.createElement('button');
-//     button.id = 'next-btn';
-//     button.className = 'notepad-btn';
-//     button.innerText = 'Next';
-
-//     button.addEventListener('click', e => {
-//         cb(input.value);
-//         button.innerText = 'Checking for host...';
-//         button.disabled = true;
-
-//     })
-
-//     noteInfo.append(noteTitle, noteBreak, input, noteBreak, button);
-//     notepad.append(img, noteInfo)
-    
-//     return notepad;
-// }
-
 
 export function createNameInput(cb){
     const notepad = `
@@ -211,88 +165,6 @@ function setPlayerLabels(player){
 }
 
 
-
-// export function createWaitingRoom(){
-//     const notepad = document.createElement('div');
-//     notepad.id = 'notepad';
-
-//     const img = document.createElement('img');
-//     img.className = 'notepad-img';
-//     img.src = './src/img/notepad.png';
-//     img.alt = 'notepad'
-
-//     const noteInfo = document.createElement('div');
-//     noteInfo.className = 'notepad';
-
-//     const noteTitle = document.createElement('div');
-//     noteTitle.className = 'notepad-title';
-//     noteTitle.innerText = 'Welcome to 31 The Card Game';
-
-//     const noteBreak = document.createElement('br');
-//     noteInfo.append(noteTitle, noteBreak, ...createPlayerList())
-
-//     const startBtn = canStartGame()
-//     if (startBtn){
-//         noteInfo.append(startBtn())
-//     }
-
-//     notepad.append(img, noteInfo);
-    
-//     return notepad
-// }
-
-
-// export function createWaitingRoom(){
-//     const waitingRoomDiv = document.createElement('div');
-//     waitingRoomDiv.id = 'waiting-room';
-//     waitingRoomDiv.append(...createPlayerList())
-
-//     const startBtn = canStartGame()
-//     if (startBtn){
-//         waitingRoomDiv.append(startBtn())
-//     }
-    
-//     return waitingRoomDiv
-// }
-
-
-// function canStartGame(){
-//     if (gameData.players[0].data.connectionId === gameData.hostName){
-//         return createStartGameBtn;
-//     }
-//     else {
-//         return null;
-//     }
-// }
-
-
-// function createStartGameBtn(){
-//     const startGameBtn = document.createElement('button');
-//     startGameBtn.className = 'notepad-btn'
-//     startGameBtn.innerText ='Start Game';
-    
-//     startGameBtn.addEventListener('click', () => {
-//         initializeGame();
-//     })
-//     return startGameBtn
-// }
-
-
-// function createPlayerList() {
-//     return returnPlayerList().map(player => createPlayerListItem(player))
-// }
-
-
-// function createPlayerListItem(player) {
-//     const playerDiv = document.createElement('div');
-//     // const playerHeading = document.createElement('h2');
-//     playerDiv.innerText = player;
-//     playerDiv.className = 'notepad-text'
-//     // playerDiv.appendChild(playerHeading);
-//     return playerDiv;
-// }
-
-
 function createCardElem(cardID){
     
     const cardElem = document.createElement('div');
@@ -408,7 +280,6 @@ function cardClickEvent(e){
 function createPlayCardsBtn(){
     if (!document.getElementById('play-cards')){
         const btn = `<button id="play-cards-btn">Play Cards</button>`
-        // document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
         document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
         
 
@@ -425,7 +296,6 @@ function createPlayCardsBtn(){
 export function createPassBtn(){
     if(!document.getElementById('player-pass')){
         const btn = `<button id="player-pass-btn">Hold Cards</button>`
-        // document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
         document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
     
         document.getElementById('player-pass-btn').addEventListener('click', () => {
@@ -441,7 +311,6 @@ export function createPassBtn(){
 export function createSwapBankBtn(){
     if(!document.getElementById('swap-bank')){
         const btn = `<button id="swap-bank-btn">Swap Bank</button>`
-        // document.getElementById('playfield').insertAdjacentHTML('afterbegin', btn);
         document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
     
         document.getElementById('swap-bank-btn').addEventListener('click', () => {
@@ -534,40 +403,6 @@ export function flipAllCards(){
 }
 
 
-// export function createScoreboard(){
-//     const result = scoring();
-//     // console.log('SCORING' ,result);
-//     const scoreBoard = document.createElement('div');
-//     scoreBoard.id = 'score-board';
-//     let firstPart = `
-//         <div class="score-title">Round Winner(s)</div>
-//         <div class="score">Winning Score: ${result.score}</div>`
-//         result.roundWinners.forEach(player => {
-//             if(player.data.connectionId != 'bank'){
-//                 firstPart = `${firstPart}<div class="winner">${player.name}</div>`
-//                 const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
-//                 playerLabel.className = `player-label player-${player.location} player-wins`
-//             }
-            
-//         })
-    
-    
-//     let secondPart = `
-//         <div class="score-title">Game Winner(s)</div>
-//         <div class="wins">Number of Wins: ${result.wins}</div>`
-//         result.gameWinners.forEach(player => {secondPart = `${secondPart}<div class="winner">${player.name}</div>`})
-    
-
-//     const htmlString = `${firstPart}${secondPart}`;
-//     scoreBoard.insertAdjacentHTML('afterbegin',htmlString);
-//     scoreBoard.append(createNextGameBtn());
-//     scoreBoard.append(createLeaveGameBtn());
-
-//     const playFieldElem = document.getElementById('playfield');
-//     playFieldElem.append(scoreBoard);
-// }
-
-
 export function startGame(){
     renderApp(createPlayfield());
     handOutDeckCards(300).then(() => {
@@ -585,44 +420,6 @@ export function startGame(){
     })
     
 }
-
-
-// function createNextGameBtn(){
-//     const button = document.createElement('button');
-//     button.type = 'button';
-//     button.id = 'next-game-btn'
-//     button.innerText = 'Next Game';
-
-//     const btnWrap = document.createElement('div');
-//     btnWrap.append(button);
-   
-//     button.addEventListener('click', e => {
-//         button.innerText = 'Waiting Room...';
-//         button.disabled = true;
-//         nextGame();
-        
-
-//     })
-//     // return button;
-//     return btnWrap;
-// }
-
-
-// function createLeaveGameBtn(){
-//     const button = document.createElement('button')
-//     button.type = 'button';
-//     button.id = 'leave-game-btn';
-//     button.innerText = 'Leave Game';
-
-//     const btnWrap = document.createElement('div');
-//     btnWrap.append(button);
-   
-//     button.addEventListener('click', () => {
-//         leaveGame(gameData.players[0]);
-//     })
-//     // return button;
-//     return btnWrap;
-// }
 
 
 export function createScoreboard(){
