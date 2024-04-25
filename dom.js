@@ -13,37 +13,132 @@ import {setupConnection} from './p2p.js';
 // import * as p2p from './p2p.js';
 
 
+// export function createNameInput(cb) {
+//     const notepad = document.createElement('div');
+//     notepad.id = 'notepad';
 
-export function createNameInput(cb) {
-    const wrapper = document.createElement('div')
+//     const img = document.createElement('img');
+//     img.className = 'notepad-img';
+//     img.src = './src/img/notepad.png';
+//     img.alt = 'notepad'
+ 
+//     const noteInfo = document.createElement('div');
+//     noteInfo.className = 'notepad';
+
+//     const noteTitle = document.createElement('div');
+//     noteTitle.className = 'notepad-title';
+//     noteTitle.innerText = 'Welcome to 31 The Card Game';
+
+//     const noteBreak = document.createElement('br');
+
+//     const input = document.createElement('input');
+//     input.type = 'text';
+//     input.id = 'player-name-input';
+//     input.placeholder = 'Enter Your Name Here';
+
+//     const button = document.createElement('button');
+//     button.id = 'next-btn';
+//     button.className = 'notepad-btn';
+//     button.innerText = 'Next';
+
+//     button.addEventListener('click', e => {
+//         cb(input.value);
+//         button.innerText = 'Checking for host...';
+//         button.disabled = true;
+
+//     })
+
+//     noteInfo.append(noteTitle, noteBreak, input, noteBreak, button);
+//     notepad.append(img, noteInfo)
     
-    const label = document.createElement('label')
-    label.innerText = 'Enter Name'
-    
-    const input = document.createElement('input')
-    input.type = 'text';
-    input.id = 'player-name-input'
-    
-    const button = document.createElement('button')
-    button.type = 'button';
-    button.innerText = 'Next';
-   
+//     return notepad;
+// }
+
+
+export function createNameInput(cb){
+    const notepad = `
+    <div id="notepad">
+    <img class="notepad-img" src="./src/img/notepad.png" alt="notepad">
+        <div class="notepad">
+            <div class="notepad-title">Welcome to 31 The Card Game</div>
+            <br>
+            <input type="text" id="player-name-input" placeholder="Enter Your Name Here">
+            <br>
+            <button id="next-btn" class="notepad-btn">Next</button>
+        </div>
+    </div>
+    `
+    const table = document.getElementById('table');
+    table.innerHTML = notepad;
+
+    const input = document.getElementById('player-name-input');
+
+    const button = document.getElementById('next-btn');
     button.addEventListener('click', e => {
         cb(input.value);
         button.innerText = 'Checking for host...';
         button.disabled = true;
 
     })
-
-    
-    wrapper.append(label, input, button)
-    
-    return wrapper;
 }
 
 
 export function handleNameSubmitted(playerName) {
     setupConnection(playerName);
+}
+
+function createPlayerList() {
+    let playerList = ''
+    returnPlayerList().forEach(player => playerList = `${playerList}<div class="notepad-text">${player}</div>`);
+    return playerList;
+}
+
+function createPlayerCoffees() {
+    let playerCoffees = ''
+    returnPlayerList().forEach((player, index) => playerCoffees = `${playerCoffees}<img id="cup-0${index+1}" src="./src/img/coffeecup_02.png" alt="coffee cup">`);
+    return playerCoffees;
+}
+
+export function createWaitingRoom(){
+    const notepad = `
+    <div id="notepad">
+        <img class="notepad-img" src="./src/img/notepad.png" alt="notepad">
+        <div class="notepad">
+            <div class="notepad-title">This is the Waiting Room</div>
+            <br>
+            ${createPlayerList()}
+            ${canStartGame()}
+        </div>
+    </div>
+    ${createPlayerCoffees()}
+    `
+
+    const table = document.getElementById('table');
+    table.innerHTML = notepad;
+
+    createStartEvent();
+
+}
+
+
+function canStartGame(){
+    if (gameData.players[0].data.connectionId === gameData.hostName){
+        return '<button id="start-game-btn" class="notepad-btn">Start Game</button>';
+    }
+    else {
+        return '';
+    }
+}
+
+
+function createStartEvent(){
+    const startGameBtn = document.getElementById('start-game-btn');
+
+    if (startGameBtn){
+        startGameBtn.addEventListener('click', () => {
+            initializeGame();
+        })
+    }
 }
 
 
@@ -116,53 +211,86 @@ function setPlayerLabels(player){
 }
 
 
-export function createWaitingRoom(){
-    const waitingRoomDiv = document.createElement('div');
-    waitingRoomDiv.id = 'waiting-room';
-    waitingRoomDiv.append(...createPlayerList())
 
-    const startBtn = canStartGame()
-    if (startBtn){
-        waitingRoomDiv.append(startBtn())
-    }
+// export function createWaitingRoom(){
+//     const notepad = document.createElement('div');
+//     notepad.id = 'notepad';
+
+//     const img = document.createElement('img');
+//     img.className = 'notepad-img';
+//     img.src = './src/img/notepad.png';
+//     img.alt = 'notepad'
+
+//     const noteInfo = document.createElement('div');
+//     noteInfo.className = 'notepad';
+
+//     const noteTitle = document.createElement('div');
+//     noteTitle.className = 'notepad-title';
+//     noteTitle.innerText = 'Welcome to 31 The Card Game';
+
+//     const noteBreak = document.createElement('br');
+//     noteInfo.append(noteTitle, noteBreak, ...createPlayerList())
+
+//     const startBtn = canStartGame()
+//     if (startBtn){
+//         noteInfo.append(startBtn())
+//     }
+
+//     notepad.append(img, noteInfo);
     
-    return waitingRoomDiv
-}
+//     return notepad
+// }
 
 
-function canStartGame(){
-    if (gameData.players[0].data.connectionId === gameData.hostName){
-        return createStartGameBtn;
-    }
-    else {
-        return null;
-    }
-}
+// export function createWaitingRoom(){
+//     const waitingRoomDiv = document.createElement('div');
+//     waitingRoomDiv.id = 'waiting-room';
+//     waitingRoomDiv.append(...createPlayerList())
 
-
-function createStartGameBtn(){
-    const startGameBtn = document.createElement('button');
-    startGameBtn.innerText ='Start Game';
+//     const startBtn = canStartGame()
+//     if (startBtn){
+//         waitingRoomDiv.append(startBtn())
+//     }
     
-    startGameBtn.addEventListener('click', () => {
-        initializeGame();
-    })
-    return startGameBtn
-}
+//     return waitingRoomDiv
+// }
 
 
-function createPlayerList() {
-    return returnPlayerList().map(player => createPlayerListItem(player))
-}
+// function canStartGame(){
+//     if (gameData.players[0].data.connectionId === gameData.hostName){
+//         return createStartGameBtn;
+//     }
+//     else {
+//         return null;
+//     }
+// }
 
 
-function createPlayerListItem(player) {
-    const playerDiv = document.createElement('div');
-    const playerHeading = document.createElement('h2');
-    playerHeading.innerText = player;
-    playerDiv.appendChild(playerHeading);
-    return playerDiv;
-}
+// function createStartGameBtn(){
+//     const startGameBtn = document.createElement('button');
+//     startGameBtn.className = 'notepad-btn'
+//     startGameBtn.innerText ='Start Game';
+    
+//     startGameBtn.addEventListener('click', () => {
+//         initializeGame();
+//     })
+//     return startGameBtn
+// }
+
+
+// function createPlayerList() {
+//     return returnPlayerList().map(player => createPlayerListItem(player))
+// }
+
+
+// function createPlayerListItem(player) {
+//     const playerDiv = document.createElement('div');
+//     // const playerHeading = document.createElement('h2');
+//     playerDiv.innerText = player;
+//     playerDiv.className = 'notepad-text'
+//     // playerDiv.appendChild(playerHeading);
+//     return playerDiv;
+// }
 
 
 function createCardElem(cardID){

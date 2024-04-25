@@ -85,7 +85,8 @@ function setAsHost(playerName){
         })
 
         // Update Waiting Room //
-        renderApp(createWaitingRoom())
+        // renderApp(createWaitingRoom())
+        createWaitingRoom()
     })
 
     peer.on('error', err => {
@@ -100,7 +101,8 @@ function setAsHost(playerName){
     gameData.players[0].data.connectionId = peer._id;
     gameData.isHost = playerName;
     gameData.waitingRoom.push(gameData.players[0]);
-    renderApp(createWaitingRoom())
+    // renderApp(createWaitingRoom())
+    createWaitingRoom()
 
 }
 
@@ -154,7 +156,8 @@ function setConnectionEvents(c) {
         // CLIENT SIDE //
         if (received.type === 'waiting-room'){
             updateGameData(received.data);
-            renderApp(createWaitingRoom())
+            // renderApp(createWaitingRoom())
+            createWaitingRoom()
         }
 
         // CLIENT SIDE //

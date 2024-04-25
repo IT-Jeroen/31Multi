@@ -333,7 +333,8 @@ export function updateWaitingRoom(){
     gameData.waitingRoom.forEach(player => {
                 
         if (player.data.connectionId == gameData.hostName){
-            renderApp(createWaitingRoom())
+            // renderApp(createWaitingRoom())
+            createWaitingRoom()
         }
         else {
             const connect = connections.filter(connection => connection.connectionId == player.data.connectionId)[0];
