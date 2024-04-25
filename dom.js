@@ -534,38 +534,38 @@ export function flipAllCards(){
 }
 
 
-export function createScoreboard(){
-    const result = scoring();
-    // console.log('SCORING' ,result);
-    const scoreBoard = document.createElement('div');
-    scoreBoard.id = 'score-board';
-    let firstPart = `
-        <div class="score-title">Round Winner(s)</div>
-        <div class="score">Winning Score: ${result.score}</div>`
-        result.roundWinners.forEach(player => {
-            if(player.data.connectionId != 'bank'){
-                firstPart = `${firstPart}<div class="winner">${player.name}</div>`
-                const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
-                playerLabel.className = `player-label player-${player.location} player-wins`
-            }
+// export function createScoreboard(){
+//     const result = scoring();
+//     // console.log('SCORING' ,result);
+//     const scoreBoard = document.createElement('div');
+//     scoreBoard.id = 'score-board';
+//     let firstPart = `
+//         <div class="score-title">Round Winner(s)</div>
+//         <div class="score">Winning Score: ${result.score}</div>`
+//         result.roundWinners.forEach(player => {
+//             if(player.data.connectionId != 'bank'){
+//                 firstPart = `${firstPart}<div class="winner">${player.name}</div>`
+//                 const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
+//                 playerLabel.className = `player-label player-${player.location} player-wins`
+//             }
             
-        })
+//         })
     
     
-    let secondPart = `
-        <div class="score-title">Game Winner(s)</div>
-        <div class="wins">Number of Wins: ${result.wins}</div>`
-        result.gameWinners.forEach(player => {secondPart = `${secondPart}<div class="winner">${player.name}</div>`})
+//     let secondPart = `
+//         <div class="score-title">Game Winner(s)</div>
+//         <div class="wins">Number of Wins: ${result.wins}</div>`
+//         result.gameWinners.forEach(player => {secondPart = `${secondPart}<div class="winner">${player.name}</div>`})
     
 
-    const htmlString = `${firstPart}${secondPart}`;
-    scoreBoard.insertAdjacentHTML('afterbegin',htmlString);
-    scoreBoard.append(createNextGameBtn());
-    scoreBoard.append(createLeaveGameBtn());
+//     const htmlString = `${firstPart}${secondPart}`;
+//     scoreBoard.insertAdjacentHTML('afterbegin',htmlString);
+//     scoreBoard.append(createNextGameBtn());
+//     scoreBoard.append(createLeaveGameBtn());
 
-    const playFieldElem = document.getElementById('playfield');
-    playFieldElem.append(scoreBoard);
-}
+//     const playFieldElem = document.getElementById('playfield');
+//     playFieldElem.append(scoreBoard);
+// }
 
 
 export function startGame(){
@@ -587,39 +587,103 @@ export function startGame(){
 }
 
 
-function createNextGameBtn(){
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.id = 'next-game-btn'
-    button.innerText = 'Next Game';
+// function createNextGameBtn(){
+//     const button = document.createElement('button');
+//     button.type = 'button';
+//     button.id = 'next-game-btn'
+//     button.innerText = 'Next Game';
 
-    const btnWrap = document.createElement('div');
-    btnWrap.append(button);
+//     const btnWrap = document.createElement('div');
+//     btnWrap.append(button);
    
-    button.addEventListener('click', e => {
-        button.innerText = 'Waiting Room...';
-        button.disabled = true;
-        nextGame();
+//     button.addEventListener('click', e => {
+//         button.innerText = 'Waiting Room...';
+//         button.disabled = true;
+//         nextGame();
         
 
+//     })
+//     // return button;
+//     return btnWrap;
+// }
+
+
+// function createLeaveGameBtn(){
+//     const button = document.createElement('button')
+//     button.type = 'button';
+//     button.id = 'leave-game-btn';
+//     button.innerText = 'Leave Game';
+
+//     const btnWrap = document.createElement('div');
+//     btnWrap.append(button);
+   
+//     button.addEventListener('click', () => {
+//         leaveGame(gameData.players[0]);
+//     })
+//     // return button;
+//     return btnWrap;
+// }
+
+
+export function createScoreboard(){
+    const result = scoring();
+
+    let roundWinners = '';
+    result.roundWinners.forEach(player => {
+        if(player.data.connectionId != 'bank'){
+            roundWinners = `${roundWinners}<div class="notepad-text">${player.name}: score ${result.score}</div>`
+            const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
+            playerLabel.className = `player-label player-${player.location} player-wins`
+        }
+        
     })
-    // return button;
-    return btnWrap;
+
+    let gameWinners = '';
+    result.gameWinners.forEach(player => {gameWinners = `${gameWinners}<div class="notepad-text">${player.name}: wins ${result.wins}</div>`})
+
+    const scoreBoard = `
+    <div id="notepad" class="scoreboard">
+        <img class="notepad-img" src="./src/img/notepad.png" alt="notepad">
+        <div class="notepad">
+            <div class="notepad-title">Round Winner(s)</div>
+            ${roundWinners}
+            <div class="notepad-title">Game Winner(s)</div>
+            ${gameWinners}
+            <button id="next-game-btn" class="scoreboard-btns">Next Game</button>
+            <button id="leave-game-btn" class="scoreboard-btns">Leave Game</button>
+        </div>
+    </div>
+    `
+    
+    const table = document.getElementById('table')
+    table.insertAdjacentHTML('afterbegin',scoreBoard);
+
+    createNextGameEvent();
+    createLeaveGameEvent();
 }
 
 
-function createLeaveGameBtn(){
-    const button = document.createElement('button')
-    button.type = 'button';
-    button.id = 'leave-game-btn';
-    button.innerText = 'Leave Game';
+function createNextGameEvent(){
+    const button = document.getElementById('next-game-btn');
 
-    const btnWrap = document.createElement('div');
-    btnWrap.append(button);
-   
-    button.addEventListener('click', () => {
-        leaveGame(gameData.players[0]);
-    })
-    // return button;
-    return btnWrap;
+    if (button){
+        button.addEventListener('click', e => {
+            button.innerText = 'Waiting Room...';
+            button.disabled = true;
+            nextGame();
+            
+
+        })
+    }
+}
+
+
+function createLeaveGameEvent(){
+    const button = document.getElementById('leave-game-btn');
+
+    if(button){
+        button.addEventListener('click', () => {
+            leaveGame(gameData.players[0]);
+        })
+    }
 }
