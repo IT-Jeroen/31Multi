@@ -594,7 +594,7 @@ body {
     left: calc(50% - 0.5 * (var(--card-width) + 2 * var(--overlap)) - 1em);
 }
 
-#score-board {
+/* #score-board {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -607,9 +607,9 @@ body {
     padding: 1em;
     border: 5px solid rgb(68, 68, 68);
     background-color: darkgray;
-}
+} */
 
-.score-title {
+/* .score-title {
     font-size: x-large;
     background-color: darkgray;
 }
@@ -636,7 +636,7 @@ body {
     background-color: white;
     margin-bottom: 1em;
     padding: 5px;
-}
+} */
 
 /* #next-game-btn {
     font-size: large;
@@ -656,7 +656,7 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-45%, -50%);
+    transform: translate(-35%, -50%);
 }
 
 .notepad-img {
@@ -697,6 +697,9 @@ body {
     background-color: blue;
 }
 
+.scoreboard{
+    z-index: 200;
+}
 
 .scoreboard-btns {
     width: 48%;
@@ -724,6 +727,10 @@ body {
 }
 
 @media screen and (max-width: 640px) {
+    #notepad {
+
+        transform: translate(-45%, -50%);
+    }
     .notepad-img {
         max-width: 100%;
     }
@@ -758,7 +765,7 @@ body {
 
 
 #next-game-btn{
-    background-color: green;
+    background-color: blue;
 }
 
 #leave-game-btn{
