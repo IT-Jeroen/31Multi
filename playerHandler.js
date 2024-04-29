@@ -1,11 +1,6 @@
+import { gameData, updateGame, sendGameData, updateHost, isLastTurn } from './dataHandler.js' 
+import {updateDomGame, flipAllCards} from './dom.js';
 import { autoPlayerPick } from './autoPlayer.js';
-import { gameData } from './dataHandler.js' 
-import {updateGame} from './dataHandler.js';
-import {sendGameData} from './dataHandler.js';
-import {updateHost} from './dataHandler.js';
-import {isLastTurn} from './dataHandler.js';
-import {updateDomGame} from './dom.js';
-import {flipAllCards} from './dom.js';
 
 
 export function returnPlayerList(){

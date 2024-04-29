@@ -1,6 +1,4 @@
-import {gameData} from './dataHandler.js';
-import {connections} from './dataHandler.js';
-import {addCardsToCardDB} from './dataHandler.js';
+import {gameData, connections, addCardsToCardDB} from './dataHandler.js';;
 import {pushData} from './p2p.js';
 
 
