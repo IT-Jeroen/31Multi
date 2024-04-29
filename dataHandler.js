@@ -1,14 +1,9 @@
-import {findPlayerById} from './playerHandler.js';
-import {shuffleHostPlayers} from './playerHandler.js';
-import {setNextPlayerActive} from './playerHandler.js';
-import {isAutoPlayerNext} from './playerHandler.js';
-import {pushData} from './p2p.js'
-import {dealCards} from './gameMechanics.js';
-import {prepCards} from './gameMechanics.js';
-import {startGame} from './dom.js';
-import {updateDomGame} from './dom.js';
-import {createWaitingRoom} from './dom.js';
+import { findPlayerById, shuffleHostPlayers, setNextPlayerActive, isAutoPlayerNext } from './playerHandler.js';
+import { startGame, updateDomGame, createWaitingRoom, startGameEvent } from './dom.js';
+import { dealCards, prepCards } from './gameMechanics.js';
 import {calculateHand} from './autoPlayer.js';
+import { pushData } from './p2p.js'
+
 
 export const connections = [
     {'name':'Local', 'connectionId': null, 'p': null, 'c': null},
@@ -328,7 +323,8 @@ export function updateWaitingRoom(){
     gameData.waitingRoom.forEach(player => {
                 
         if (player.data.connectionId == gameData.hostName){
-            createWaitingRoom()
+            // createWaitingRoom()
+            createWaitingRoom(startGameEvent);
         }
         else {
             const connect = connections.filter(connection => connection.connectionId == player.data.connectionId)[0];

@@ -1,4 +1,3 @@
-import {createNameInput} from './dom.js';
-import {handleNameSubmitted} from './dom.js';
+import {createNameInput, nameInputEvent} from './dom.js';
 
-createNameInput(handleNameSubmitted);
+createNameInput(nameInputEvent);

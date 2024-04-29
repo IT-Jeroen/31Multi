@@ -1,14 +1,16 @@
-import {gameData} from './dataHandler.js';
-import {connections} from './dataHandler.js';
-import {updateGameData} from './dataHandler.js';
-import {setCardsDB} from './dataHandler.js';
-import {updateClient} from './dataHandler.js';
-import {updateHost} from './dataHandler.js';
-import {updateWaitingRoom} from './dataHandler.js';
-import {removeConnection} from './dataHandler.js';
-import {removePlayer} from './dataHandler.js';
-import {createWaitingRoom} from './dom.js';
-import {startGame} from './dom.js';
+import {
+    gameData,
+    connections,
+    updateGameData,
+    setCardsDB,
+    updateClient,
+    updateHost,
+    updateWaitingRoom,
+    removeConnection,
+    removePlayer
+} from './dataHandler.js';
+
+import { createWaitingRoom, startGame, startGameEvent } from './dom.js';
 
 
 
@@ -82,7 +84,8 @@ function setAsHost(playerName){
         })
 
         // Update Waiting Room //
-        createWaitingRoom()
+        // createWaitingRoom()
+        createWaitingRoom(startGameEvent);
     })
 
     peer.on('error', err => {
@@ -97,7 +100,8 @@ function setAsHost(playerName){
     gameData.players[0].data.connectionId = peer._id;
     gameData.isHost = playerName;
     gameData.waitingRoom.push(gameData.players[0]);
-    createWaitingRoom()
+    // createWaitingRoom()
+    createWaitingRoom(startGameEvent);
 
 }
 
@@ -151,7 +155,8 @@ function setConnectionEvents(c) {
         // CLIENT SIDE //
         if (received.type === 'waiting-room'){
             updateGameData(received.data);
-            createWaitingRoom()
+            // createWaitingRoom()
+            createWaitingRoom(startGameEvent);
         }
 
         // CLIENT SIDE //

@@ -1,15 +1,9 @@
-import {gameData} from './dataHandler.js';
-import {initializeGame} from './dataHandler.js';
-import {scoring} from './dataHandler.js';
-import {nextGame} from './dataHandler.js';
-import {leaveGame} from './dataHandler.js';
-import {returnPlayerList} from './playerHandler.js';
-import {nextPlayer} from './playerHandler.js';
-import {setPlayerPass} from './playerHandler.js';
-import {isAutoPlayerNext} from './playerHandler.js';
-import {setupConnection} from './p2p.js';
+import { gameData, initializeGame, scoring, nextGame, leaveGame } from './dataHandler.js';
+import { returnPlayerList, nextPlayer, setPlayerPass, isAutoPlayerNext } from './playerHandler.js';
+import { setupConnection } from './p2p.js';
 
-export function createNameInput(cb){
+
+export function createNameInput(event){
     const notepad = `
     <div id="notepad">
     <img class="notepad-img" src="./src/img/notepad.png" alt="notepad">
@@ -25,11 +19,16 @@ export function createNameInput(cb){
     const table = document.getElementById('table');
     table.innerHTML = notepad;
 
+    event();
+}
+
+
+export function nameInputEvent(){
     const input = document.getElementById('player-name-input');
 
     const button = document.getElementById('next-btn');
     button.addEventListener('click', e => {
-        cb(input.value);
+        setupConnection(input.value);
         button.innerText = 'Checking for host...';
         button.disabled = true;
 
@@ -37,15 +36,12 @@ export function createNameInput(cb){
 }
 
 
-export function handleNameSubmitted(playerName) {
-    setupConnection(playerName);
-}
-
 function createPlayerList() {
     let playerList = ''
     returnPlayerList().forEach(player => playerList = `${playerList}<div class="notepad-text">${player}</div>`);
     return playerList;
 }
+
 
 function createPlayerCoffees() {
     let playerCoffees = ''
@@ -53,7 +49,9 @@ function createPlayerCoffees() {
     return playerCoffees;
 }
 
-export function createWaitingRoom(){
+
+
+export function createWaitingRoom(event){
     const notepad = `
     <div id="notepad">
         <img class="notepad-img" src="./src/img/notepad.png" alt="notepad">
@@ -70,7 +68,7 @@ export function createWaitingRoom(){
     const table = document.getElementById('table');
     table.innerHTML = notepad;
 
-    createStartEvent();
+    event();
 
 }
 
@@ -85,7 +83,7 @@ function canStartGame(){
 }
 
 
-function createStartEvent(){
+export function startGameEvent(){
     const startGameBtn = document.getElementById('start-game-btn');
 
     if (startGameBtn){
@@ -271,60 +269,74 @@ function cardClickEvent(e){
         }
 
         if (gameData.pickedBank[0] && gameData.pickedHand[0]){
-            createPlayCardsBtn()
+            createPlayCardsBtn(playCardsEvent)
         }
     }
 }
 
 
-function createPlayCardsBtn(){
-    if (!document.getElementById('play-cards')){
+function createPlayCardsBtn(event){
+    if (!document.getElementById('play-cards-btn')){
         const btn = `<button id="play-cards-btn">Play Cards</button>`
         document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
         
+        event()
+    }
+}
 
-        document.getElementById('play-cards-btn').addEventListener('click', () => {
+
+function playCardsEvent(){
+    document.getElementById('play-cards-btn').addEventListener('click', () => {
         removeBtn();
         removeClicked();
         nextPlayer();
         })
-    }
-    
 }
 
 
-export function createPassBtn(){
-    if(!document.getElementById('player-pass')){
+function createPassBtn(event){
+    if(!document.getElementById('player-pass-btn')){
         const btn = `<button id="player-pass-btn">Hold Cards</button>`
         document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
-    
-        document.getElementById('player-pass-btn').addEventListener('click', () => {
-            removeBtn();
-            removeClicked();
-            setPlayerPass();
-            nextPlayer();
-        })
+        
+        event()
     }
-
+    
 }
 
-export function createSwapBankBtn(){
-    if(!document.getElementById('swap-bank')){
+
+function passEvent(){
+    document.getElementById('player-pass-btn').addEventListener('click', () => {
+        removeBtn();
+        removeClicked();
+        setPlayerPass();
+        nextPlayer();
+    })
+}
+
+
+function createSwapBankBtn(event){
+    if(!document.getElementById('swap-bank-btn')){
         const btn = `<button id="swap-bank-btn">Swap Bank</button>`
         document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
-    
-        document.getElementById('swap-bank-btn').addEventListener('click', () => {
-            removeBtn();
-            removeClicked();
-            const player = gameData.players[0];
-            player.data.pass = true;
-            const bank = gameData.players[4];
-            gameData.pickedHand = player.data.cards;
-            gameData.pickedBank = bank.data.cards;
-            nextPlayer();
-        })
+        
+        event()
     }
+    
+}
 
+
+function swapBankEvent(){
+    document.getElementById('swap-bank-btn').addEventListener('click', () => {
+        removeBtn();
+        removeClicked();
+        const player = gameData.players[0];
+        player.data.pass = true;
+        const bank = gameData.players[4];
+        gameData.pickedHand = player.data.cards;
+        gameData.pickedBank = bank.data.cards;
+        nextPlayer();
+    })
 }
 
 
@@ -355,15 +367,10 @@ export function swapDomCards(){
             cardBank.className = handCss;
         })
     }
-    else {
-
-    }
-
 }
 
 
 function lastTurnEvent(playerName){
-    console.log(`LAST TURN ${playerName}`);
     const playFieldElem = document.getElementById('playfield');
     const lastTurnLabel = `
         <div id=last-turn class="player-label last-turn player-active">
@@ -382,14 +389,14 @@ export function updateDomGame(){
     }
 
     if (gameData.players[0].data.active && !gameData.players[0].data.pass){
-        createPassBtn();
-        createSwapBankBtn();
+        createPassBtn(passEvent)
+        createSwapBankBtn(swapBankEvent)
     }
 
     if (gameData.endOfGame){
         removeBtn();
         flipAllCards(); 
-        createScoreboard();
+        createScoreboard(nextGameEvent, leaveGameEvent);
     }
 }
 
@@ -408,8 +415,8 @@ export function startGame(){
     handOutDeckCards(300).then(() => {
         updatePlayerLabels();
         if (gameData.players[0].data.active){
-            createPassBtn();
-            createSwapBankBtn();
+            createPassBtn(passEvent)
+            createSwapBankBtn(swapBankEvent)
         }
         else {
             if (gameData.players[0].data.connectionId == gameData.hostName){
@@ -422,7 +429,7 @@ export function startGame(){
 }
 
 
-export function createScoreboard(){
+function createScoreboard(next, leave){
     const result = scoring();
 
     let roundWinners = '';
@@ -455,12 +462,12 @@ export function createScoreboard(){
     const table = document.getElementById('table')
     table.insertAdjacentHTML('afterbegin',scoreBoard);
 
-    createNextGameEvent();
-    createLeaveGameEvent();
+    next()
+    leave()
 }
 
 
-function createNextGameEvent(){
+function nextGameEvent(){
     const button = document.getElementById('next-game-btn');
 
     if (button){
@@ -475,7 +482,7 @@ function createNextGameEvent(){
 }
 
 
-function createLeaveGameEvent(){
+function leaveGameEvent(){
     const button = document.getElementById('leave-game-btn');
 
     if(button){
