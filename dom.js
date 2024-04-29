@@ -134,7 +134,8 @@ export function updatePlayerLabels(){
 
 
 function removePlayerLabels(){
-    const removeInactive = [...document.getElementsByClassName('player-label')];
+    // const removeInactive = [...document.getElementsByClassName('player-label')];
+    const removeInactive = [...document.getElementsByClassName('label-wrapper')];
     removeInactive.forEach(label => label.remove());
 }
 
@@ -146,8 +147,10 @@ function setPlayerLabels(player){
         if(player.data.active){
             if(player.location != 'south' && !player.data.pass){
                 const activeLabel = `
-                <div class="player-label player-${player.location} player-active">
-                    ${player.name}
+                <div class="label-wrapper player-${player.location}">
+                    <div class="player-label player-active">
+                        ${player.name}
+                    </div>
                 </div>`
                 playFieldElem.insertAdjacentHTML('afterbegin',activeLabel);
             }
@@ -155,16 +158,20 @@ function setPlayerLabels(player){
 
         if(player.data.pass){
             const passLabel = `
-            <div class="player-label player-${player.location} player-pass">
-                ${player.name}
+            <div class="label-wrapper player-${player.location}">
+                <div class="player-label player-pass">
+                    ${player.name}
+                </div>
             </div>`
             playFieldElem.insertAdjacentHTML('afterbegin',passLabel);
         }
 
         if (!player.data.active && !player.data.pass){
             const inActiveLabel = `
-            <div class="player-label player-${player.location}">
-                ${player.name}
+            <div class="label-wrapper player-${player.location}">
+                <div class="player-label">
+                    ${player.name}
+                </div>
             </div>`
             playFieldElem.insertAdjacentHTML('afterbegin',inActiveLabel);
         }
@@ -446,8 +453,9 @@ function createScoreboard(next, leave){
     result.roundWinners.forEach(player => {
         if(player.data.connectionId != 'bank'){
             roundWinners = `${roundWinners}<div class="notepad-text">${player.name}: score ${result.score}</div>`
-            const playerLabel = document.querySelectorAll(`.player-${player.location}`)[0];
-            playerLabel.className = `player-label player-${player.location} player-wins`
+            const labelWrapper = document.querySelectorAll(`.player-${player.location}`)[0];
+            const playerLabel = labelWrapper.querySelectorAll('.player-label')[0];
+            playerLabel.className = `player-label player-wins`
         }
         
     })
