@@ -35,6 +35,7 @@ export const gameData = {
     endOfGame: false,
     lastTurn: null,
     waitingRoom: [],
+    gameStatus: 'waiting',
 }
 
 
@@ -244,9 +245,10 @@ export function scoring(){
         }
     })
 
-    if (gameData.players[0].data.connectionId == gameData.hostName){
-        roundWinners.forEach(player => player.data.wins += 1);
-    }
+    // if (gameData.players[0].data.connectionId == gameData.hostName){
+    //     roundWinners.forEach(player => player.data.wins += 1);
+    // }
+    roundWinners.forEach(player => player.data.wins += 1);
     
 
     gameData.players.forEach(player => {
@@ -296,6 +298,7 @@ export function nextGame(){
         gameData.prevActivePlayerId = null;
         gameData.endOfGame = false;
         gameData.lastTurn = null;
+        gameData.gameStatus = 'waiting';
 
         gameData.players.forEach(player => {
             player.data.cards = [];
@@ -323,7 +326,6 @@ export function updateWaitingRoom(){
     gameData.waitingRoom.forEach(player => {
                 
         if (player.data.connectionId == gameData.hostName){
-            // createWaitingRoom()
             createWaitingRoom(startGameEvent);
         }
         else {

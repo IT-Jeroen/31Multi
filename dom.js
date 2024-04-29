@@ -36,6 +36,16 @@ export function nameInputEvent(){
 }
 
 
+export function resetNameEntry(){
+    const input = document.getElementById('player-name-input');
+    input.value = '';
+    input.placeholder = 'No Place Available at this Time';
+    const button = document.getElementById('next-btn');
+    button.innerText = 'Next';
+    button.disabled = false;
+}
+
+
 function createPlayerList() {
     let playerList = ''
     returnPlayerList().forEach(player => playerList = `${playerList}<div class="notepad-text">${player}</div>`);
@@ -69,7 +79,6 @@ export function createWaitingRoom(event){
     table.innerHTML = notepad;
 
     event();
-
 }
 
 
@@ -88,6 +97,7 @@ export function startGameEvent(){
 
     if (startGameBtn){
         startGameBtn.addEventListener('click', () => {
+            gameData.gameStatus = 'in-progress';
             initializeGame();
         })
     }
@@ -269,7 +279,7 @@ function cardClickEvent(e){
         }
 
         if (gameData.pickedBank[0] && gameData.pickedHand[0]){
-            createPlayCardsBtn(playCardsEvent)
+            createPlayCardsBtn(playCardsEvent);
         }
     }
 }
@@ -280,7 +290,7 @@ function createPlayCardsBtn(event){
         const btn = `<button id="play-cards-btn">Play Cards</button>`
         document.getElementById('btn-wrapper').insertAdjacentHTML('afterbegin', btn);
         
-        event()
+        event();
     }
 }
 
@@ -395,8 +405,8 @@ export function updateDomGame(){
 
     if (gameData.endOfGame){
         removeBtn();
-        flipAllCards(); 
-        createScoreboard(nextGameEvent, leaveGameEvent);
+        flipAllCards();
+        setTimeout(()=> createScoreboard(nextGameEvent, leaveGameEvent), 600)
     }
 }
 

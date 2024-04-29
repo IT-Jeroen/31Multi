@@ -10,7 +10,7 @@ import {
     removePlayer
 } from './dataHandler.js';
 
-import { createWaitingRoom, startGame, startGameEvent } from './dom.js';
+import { createWaitingRoom, startGame, startGameEvent, resetNameEntry } from './dom.js';
 
 
 
@@ -76,16 +76,18 @@ function setAsHost(playerName){
         })
 
     peer.on('connection', (c)=>{
-        addNewConnection(c)
-        setConnectionEvents(c)
-
-        connections.forEach(connection => {
-            pushData(connection.c, gameData, 'waiting-room');
-        })
-
-        // Update Waiting Room //
-        // createWaitingRoom()
-        createWaitingRoom(startGameEvent);
+        if (gameData.gameStatus == 'waiting'){
+            addNewConnection(c)
+            setConnectionEvents(c)
+            connections.forEach(connection => {
+                pushData(connection.c, gameData, 'waiting-room');
+            })
+    
+            createWaitingRoom(startGameEvent);
+        }
+        else {
+            pushData(c, null, 'try-again');
+        }
     })
 
     peer.on('error', err => {
@@ -94,13 +96,12 @@ function setAsHost(playerName){
         setupConnection(playerName);
     });
 
-    // Create Waiting Room //
     gameData.players[0].name = playerName;
     connections[0].p = peer;
     gameData.players[0].data.connectionId = peer._id;
     gameData.isHost = playerName;
     gameData.waitingRoom.push(gameData.players[0]);
-    // createWaitingRoom()
+
     createWaitingRoom(startGameEvent);
 
 }
@@ -122,7 +123,7 @@ function addNewConnection(c){
         
         if (autoPlayerIndex == -1){
             console.log('CANNOT ADD CONNECTION GAME FULL:', c.metadata);
-            pushData(c, null, 'game-full');
+            pushData(c, null, 'try-again');
         }
         else{
             gameData.players[autoPlayerIndex].name = c.metadata;
@@ -133,7 +134,6 @@ function addNewConnection(c){
             connections[autoPlayerIndex].connectionId = c.connectionId;
             connections[autoPlayerIndex].c = c;
 
-            // add to waiting room //
             gameData.waitingRoom.push(gameData.players[autoPlayerIndex]);
         }
         
@@ -148,14 +148,13 @@ function setConnectionEvents(c) {
 
     c.on('data', function (received) {
         // CLIENT SIDE //
-        if (received.type === 'game-full'){
-            document.getElementById('player-name-input').value = 'No Place Available at this Time';
+        if (received.type === 'try-again'){
+            resetNameEntry();
             
         }
         // CLIENT SIDE //
         if (received.type === 'waiting-room'){
             updateGameData(received.data);
-            // createWaitingRoom()
             createWaitingRoom(startGameEvent);
         }
 
