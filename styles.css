@@ -123,11 +123,11 @@ body {
     transform-style: preserve-3d;
     box-shadow: 1px 1px 10px 3px rgba(0,0,0,.2);
     border-radius: 5%;
-    transition: left 2s ease-in-out,
-            right 2s ease-in-out,
-            top 2s ease-in-out,
-            bottom 2s ease-in-out,
-            transform 2s ease-in-out;
+    transition: left 0.4s  ease-in-out,
+            right 0.4s ease-in-out,
+            top 0.4s ease-in-out,
+            bottom 0.4s ease-in-out,
+            transform 0.4s ease-in-out;
 }
 
 .card img{
@@ -192,6 +192,14 @@ body {
 
 /* ------------------------------------------------------------------------------------------ */
 
+.deck{
+    position: absolute;
+    left: calc(50% - 0.5 * var(--card-width));
+    top: calc(50% - 0.5 * var(--card-height));
+    transform: rotateY(180deg);
+}
+
+
 .north {
     position: absolute;
     top: 0rem;
@@ -218,7 +226,8 @@ body {
 
 .south {
     position: absolute;
-    bottom: 0rem;
+    /* bottom: 0rem; */
+    top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) - var(--overlap));
     transform: rotateZ(0deg);
     z-index: 1;
@@ -226,7 +235,8 @@ body {
 
 .south ~ .south{
     position: absolute;
-    bottom: 0rem;
+    /* bottom: 0rem; */
+    top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width));
     transform: rotateZ(0deg);
     z-index: 2;
@@ -234,7 +244,8 @@ body {
 
 .south ~ .south ~ .south {
     position: absolute;
-    bottom: 0rem;
+    /* bottom: 0rem; */
+    top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) + var(--overlap));
     transform: rotateZ(0deg);
     z-index: 3;
@@ -266,7 +277,8 @@ body {
 
 .east {
     position: absolute;
-    right: var(--width-height-offset);
+    /* right: var(--width-height-offset); */
+    left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) - var(--overlap));
     transform: rotateZ(270deg) rotateY(180deg);
     z-index: 1;
@@ -274,7 +286,8 @@ body {
 
 .east ~ .east{
     position: absolute;
-    right: var(--width-height-offset);
+    /* right: var(--width-height-offset); */
+    left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height));
     transform: rotateZ(270deg) rotateY(180deg);
     z-index: 2;
@@ -282,7 +295,8 @@ body {
 
 .east ~ .east ~ .east{
     position: absolute;
-    right: var(--width-height-offset);
+    /* right: var(--width-height-offset); */
+    left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) + var(--overlap));
     transform: rotateZ(270deg) rotateY(180deg);
     z-index: 3;
@@ -338,7 +352,8 @@ body {
 
 .south-open {
     position: absolute;
-    bottom: 0rem;
+    /* bottom: 0rem; */
+    top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) - var(--overlap));
     transform: rotateZ(0deg);
     z-index: 1;
@@ -346,7 +361,8 @@ body {
 
 .south-open ~ .south-open{
     position: absolute;
-    bottom: 0rem;
+    /* bottom: 0rem; */
+    top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width));
     transform: rotateZ(0deg);
     z-index: 2;
@@ -354,7 +370,8 @@ body {
 
 .south-open ~ .south-open ~ .south-open {
     position: absolute;
-    bottom: 0rem;
+    /* bottom: 0rem; */
+    top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) + var(--overlap));
     transform: rotateZ(0deg);
     z-index: 3;
@@ -386,7 +403,8 @@ body {
 
 .east-open {
     position: absolute;
-    right: var(--width-height-offset);
+    /* right: var(--width-height-offset); */
+    left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) - var(--overlap));
     transform: rotateZ(270deg);
     z-index: 1;
@@ -394,7 +412,8 @@ body {
 
 .east-open ~ .east-open{
     position: absolute;
-    right: var(--width-height-offset);
+    /* right: var(--width-height-offset); */
+    left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height));
     transform: rotateZ(270deg);
     z-index: 2;
@@ -402,7 +421,8 @@ body {
 
 .east-open ~ .east-open ~ .east-open{
     position: absolute;
-    right: var(--width-height-offset);
+    /* right: var(--width-height-offset); */
+    left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) + var(--overlap));
     transform: rotateZ(270deg);
     z-index: 3;
@@ -435,14 +455,6 @@ body {
     transform: rotateY(180deg);
 }
 
-
-.deck{
-    position: absolute;
-    left: calc(50% - 0.5 * var(--card-width));
-    top: calc(50% - 0.5 * var(--card-height));
-    transform: rotateY(180deg);
-}
-
 .center:hover {
     top: calc(50% - 0.5 * var(--card-height) - 3em);
 }
@@ -461,19 +473,23 @@ body {
 
 
 .south:hover {
-    bottom: 3em;
+    /* bottom: 3em; */
+    top: calc(100% - 3em - var(--card-height));
 }
 
 .south ~ .south:hover {
-    bottom: 3em;
+    /* bottom: 3em; */
+    top: calc(100% - 3em - var(--card-height));
 }
 
 .south.clicked {
-    bottom: 3em;
+    /* bottom: 3em; */
+    top: calc(100% - 3em - var(--card-height));
 }
 
 .south ~ .south.clicked {
-    bottom: 3em;
+    /* bottom: 3em; */
+    top: calc(100% - 3em - var(--card-height));
 }
 
 .player-label {

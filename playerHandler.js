@@ -1,5 +1,5 @@
 import { gameData, updateGame, sendGameData, updateHost, isLastTurn } from './dataHandler.js' 
-import {updateDomGame, flipAllCards} from './dom.js';
+import {updateDomGame} from './dom.js';
 import { autoPlayerPick } from './autoPlayer.js';
 
 
@@ -36,15 +36,10 @@ export function findPlayerById(connectionId){
 
 export function nextPlayer(){
     if (gameData.singlePlayer){
-        if (!gameData.endOfGame){
-            updateGame();
-            updateDomGame();
-            gameData.pickedBank = [];
-            gameData.pickedHand = [];
-        }
-        else {
-            flipAllCards()
-        }
+        updateGame();
+        updateDomGame();
+        gameData.pickedBank = [];
+        gameData.pickedHand = [];
     }
     else {
         if (gameData.players[0].data.connectionId == gameData.hostName){
