@@ -245,9 +245,6 @@ export function scoring(){
         }
     })
 
-    // if (gameData.players[0].data.connectionId == gameData.hostName){
-    //     roundWinners.forEach(player => player.data.wins += 1);
-    // }
     roundWinners.forEach(player => player.data.wins += 1);
     
 
