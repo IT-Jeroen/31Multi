@@ -7,17 +7,17 @@
 
 @media screen and (max-width: 1007px) {
     :root {
-        --card-width: 6em;
-        --card-height: calc(6em * 1.4467);
-        --width-height-offset: calc(6em * 0.4467 * 0.5);
+        --card-width: 7em;
+        --card-height: calc(7em * 1.4467);
+        --width-height-offset: calc(7em * 0.4467 * 0.5);
     }
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 730px) {
     :root {
-        --card-width: 4em;
-        --card-height: calc(4em * 1.4467);
-        --width-height-offset: calc(4em * 0.4467 * 0.5);
+        --card-width: 5em;
+        --card-height: calc(5em * 1.4467);
+        --width-height-offset: calc(5em * 0.4467 * 0.5);
     }
 }
 
@@ -380,29 +380,48 @@ body {
 .player-label {
     width: 100%;
     margin: auto 0;
+    padding: 0.2em;
     background-color: black;
     font-family: "Shadows Into Light";
     font-size:xx-large;
     font-weight: 600;
     color: white;
     text-align: center;
-
 }
+
+#last-turn {
+    position: absolute;
+    width: 15em;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0em;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
 
 @media screen and (max-width: 1007px) {
     .label-wrapper {
-        width: 11em;
+        width: 12.5em;
         height: var(--card-height);
+    }
+    #last-turn {
+        width: 12.5em;
     }
     .player-label{
         font-size: x-large;
     }
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 730px) {
     .label-wrapper {
-        width: 9em;
+        width: 10em;
         height: var(--card-height);
+    }
+    #last-turn {
+        width: 10em;
     }
     .player-label{
         font-size: larger;
@@ -433,7 +452,7 @@ body {
 
 .player-west{
     position: absolute;
-    left: -1em;
+    left: calc(-0.5 * var(--width-height-offset));
     top: 50%;
     transform: translate(0, -50%) rotateZ(90deg);
 }
@@ -447,56 +466,101 @@ body {
 
 .player-east{
     position: absolute;
-    right: -1em;
+    right: calc(-0.5 * var(--width-height-offset)); 
     top: 50%;
     transform: translate(0, -50%) rotateZ(270deg);
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 1007px) {
     .player-west{
-        left: -1.5em;
+        left: calc(-0.6 * var(--width-height-offset)); 
     }
     .player-east{
-        right: -1.5em;
+        right: calc(-0.6 * var(--width-height-offset)); 
     }
 }
+
+@media screen and (max-width: 730px) {
+    .player-west{
+        left: calc(-1.2 * var(--width-height-offset)); 
+    }
+    .player-east{
+        right: calc(-1.2 * var(--width-height-offset)); 
+    }
+}
+
 #btn-wrapper{
     position: absolute;
     max-height: var(--card-height);
     z-index: 200;
-    bottom: 1em;
-    left: calc(50% + var(--card-width));
+    bottom: 0em;
+    left: 50%;
+    transform: translate(110%, 0);
     display: grid;
-    row-gap: 1em;
+    row-gap: 0.5em;
     grid-auto-rows: auto;
 
 }
+
 
 #play-cards-btn{
     background-color: blue;
     color: white;
     padding: 1em;
+    border-width: 0px;
+    font-size: large;
+    font-weight: 600;
 }
 
 #player-pass-btn{
-    background-color: rgb(0, 110, 255);
+    background-color: red;
     color: white;
     padding: 1em;
-
+    border-width: 0px;
+    font-size: large;
+    font-weight: 600;
 }
 
 #swap-bank-btn{
-    background-color: rgb(0, 162, 255);
-    color: white;
+    background-color: orange;
+    color: black;
     padding: 1em;
+    border-width: 0px;
+    font-size: large;
+    font-weight: 600;
 
 }
 
-.last-turn {
-    position: absolute;
-    top: 0em;
-    left: calc(50% - 0.5 * (var(--card-width) + 2 * var(--overlap)) - 1em);
+@media screen and (max-width: 1007px) {
+    #play-cards-btn{
+        font-size: smaller;
+        font-weight: 600;
+    }
+    #player-pass-btn{
+        font-size: smaller;
+        font-weight: 600;
+    }
+    #swap-bank-btn{
+        font-size: smaller;
+        font-weight: 600;
+    }
 }
+
+@media screen and (max-width: 730px) {
+    #play-cards-btn{
+        font-size:x-small;
+        font-weight: 600;
+    }
+    #player-pass-btn{
+        font-size:x-small;
+        font-weight: 600;
+    }
+    #swap-bank-btn{
+        font-size:x-small;
+        font-weight: 600;
+    }
+}
+
 
 #notepad {
     position: absolute;
@@ -572,7 +636,7 @@ body {
     }
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 730px) {
     #notepad {
         transform: translate(-45%, -50%);
     }

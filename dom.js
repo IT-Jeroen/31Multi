@@ -390,11 +390,14 @@ export function swapDomCards(){
 function lastTurnEvent(playerName){
     const playFieldElem = document.getElementById('playfield');
     const lastTurnLabel = `
-        <div id=last-turn class="player-label last-turn player-active">
-            LAST TURN ${playerName}!
+        <div id=last-turn>
+            <div class="player-label player-active">
+                LAST TURN ${playerName}!
+            </div>
         </div>`
         playFieldElem.insertAdjacentHTML('afterbegin',lastTurnLabel);
 }
+
 
 
 export function updateDomGame(){
