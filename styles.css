@@ -7,17 +7,17 @@
 
 @media screen and (max-width: 1007px) {
     :root {
-        --card-width: 6em;
-        --card-height: calc(6em * 1.4467);
-        --width-height-offset: calc(6em * 0.4467 * 0.5);
+        --card-width: 7em;
+        --card-height: calc(7em * 1.4467);
+        --width-height-offset: calc(7em * 0.4467 * 0.5);
     }
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 730px) {
     :root {
-        --card-width: 4em;
-        --card-height: calc(4em * 1.4467);
-        --width-height-offset: calc(4em * 0.4467 * 0.5);
+        --card-width: 5em;
+        --card-height: calc(5em * 1.4467);
+        --width-height-offset: calc(5em * 0.4467 * 0.5);
     }
 }
 
@@ -27,6 +27,7 @@ body {
     offset: none;
 }
 
+<<<<<<< HEAD
 /* #background {
     background-color: #1a1a1a;
 } */
@@ -103,6 +104,8 @@ body {
     text-align: center;
 } */
 
+=======
+>>>>>>> cosmetics
 #table {
     position: absolute;
     width: 100vw;
@@ -161,10 +164,18 @@ body {
     visibility: visible;
 }
 
+<<<<<<< HEAD
 /* #swap-bank-btn{
+=======
+.deck{
+>>>>>>> cosmetics
     position: absolute;
+    left: calc(50% - 0.5 * var(--card-width));
+    top: calc(50% - 0.5 * var(--card-height));
+    transform: rotateY(180deg);
 }
 
+<<<<<<< HEAD
 #hold-cards-btn{
     position: absolute;
 }
@@ -191,6 +202,8 @@ body {
 } */
 
 /* ------------------------------------------------------------------------------------------ */
+=======
+>>>>>>> cosmetics
 
 .deck{
     position: absolute;
@@ -226,7 +239,10 @@ body {
 
 .south {
     position: absolute;
+<<<<<<< HEAD
     /* bottom: 0rem; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) - var(--overlap));
     transform: rotateZ(0deg);
@@ -235,7 +251,10 @@ body {
 
 .south ~ .south{
     position: absolute;
+<<<<<<< HEAD
     /* bottom: 0rem; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width));
     transform: rotateZ(0deg);
@@ -244,7 +263,10 @@ body {
 
 .south ~ .south ~ .south {
     position: absolute;
+<<<<<<< HEAD
     /* bottom: 0rem; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) + var(--overlap));
     transform: rotateZ(0deg);
@@ -277,7 +299,10 @@ body {
 
 .east {
     position: absolute;
+<<<<<<< HEAD
     /* right: var(--width-height-offset); */
+=======
+>>>>>>> cosmetics
     left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) - var(--overlap));
     transform: rotateZ(270deg) rotateY(180deg);
@@ -286,7 +311,10 @@ body {
 
 .east ~ .east{
     position: absolute;
+<<<<<<< HEAD
     /* right: var(--width-height-offset); */
+=======
+>>>>>>> cosmetics
     left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height));
     transform: rotateZ(270deg) rotateY(180deg);
@@ -295,7 +323,10 @@ body {
 
 .east ~ .east ~ .east{
     position: absolute;
+<<<<<<< HEAD
     /* right: var(--width-height-offset); */
+=======
+>>>>>>> cosmetics
     left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) + var(--overlap));
     transform: rotateZ(270deg) rotateY(180deg);
@@ -352,7 +383,10 @@ body {
 
 .south-open {
     position: absolute;
+<<<<<<< HEAD
     /* bottom: 0rem; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) - var(--overlap));
     transform: rotateZ(0deg);
@@ -361,7 +395,10 @@ body {
 
 .south-open ~ .south-open{
     position: absolute;
+<<<<<<< HEAD
     /* bottom: 0rem; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width));
     transform: rotateZ(0deg);
@@ -370,7 +407,10 @@ body {
 
 .south-open ~ .south-open ~ .south-open {
     position: absolute;
+<<<<<<< HEAD
     /* bottom: 0rem; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - var(--card-height));
     left: calc(50% - 0.5 * var(--card-width) + var(--overlap));
     transform: rotateZ(0deg);
@@ -403,7 +443,10 @@ body {
 
 .east-open {
     position: absolute;
+<<<<<<< HEAD
     /* right: var(--width-height-offset); */
+=======
+>>>>>>> cosmetics
     left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) - var(--overlap));
     transform: rotateZ(270deg);
@@ -412,7 +455,10 @@ body {
 
 .east-open ~ .east-open{
     position: absolute;
+<<<<<<< HEAD
     /* right: var(--width-height-offset); */
+=======
+>>>>>>> cosmetics
     left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height));
     transform: rotateZ(270deg);
@@ -421,7 +467,10 @@ body {
 
 .east-open ~ .east-open ~ .east-open{
     position: absolute;
+<<<<<<< HEAD
     /* right: var(--width-height-offset); */
+=======
+>>>>>>> cosmetics
     left: calc(100% - var(--card-height) + var(--width-height-offset));
     top: calc(50% - 0.5 * var(--card-height) + var(--overlap));
     transform: rotateZ(270deg);
@@ -471,39 +520,97 @@ body {
     top: calc(50% - 0.5 * var(--card-height) - 3em);
 }
 
-
 .south:hover {
+<<<<<<< HEAD
     /* bottom: 3em; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - 3em - var(--card-height));
 }
 
 .south ~ .south:hover {
+<<<<<<< HEAD
     /* bottom: 3em; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - 3em - var(--card-height));
 }
 
 .south.clicked {
+<<<<<<< HEAD
     /* bottom: 3em; */
+=======
+>>>>>>> cosmetics
     top: calc(100% - 3em - var(--card-height));
 }
 
 .south ~ .south.clicked {
+<<<<<<< HEAD
     /* bottom: 3em; */
+    top: calc(100% - 3em - var(--card-height));
+=======
     top: calc(100% - 3em - var(--card-height));
 }
 
+.label-wrapper {
+    width: 15em;
+    height: var(--card-height);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+>>>>>>> cosmetics
+}
+
 .player-label {
-    /* position: absolute; */
-    width: calc(var(--card-width) + 2 * var(--overlap));
-    /* height: calc(0.5 * var(--card-height)); */
+    width: 100%;
+    margin: auto 0;
+    padding: 0.2em;
     background-color: black;
-    /* opacity: 0.8; */
-    font-size:x-large;
+    font-family: "Shadows Into Light";
+    font-size:xx-large;
     font-weight: 600;
     color: white;
     text-align: center;
-    padding: 1em;
+}
+
+#last-turn {
+    position: absolute;
+    width: 15em;
     z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0em;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+
+@media screen and (max-width: 1007px) {
+    .label-wrapper {
+        width: 12.5em;
+        height: var(--card-height);
+    }
+    #last-turn {
+        width: 12.5em;
+    }
+    .player-label{
+        font-size: x-large;
+    }
+}
+
+@media screen and (max-width: 730px) {
+    .label-wrapper {
+        width: 10em;
+        height: var(--card-height);
+    }
+    #last-turn {
+        width: 10em;
+    }
+    .player-label{
+        font-size: larger;
+    }
 }
 
 .player-active {
@@ -521,43 +628,41 @@ body {
     color: white;
 }
 
-/* .player-label {
-    width: 100%;
-    height: 100%;
-    font-size: large;
-    font-weight: 400;
-    color: white;
-    text-align: center;
-
-} */
-
 .player-south{
     position: absolute;
-    bottom: 3em;
-    left: calc(50% - 0.5 * (var(--card-width) + 2 * var(--overlap)) - 1em);
+    bottom: 0em;
+    left: 50%;
+    transform: translate(-50%, 0);
 }
 
 .player-west{
     position: absolute;
-    left: -3em;
-    top: calc(50% - var(--overlap));
-    transform: rotateZ(90deg);
+    left: calc(-0.5 * var(--width-height-offset));
+    top: 50%;
+    transform: translate(0, -50%) rotateZ(90deg);
 }
 
 .player-north{
     position: absolute;
+<<<<<<< HEAD
     top: 3em;
     left: calc(50% - 0.5 * (var(--card-width) + 2 * var(--overlap)) - 1em);
     /* transform: rotateZ(180deg); */
+=======
+    top: 0em;
+    left: 50%;
+    transform: translate(-50%, 0);
+>>>>>>> cosmetics
 }
 
 .player-east{
     position: absolute;
-    right: -3em;
-    top: calc(50% - var(--overlap));
-    transform: rotateZ(270deg);
+    right: calc(-0.5 * var(--width-height-offset)); 
+    top: 50%;
+    transform: translate(0, -50%) rotateZ(270deg);
 }
 
+<<<<<<< HEAD
 #btn-wrapper{
     position: absolute;
     max-height: var(--card-height);
@@ -602,15 +707,84 @@ body {
     /* z-index: 200; */
     /* bottom: 1em; */
     /* left: calc(50% - calc(2 * var(--card-width))); */
-
+=======
+@media screen and (max-width: 1007px) {
+    .player-west{
+        left: calc(-0.6 * var(--width-height-offset)); 
+    }
+    .player-east{
+        right: calc(-0.6 * var(--width-height-offset)); 
+    }
 }
 
-.last-turn {
+@media screen and (max-width: 730px) {
+    .player-west{
+        left: calc(-1.2 * var(--width-height-offset)); 
+    }
+    .player-east{
+        right: calc(-1.2 * var(--width-height-offset)); 
+    }
+}
+
+#btn-wrapper{
     position: absolute;
-    top: 0em;
-    left: calc(50% - 0.5 * (var(--card-width) + 2 * var(--overlap)) - 1em);
+    max-height: var(--card-height);
+    z-index: 200;
+    bottom: 0em;
+    left: 50%;
+    transform: translate(110%, 0);
+    display: grid;
+    row-gap: 0.5em;
+    grid-auto-rows: auto;
+
 }
 
+
+#play-cards-btn{
+    background-color: blue;
+    color: white;
+    padding: 1em;
+    border-width: 0px;
+    font-size: large;
+    font-weight: 600;
+}
+
+#player-pass-btn{
+    background-color: red;
+    color: white;
+    padding: 1em;
+    border-width: 0px;
+    font-size: large;
+    font-weight: 600;
+}
+
+#swap-bank-btn{
+    background-color: orange;
+    color: black;
+    padding: 1em;
+    border-width: 0px;
+    font-size: large;
+    font-weight: 600;
+>>>>>>> cosmetics
+
+}
+
+@media screen and (max-width: 1007px) {
+    #play-cards-btn{
+        font-size: smaller;
+        font-weight: 600;
+    }
+    #player-pass-btn{
+        font-size: smaller;
+        font-weight: 600;
+    }
+    #swap-bank-btn{
+        font-size: smaller;
+        font-weight: 600;
+    }
+}
+
+<<<<<<< HEAD
 /* #score-board {
     position: absolute;
     top: 50%;
@@ -676,6 +850,31 @@ body {
     transform: translate(-35%, -50%);
 }
 
+=======
+@media screen and (max-width: 730px) {
+    #play-cards-btn{
+        font-size:x-small;
+        font-weight: 600;
+    }
+    #player-pass-btn{
+        font-size:x-small;
+        font-weight: 600;
+    }
+    #swap-bank-btn{
+        font-size:x-small;
+        font-weight: 600;
+    }
+}
+
+
+#notepad {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-35%, -50%);
+}
+
+>>>>>>> cosmetics
 .notepad-img {
     filter:drop-shadow(-0.3em 0.3em 0.8em);
     max-width: 80%;
@@ -743,9 +942,14 @@ body {
     }
 }
 
+<<<<<<< HEAD
 @media screen and (max-width: 640px) {
     #notepad {
 
+=======
+@media screen and (max-width: 730px) {
+    #notepad {
+>>>>>>> cosmetics
         transform: translate(-45%, -50%);
     }
     .notepad-img {
