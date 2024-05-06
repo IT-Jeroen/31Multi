@@ -5,15 +5,7 @@
     --overlap: 2em;
 }
 
-@media screen and (max-height: 625px) {
-    :root {
-        --card-width: 8em;
-        --card-height: calc(8em * 1.4467);
-        --width-height-offset: calc(8em * 0.4467 * 0.5);
-    }
-}
-
-@media screen and (max-width: 1007px) {
+@media screen and (max-width: 1007px), screen and (max-height: 625px) {
     :root {
         --card-width: 7em;
         --card-height: calc(7em * 1.4467);
