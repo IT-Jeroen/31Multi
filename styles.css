@@ -458,7 +458,7 @@ body {
 }
 
 
-@media screen and (max-width: 1007px) {
+@media screen and (max-width: 1007px), screen and (max-height: 625px) {
     .label-wrapper {
         width: 12.5em;
         height: var(--card-height);
@@ -527,7 +527,7 @@ body {
     transform: translate(0, -50%) rotateZ(270deg);
 }
 
-@media screen and (max-width: 1007px) {
+@media screen and (max-width: 1007px), screen and (max-height: 625px) {
     .player-west{
         left: calc(-0.6 * var(--width-height-offset)); 
     }
@@ -587,7 +587,7 @@ body {
 
 }
 
-@media screen and (max-width: 1007px) {
+@media screen and (max-width: 1007px), screen and (max-height: 625px) {
     #play-cards-btn{
         font-size: smaller;
         font-weight: 600;
@@ -677,7 +677,7 @@ body {
     font-size:small ;
 }
 
-@media screen and (max-width: 1007px) {
+@media screen and (max-width: 1007px), screen and (max-height: 625px) {
     .notepad-title {
         font-size: larger;
     }
