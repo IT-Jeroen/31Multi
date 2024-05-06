@@ -5,6 +5,14 @@
     --overlap: 2em;
 }
 
+@media screen and (max-height: 625px) {
+    :root {
+        --card-width: 8em;
+        --card-height: calc(8em * 1.4467);
+        --width-height-offset: calc(8em * 0.4467 * 0.5);
+    }
+}
+
 @media screen and (max-width: 1007px) {
     :root {
         --card-width: 7em;
@@ -193,23 +201,34 @@ body {
     position: absolute;
     left: calc(50% - 1.5 * var(--card-width) - 0.5em);
     top: calc(50% - 0.5 * var(--card-height));
-    z-index: 1;
+    z-index: 4;
 }
 
 .center ~ .center{
     position: absolute;
     left: calc(50% - 0.5 * var(--card-width));
     top: calc(50% - 0.5 * var(--card-height));
-    z-index: 2;
+    z-index: 5;
 }
 
 .center ~ .center ~ .center{
     position: absolute;
     left: calc(50% + 0.5 * var(--card-width) + 0.5em);
     top: calc(50% - 0.5 * var(--card-height));
-    z-index: 3;
+    z-index: 6;
 }
 
+@media screen and (max-width: 550px) {
+    .center{
+        left: calc(50% - 0.5 * var(--card-width));
+        top: calc(50% - 1.5 * var(--card-height) - 0.5em);
+    }
+    
+    .center ~ .center ~ .center{
+        left: calc(50% - 0.5 * var(--card-width));
+        top: calc(50% + 0.5 * var(--card-height) + 0.5em);
+    }
+}
 
 /* ---------------------------------------- OPEN ------------------------------------------------------ */
 
@@ -330,6 +349,18 @@ body {
     z-index: 3;
 }
 
+@media screen and (max-width: 550px) {
+    .center-open{
+        left: calc(50% - 0.5 * var(--card-width));
+        top: calc(50% - 1.5 * var(--card-height) - 0.5em);
+    }
+    
+    .center-open ~ .center-open ~ .center-open{
+        left: calc(50% - 0.5 * var(--card-width));
+        top: calc(50% + 0.5 * var(--card-height) + 0.5em);
+    }
+}
+
 /* ------------------------------------------------------------------------------------------------------- */
 
 .flipped {
@@ -350,6 +381,39 @@ body {
 
 .center ~ .center.clicked {
     top: calc(50% - 0.5 * var(--card-height) - 3em);
+}
+
+@media screen and (max-width: 550px) {
+
+    .center:hover {
+        left: calc(50% - 0.5 * var(--card-width) - 3em);
+        top: calc(50% - 1.5 * var(--card-height) - 0.5em);
+    }
+    
+    .center ~ .center:hover {
+        left: calc(50% - 0.5 * var(--card-width) - 3em);
+        top: calc(50% - 0.5 * var(--card-height));
+    }
+
+    .center ~ .center ~ .center:hover {
+        left: calc(50% - 0.5 * var(--card-width) - 3em);
+        top: calc(50% + 0.5 * var(--card-height) + 0.5em);
+    }
+    
+    .center.clicked {
+        left: calc(50% - 0.5 * var(--card-width) - 3em);
+        top: calc(50% - 1.5 * var(--card-height) - 0.5em);
+    }
+    
+    .center ~ .center.clicked {
+        left: calc(50% - 0.5 * var(--card-width) - 3em);
+        top: calc(50% - 0.5 * var(--card-height));
+    }
+
+    .center ~ .center ~ .center.clicked {
+        left: calc(50% - 0.5 * var(--card-width) - 3em);
+        top: calc(50% + 0.5 * var(--card-height) + 0.5em);
+    }
 }
 
 .south:hover {
@@ -571,13 +635,13 @@ body {
 
 .notepad-img {
     filter:drop-shadow(-0.3em 0.3em 0.8em);
-    max-width: 80%;
+    max-width: 70%;
 }
 
 .notepad {
     position:absolute;
     top: 20%;
-    left: 10%;
+    left: 6%;
     width:50%
 }
 
@@ -644,7 +708,8 @@ body {
         max-width: 100%;
     }
     .notepad {
-        width:70%
+        width: 70%;
+        left: 9%;
     }
     .notepad-title {
         font-size: large;
